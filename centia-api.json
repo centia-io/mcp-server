@@ -1,0 +1,3113 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "GC2 API",
+        "contact": {
+            "email": "mh@mapcentia.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v4/call": {
+            "post": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Call a RPC method",
+                "operationId": "postCall",
+                "requestBody": {
+                    "description": "RPC method call",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Call"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/clients/{id}": {
+            "get": {
+                "tags": [
+                    "Clients"
+                ],
+                "description": "Get client",
+                "operationId": "getClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of client",
+                        "required": false,
+                        "example": "66f5005bd44c6"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "Client ID",
+                                                    "type": "string",
+                                                    "example": "66f5005bd44c6"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/Client"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Clients"
+                ],
+                "description": "Delete client",
+                "operationId": "deleteClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of client",
+                        "required": true,
+                        "example": "66f5005bd44c6"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Client deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Clients"
+                ],
+                "description": "Update client",
+                "operationId": "patchClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of client",
+                        "required": true,
+                        "example": "66f5005bd44c6"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Properties to update. Partial update is allowed.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Client"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Client updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/clients": {
+            "post": {
+                "tags": [
+                    "Clients"
+                ],
+                "description": "Create a new client OAuth client",
+                "operationId": "postClient",
+                "requestBody": {
+                    "description": "New client",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Client"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Client created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id",
+                                        "secret"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "example": "66fd4ad4aa716"
+                                        },
+                                        "secret": {
+                                            "type": "string",
+                                            "example": "5a55bf524a8c9eed61a896878d1a26d1193b30d05715e9cc29aa4f004c4cd8e6"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/columns/{column}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get column(s)",
+                "operationId": "getColumn",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "column",
+                        "in": "path",
+                        "description": "Column names",
+                        "required": false,
+                        "example": "my_columns"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Column"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Delete column(s)",
+                "operationId": "deleteColumn",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "column",
+                        "in": "path",
+                        "description": "Column names",
+                        "required": true,
+                        "example": "my_columns"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Column deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/columns/": {
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Create new column(s)",
+                "operationId": "postColumn",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New column",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Column"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/columns/{column}/": {
+            "patch": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Update column(s)",
+                "operationId": "patchColumn",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "column",
+                        "in": "path",
+                        "description": "Column names",
+                        "required": true,
+                        "example": "my_columns"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Column",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Column"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Column updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/commit": {
+            "post": {
+                "tags": [
+                    "Commit"
+                ],
+                "description": "Commit schema changes to Git and push to remote.",
+                "operationId": "postCommit",
+                "requestBody": {
+                    "description": "New index",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Commit"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Committed"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/constraints/{constraint}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get constraints",
+                "operationId": "getConstraint",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "constraint",
+                        "in": "path",
+                        "description": "Constraint name(s)",
+                        "required": false,
+                        "example": "my_constraint"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Constraint"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get constraints",
+                "operationId": "postConstraint",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New constraint",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Constraint"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get constraint",
+                "operationId": "deleteConstraint",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "constraint",
+                        "in": "path",
+                        "description": "Constraint name(s)",
+                        "required": true,
+                        "example": "my_constraint"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Column deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/file/upload": {
+            "post": {
+                "tags": [
+                    "File"
+                ],
+                "description": "Upload the file(s) using multipart/form-data to get them staged on the server.",
+                "operationId": "postFileUpload",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "filename": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "example": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/api/v4/file/process": {
+            "post": {
+                "tags": [
+                    "File"
+                ],
+                "description": "Process the uploaded file into a target schema/table with desired options (dry-run, append, SRS, etc.).",
+                "operationId": "postFileProcess",
+                "requestBody": {
+                    "description": "New table",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/rules/{id}": {
+            "get": {
+                "tags": [
+                    "Rules"
+                ],
+                "description": "Get rule(s)",
+                "operationId": "getRule",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Rule identifier",
+                        "required": false,
+                        "example": 2
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rule"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Rules"
+                ],
+                "description": "Delete rule(s)",
+                "operationId": "deleteRule",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of rule",
+                        "required": true,
+                        "example": "2"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Rule deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Rules"
+                ],
+                "description": "Update rule(s)",
+                "operationId": "patchRule",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Rule identifier",
+                        "required": true,
+                        "example": 2
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update rule",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Rule"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Rule updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/rules": {
+            "post": {
+                "tags": [
+                    "Rules"
+                ],
+                "description": "Create rule(s)",
+                "operationId": "postRule",
+                "requestBody": {
+                    "description": "New rule",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Rule"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/graphql/{schema}": {
+            "post": {
+                "tags": [
+                    "GraphQL"
+                ],
+                "summary": "GraphQL POST endpoint.\nAccepts a JSON body: { \"query\": string, \"variables\": object|null }",
+                "description": "Run GraphQL query/mutation",
+                "operationId": "postGraphQL",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New rule",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GraphQL"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/indices/{index}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get index(s)",
+                "operationId": "getIndex",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table",
+                        "required": true,
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "index",
+                        "in": "path",
+                        "description": "Index",
+                        "required": false,
+                        "example": "my_index"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "properties": {
+                                                "unique": {
+                                                    "description": "If the index has a unique constraint",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/Index"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Delete index(s)",
+                "operationId": "deleteIndex",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Name of schema",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Name of table",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "index",
+                        "in": "path",
+                        "description": "Index name(s)",
+                        "required": true,
+                        "example": "my_index"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Index deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/indices": {
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Create index(s)",
+                "operationId": "postIndex",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Name of schema",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Name of table",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New index",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Index"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "links": {
+                            "": {
+                                "operationId": "getIndex"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/methods/{method}": {
+            "get": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Get RPC methods",
+                "operationId": "getRpc",
+                "parameters": [
+                    {
+                        "name": "method",
+                        "in": "path",
+                        "description": "Identifier of RPC method",
+                        "required": false,
+                        "example": "myMethod"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Method"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Update RPC method",
+                "operationId": "patchRpc",
+                "parameters": [
+                    {
+                        "name": "method",
+                        "in": "path",
+                        "description": "Method name",
+                        "required": true,
+                        "example": "66f5005bd44c6"
+                    }
+                ],
+                "requestBody": {
+                    "description": "RPC method to execute",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Method"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Method updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/methods": {
+            "post": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Create RPC method",
+                "operationId": "postRpc",
+                "requestBody": {
+                    "description": "RPC method to create",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Method"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/methods/{id}": {
+            "delete": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Delete RPC method",
+                "operationId": "deleteSql",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Name of method",
+                        "required": true,
+                        "example": "myStatement"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Method deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/oauth": {
+            "post": {
+                "tags": [
+                    "OAuth"
+                ],
+                "description": "Create token",
+                "operationId": "postOauth",
+                "requestBody": {
+                    "description": "OAuth flow",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuth"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OAuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/oauth/device": {
+            "post": {
+                "tags": [
+                    "OAuth"
+                ],
+                "description": "Start device flow",
+                "operationId": "postDevice",
+                "requestBody": {
+                    "description": "OAuth device flow",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthDevice"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OAuthDeviceResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/privileges": {
+            "get": {
+                "tags": [
+                    "Privileges"
+                ],
+                "description": "Get privileges",
+                "operationId": "getPrivileges",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Privilege"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Privileges"
+                ],
+                "description": "Update privileges",
+                "operationId": "patchPrivileges",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Privileges",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Privilege"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Privileges updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/interfaces": {
+            "get": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Get the interfaces for all RPC-JSON methods.",
+                "operationId": "getTypeScript",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "text/plain": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get schema(s)",
+                "operationId": "getSchema",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": false,
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Schema"
+                                }
+                            }
+                        },
+                        "links": {
+                            "getTableLink": {
+                                "operationId": "getTable",
+                                "parameters": {
+                                    "schema": "$request.path.schema"
+                                },
+                                "description": "Link to tables in schema."
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Delete schema(s)",
+                "operationId": "deleteSchema",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Schema deleted"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Rename a schema",
+                "operationId": "patchSchema",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": false,
+                        "example": "my_schema"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Rename schema",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "required": [
+                                            "name"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "description": "New name of schema",
+                                                "type": "string",
+                                                "example": "my_schema_with_new_name"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas": {
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Create schema(s)",
+                "operationId": "postSchema",
+                "requestBody": {
+                    "description": "New schema",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Schema"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/sequences/{sequence}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get sequence(s)",
+                "operationId": "getSequence",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "sequence",
+                        "in": "path",
+                        "description": "Sequence names",
+                        "required": false,
+                        "example": "my_sequences"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Sequence"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Delete sequence(s)",
+                "operationId": "deleteSequence",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "sequence",
+                        "in": "path",
+                        "description": "Sequence names",
+                        "required": true,
+                        "example": "my_sequences"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Sequence deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Update sequence(s)",
+                "operationId": "patchSequence",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "sequence",
+                        "in": "path",
+                        "description": "Sequence names",
+                        "required": true,
+                        "example": "my_sequences"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Sequence",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Sequence"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Sequence updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/sequences/": {
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Create sequence(s)",
+                "operationId": "postSequence",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New sequence",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Sequence"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/sql": {
+            "post": {
+                "tags": [
+                    "Sql"
+                ],
+                "description": "Execute SQL statements",
+                "operationId": "postSql",
+                "requestBody": {
+                    "description": "Sql statement to execute",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Sql"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error. Most like an SQL error."
+                    }
+                }
+            }
+        },
+        "/api/v4/sql/database/{database}": {
+            "post": {
+                "tags": [
+                    "Sql"
+                ],
+                "description": "Run SQL statements without token",
+                "operationId": "postSqlNoToken",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database to use",
+                        "required": false,
+                        "example": "mydb"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Sql statement to run",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Sql"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "500": {
+                        "description": "Internal error. Most like an SQL error."
+                    }
+                }
+            }
+        },
+        "/api/v4/stats": {
+            "get": {
+                "tags": [
+                    "Stats"
+                ],
+                "description": "Get statistics",
+                "operationId": "getStats",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Stats"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}": {
+            "get": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get table(s)",
+                "operationId": "getTable",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": false,
+                        "example": "my_table"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Table"
+                                }
+                            }
+                        },
+                        "links": {
+                            "getColumn": {
+                                "operationId": "getColumn",
+                                "parameters": {
+                                    "schema": "$request.path.schema",
+                                    "table ": "$request.path.table"
+                                },
+                                "description": "Link to columns."
+                            },
+                            "getConstraint": {
+                                "operationId": "getConstraint",
+                                "parameters": {
+                                    "schema": "$request.path.schema",
+                                    "table ": "$request.path.table"
+                                },
+                                "description": "Link to constraints."
+                            },
+                            "getIndex": {
+                                "operationId": "getIndex",
+                                "parameters": {
+                                    "schema": "$request.path.schema",
+                                    "table ": "$request.path.table"
+                                },
+                                "description": "Link to indices."
+                            },
+                            "getPrivileges": {
+                                "operationId": "getPrivileges",
+                                "parameters": {
+                                    "schema": "$request.path.schema",
+                                    "table ": "$request.path.table"
+                                },
+                                "description": "Link to privileges."
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Delete table",
+                "operationId": "deleteTable",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Table deleted"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Rename and move table(s)",
+                "operationId": "patchTable",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Updated table",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "properties": {
+                                            "name": {
+                                                "description": "New name of table",
+                                                "type": "string",
+                                                "example": "my_table_with_new_name"
+                                            },
+                                            "schema": {
+                                                "description": "Move table to schema",
+                                                "type": "string",
+                                                "example": "my_other_schema"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Table updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables": {
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Create table(s)",
+                "operationId": "postTable",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New table",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Table"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/user/{name}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "description": "Get rules",
+                "operationId": "getUser",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "User identifier",
+                        "required": false,
+                        "example": "joe"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/users": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "description": "New user",
+                "operationId": "postUser",
+                "requestBody": {
+                    "description": "New user",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/users/{name}": {
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "description": "Delete user",
+                "operationId": "deleteUsers",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "User identifier",
+                        "required": true,
+                        "example": "joe"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "description": "Update user",
+                "operationId": "patchUser",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "User identifier",
+                        "required": true,
+                        "example": "joe"
+                    }
+                ],
+                "requestBody": {
+                    "description": "User",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Rule updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Call": {
+                "description": "JSON-RPC is a stateless, lightweight remote procedure call (RPC) protocol that uses JSON for data interchange. Defined by the JSON-RPC 2.0 specification, it enables clients to invoke methods on a server by sending JSON-formatted requests and receiving JSON-formatted responses, with support for batch calls, notifications, and standardized error handling.",
+                "required": [
+                    "jsonrpc",
+                    "method"
+                ],
+                "properties": {
+                    "jsonrpc": {
+                        "title": "JSON RPC version",
+                        "description": "The version number of the JSON-RPC protocol. Must be exactly \"2.0\".",
+                        "type": "string",
+                        "enum": [
+                            "2.0"
+                        ],
+                        "example": "2.0"
+                    },
+                    "id": {
+                        "title": "Identifier",
+                        "description": "An identifier established by the Client that MUST contain a string if included",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "method": {
+                        "title": "Method name",
+                        "description": "A String containing the name of the method to be invoked or created",
+                        "type": "string",
+                        "example": "getDate"
+                    },
+                    "params": {
+                        "title": "Parameters",
+                        "description": "Parameters for method.",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "example": {
+                            "my_date": "2011 04 01"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Client": {
+                "description": "OAuth clients are applications that request and manage access to user resources through the OAuth authorization protocol. These clients act as intermediaries, enabling secure, delegated access to user accounts without directly handling sensitive credentials.",
+                "required": [
+                    "name",
+                    "redirect_uri"
+                ],
+                "properties": {
+                    "id": {
+                        "title": "Client id",
+                        "description": "Id of client, which identify the client.",
+                        "type": "string",
+                        "example": "my_client_id"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of client. Can help identify the client.",
+                        "type": "string",
+                        "example": "My Application"
+                    },
+                    "homepage": {
+                        "title": "Homepage",
+                        "description": "The homepage (or web-app), which starts the code flow.",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://mapcentia.com"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "A longer description of the client, which can help identify the client.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": null
+                    },
+                    "redirect_uri": {
+                        "title": "Redirect URIs.",
+                        "description": "The URIs the auth server is allowed to redirect back to.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "https://my_site1.com",
+                            "https://my_site2.com"
+                        ]
+                    },
+                    "public": {
+                        "title": "Public",
+                        "description": "Public clients do not require a secret.",
+                        "type": "boolean",
+                        "default": false,
+                        "example": true
+                    },
+                    "confirm": {
+                        "title": "Confirm",
+                        "description": "Users must confirm client access.",
+                        "type": "boolean",
+                        "default": true,
+                        "example": true
+                    },
+                    "two_factor": {
+                        "title": "Two factor authentication",
+                        "description": "Users must log in with two factor authentication.",
+                        "type": "boolean",
+                        "default": true,
+                        "example": true
+                    },
+                    "allow_signup": {
+                        "title": "Allow users to sign up",
+                        "description": "Users can sign up for a new account in the web-dialog.",
+                        "type": "boolean",
+                        "default": false,
+                        "example": true
+                    },
+                    "social_signup": {
+                        "title": "Enable social signup",
+                        "description": "Users can sign up for a new account with social login.",
+                        "type": "boolean",
+                        "default": false,
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "Column": {
+                "description": "Each column has a data type. The data type constrains the set of possible values that can be assigned to a column and assigns semantics to the data stored in the column so that it can be used for computations. For instance, a column declared to be of a numerical type will not accept arbitrary text strings, and the data stored in such a column can be used for mathematical computations. By contrast, a column declared to be of a character string type will accept almost any kind of data but it does not lend itself to mathematical calculations, although other operations such as string concatenation are available.",
+                "required": [],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of the column.",
+                        "type": "string",
+                        "example": "my-column"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "description": "The type of the column, like varchar, integer, boolean etc.",
+                        "type": "string",
+                        "example": "int"
+                    },
+                    "is_nullable": {
+                        "title": "Is nullable",
+                        "description": "If true the column can be set to null.",
+                        "type": "boolean",
+                        "default": "true",
+                        "example": "false"
+                    },
+                    "default_value": {
+                        "title": "Default value",
+                        "description": "The column is set to the default value if no value is given.",
+                        "type": "string",
+                        "example": "my-value"
+                    },
+                    "identity_generation": {
+                        "title": "Identity generation of the column",
+                        "description": "An identity column is a special column that is generated automatically from an implicit sequence. It can be used to generate key values.",
+                        "type": "string",
+                        "enum": [
+                            "always",
+                            "by default"
+                        ],
+                        "example": "always"
+                    }
+                },
+                "type": "object"
+            },
+            "Commit": {
+                "description": "Schema commit.",
+                "required": [
+                    "schema",
+                    "repo",
+                    "message"
+                ],
+                "properties": {
+                    "schema": {
+                        "title": "Schema",
+                        "description": "Schema to commit",
+                        "type": "string",
+                        "example": "myschema"
+                    },
+                    "repo": {
+                        "title": "Repository",
+                        "description": "An Git repository URL with credentials.",
+                        "type": "string",
+                        "example": "https://user:password@github.com/path/repo.git"
+                    },
+                    "message": {
+                        "title": "Commit message",
+                        "description": "The commit message.",
+                        "type": "string",
+                        "example": "My first commit"
+                    },
+                    "meta_query": {
+                        "title": "Meta query string",
+                        "description": "Only commit meta for this search.",
+                        "type": "string",
+                        "default": null,
+                        "example": "tag:mytables"
+                    }
+                },
+                "type": "object"
+            },
+            "Constraint": {
+                "description": "A constraint is a rule that is enforced on a table to ensure data integrity. Constraints can be used to enforce rules such as uniqueness, foreign key relationships, and check constraints. They help maintain the consistency and accuracy of data in a database.",
+                "required": [
+                    "constraint",
+                    "columns"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of the constraint.",
+                        "type": "string",
+                        "example": "my-constraint"
+                    },
+                    "constraint": {
+                        "title": "Type",
+                        "description": "Type of the constraint.",
+                        "type": "string",
+                        "example": "foreign"
+                    },
+                    "columns": {
+                        "title": "Columns",
+                        "description": "Columns in constraint",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "c1",
+                            "c2",
+                            "c3"
+                        ]
+                    },
+                    "check": {
+                        "title": "Check",
+                        "description": "A check constraint.",
+                        "type": "string",
+                        "example": "c1 > 0"
+                    },
+                    "referenced_table": {
+                        "title": "Referenced table",
+                        "description": "Referenced table in a foreign key constraint.",
+                        "type": "string",
+                        "example": "my_schema.my.table"
+                    },
+                    "referenced_columns": {
+                        "title": "Referenced columns",
+                        "description": "Referenced columns in a foreign key constraint. This will default to the primary key if omitted.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "c1",
+                            "c2",
+                            "c3"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "File": {
+                "description": "Use the Files endpoints to upload one or more files (like CSV files) to temporary storage and then process them into a database table.",
+                "required": [
+                    "file",
+                    "schema"
+                ],
+                "properties": {
+                    "file": {
+                        "title": "File",
+                        "description": "File to import to database.",
+                        "type": "string"
+                    },
+                    "schema": {
+                        "title": "Schema",
+                        "description": "Destination schema",
+                        "type": "string"
+                    },
+                    "import": {
+                        "title": "Import",
+                        "description": "If false, a dry-run will be executed.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "t_srs": {
+                        "title": "Target srs",
+                        "description": "Fallback target SRS. Will be used if no authority name/code is available.",
+                        "type": "string",
+                        "default": "EPSG:4326"
+                    },
+                    "s_srs": {
+                        "title": "Source srs",
+                        "description": "Fallback source SRS. Will be used if file doesn't contain projection information.",
+                        "type": "string",
+                        "default": "EPSG:4326"
+                    },
+                    "append": {
+                        "title": "Append",
+                        "description": "Append to existing table instead of creating new.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "p_multi": {
+                        "title": "Promote to multi",
+                        "description": "Promote single geometries to multi part.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "truncate": {
+                        "title": "Truncate",
+                        "description": "Truncate table before appending. Only have effect if --append is set.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "timestamp": {
+                        "title": "Timestamp",
+                        "description": "Name of timestamp field. Create a timestamp field in the import table. Omit property for no timestamp field.",
+                        "type": "string",
+                        "example": "creation_timestamp"
+                    },
+                    "x_possible_names": {
+                        "title": "Possible names for X",
+                        "description": "Specify the potential names of the columns that can contain X/longitude. Only effects CSV",
+                        "type": "string",
+                        "default": "lon*,Lon*,x,X",
+                        "example": "Lon*"
+                    },
+                    "y_possible_names": {
+                        "title": "Possible names for Y",
+                        "description": "Specify the potential names of the columns that can contain Y/latitude. Only effects CSV",
+                        "type": "string",
+                        "default": "lat*,Lat*,y,Y",
+                        "example": "Lat*"
+                    }
+                },
+                "type": "object"
+            },
+            "Rule": {
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Unique identifier",
+                        "description": "Id of the rule. If omitted the rule will get an id automatically generated.",
+                        "type": "integer",
+                        "example": 1000
+                    },
+                    "priority": {
+                        "title": "Priority",
+                        "description": "All rules are checked by priority in descending order. The first that matches will be applied.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "username": {
+                        "title": "Username",
+                        "description": "Rule match for user name (the user that makes the request).",
+                        "type": "string",
+                        "example": "john"
+                    },
+                    "service": {
+                        "title": "Service",
+                        "description": "Rule match for service.",
+                        "type": "string",
+                        "enum": [
+                            "sql",
+                            "ows",
+                            "wfst"
+                        ],
+                        "example": "sql"
+                    },
+                    "request": {
+                        "title": "Request",
+                        "description": "Rule match for request.",
+                        "type": "string",
+                        "enum": [
+                            "select",
+                            "insert",
+                            "update",
+                            "delete"
+                        ],
+                        "example": "select"
+                    },
+                    "layer": {
+                        "title": "Layer",
+                        "description": "Rule match for the requested layer(s).",
+                        "type": "string",
+                        "example": "my_table"
+                    },
+                    "iprange": {
+                        "title": "Iprange",
+                        "description": "Rule match for the iprange, which the request originates from.",
+                        "type": "string",
+                        "example": "127.0.0.1/32"
+                    },
+                    "schema": {
+                        "title": "Schema",
+                        "description": "Rule match for the requested schema(s).",
+                        "type": "string",
+                        "example": "my_schema"
+                    },
+                    "access": {
+                        "title": "Access",
+                        "description": "The access level the rule grants.",
+                        "type": "string",
+                        "enum": [
+                            "allow",
+                            "limit",
+                            "deny"
+                        ],
+                        "example": "limit"
+                    },
+                    "filter": {
+                        "title": "Filter",
+                        "description": "A filter for rules with 'limit' access. This is a valid WHERE clause.",
+                        "type": "string",
+                        "example": "user='john'"
+                    }
+                },
+                "type": "object"
+            },
+            "GraphQL": {
+                "description": "The GraphQL API allows you to query and manipulate your database data using a dynamically generated schema. Each table in your schema is automatically mapped to GraphQL types, queries, and mutations.",
+                "required": [
+                    "query"
+                ],
+                "properties": {
+                    "query": {
+                        "title": "Query",
+                        "description": "GraphQL query. Both query and mutation operations are supported. Queries retrieve data, while mutations modify data.",
+                        "type": "string",
+                        "example": "query { ... }"
+                    },
+                    "variables": {
+                        "title": "Variables",
+                        "description": "Variables for the GraphQL query. Should be a JSON object with variable names as keys and their values as values.",
+                        "type": "object",
+                        "example": {
+                            "id": 1
+                        }
+                    },
+                    "operationName": {
+                        "title": "Operation name",
+                        "description": "Name of the operation to execute. Useful when a query contains multiple operations.",
+                        "type": "string",
+                        "example": "Artists"
+                    }
+                },
+                "type": "object"
+            },
+            "Index": {
+                "description": "Indices in a database use a similar approach as in most non-fiction books: terms and concepts that are frequently looked up by readers are collected in an alphabetic index at the end of the book. The interested reader can scan the index relatively quickly and flip to the appropriate page(s), rather than having to read the entire book to find the material of interest.",
+                "required": [
+                    "columns"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of the index.",
+                        "type": "string",
+                        "example": "my-btree"
+                    },
+                    "columns": {
+                        "title": "Columns",
+                        "description": "Column(s) to index. An index can comprise more columns.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "field1"
+                        ]
+                    },
+                    "method": {
+                        "title": "The index method.",
+                        "description": "The index method.",
+                        "type": "string",
+                        "default": "btree",
+                        "enum": [
+                            "btree",
+                            "brin",
+                            "gin",
+                            "gist",
+                            "hash"
+                        ],
+                        "example": "btree"
+                    }
+                },
+                "type": "object"
+            },
+            "Method": {
+                "description": "nstead of sending raw SQL every time you want to run a statement, you can wrap your SQL statements inside JSON-RPC methods. This means you define a named method which holds your SQL query along with optional instructions on how to interpret and format the data types.",
+                "required": [
+                    "method",
+                    "q"
+                ],
+                "properties": {
+                    "method": {
+                        "title": "Method",
+                        "description": "A String containing the name of the method to be created.",
+                        "type": "string",
+                        "example": "getDate"
+                    },
+                    "q": {
+                        "title": "Query",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE or DELETE.",
+                        "type": "string",
+                        "example": "SELECT :my_date::date as my_date"
+                    },
+                    "type_hints": {
+                        "title": "Type hints",
+                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "type": "object",
+                        "example": {
+                            "my_date": "date"
+                        }
+                    },
+                    "type_formats": {
+                        "title": "Type formats",
+                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "type": "object",
+                        "example": {
+                            "my_date": "Y m d"
+                        }
+                    },
+                    "output_format": {
+                        "title": "Output format",
+                        "description": "The wanted output format.",
+                        "type": "string",
+                        "default": "json",
+                        "example": "csv"
+                    },
+                    "srs": {
+                        "title": "Spatial reference system",
+                        "description": "The spatial reference system to use for PostGIS geometry columns. EPSG code.",
+                        "type": "integer",
+                        "default": 4326,
+                        "example": 25832
+                    }
+                },
+                "type": "object"
+            },
+            "OAuth": {
+                "description": "OAuth is used to authenticate users and grant access to resources. It is a protocol that allows users to authorize third-party applications to access their resources without sharing their credentials.",
+                "required": [
+                    "grant_type"
+                ],
+                "properties": {
+                    "grant_type": {
+                        "title": "OAuth grant type",
+                        "description": "The OAuth grant type to use for authentication.",
+                        "type": "string",
+                        "enum": [
+                            "password",
+                            "authorization_code",
+                            "refresh_token",
+                            "device_code"
+                        ],
+                        "example": "password"
+                    },
+                    "username": {
+                        "title": "Username",
+                        "description": "Username - either database user or sub-user. Only used in password grant.",
+                        "type": "string",
+                        "example": "mydb"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "description": "Password for password grant.",
+                        "type": "string",
+                        "example": "abc123!"
+                    },
+                    "database": {
+                        "title": "Database",
+                        "description": "The database the user belongs to.",
+                        "type": "string",
+                        "example": "mydb"
+                    },
+                    "client_id": {
+                        "title": "Client id",
+                        "description": "The OAuth client id.",
+                        "type": "string",
+                        "example": "djskjskdj"
+                    },
+                    "client_secret": {
+                        "title": "Client secret",
+                        "description": "The OAuth client secret.",
+                        "type": "string",
+                        "example": "xxx"
+                    },
+                    "code": {
+                        "title": "Code",
+                        "description": "The code which is exchanged for an access token in authorization_code grant",
+                        "type": "string",
+                        "example": "xxx"
+                    },
+                    "redirect_uri": {
+                        "title": "Redirect uri",
+                        "description": "The redirect uris for authorization_code grant.",
+                        "type": "string",
+                        "example": "xxx"
+                    },
+                    "code_verifier": {
+                        "title": "Code verifier",
+                        "description": "The code verifier for PKCE.",
+                        "type": "string",
+                        "example": "xxx"
+                    }
+                },
+                "type": "object"
+            },
+            "OAuthResponse": {
+                "description": "OAuth grant response. This is the final response with tokens.",
+                "required": [
+                    "access_token",
+                    "token_type",
+                    "expires_in",
+                    "refresh_token",
+                    "scope"
+                ],
+                "properties": {
+                    "access_token": {
+                        "title": "JWT access token",
+                        "description": "The JWT access token.",
+                        "type": "string",
+                        "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    },
+                    "token_type": {
+                        "title": "Token type",
+                        "description": "Always 'bearer'",
+                        "type": "string",
+                        "enum": [
+                            "bearer"
+                        ],
+                        "example": "bearer"
+                    },
+                    "expires_in": {
+                        "title": "Expiration time",
+                        "description": "The token expiration time.",
+                        "type": "integer",
+                        "example": 3600
+                    },
+                    "refresh_token": {
+                        "title": "JWT refresh token",
+                        "description": "The JWT refresh token.",
+                        "type": "string",
+                        "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    },
+                    "scope": {
+                        "title": "Scope",
+                        "description": "The scope.",
+                        "type": "string",
+                        "example": "sql"
+                    }
+                },
+                "type": "object"
+            },
+            "OAuthDeviceResponse": {
+                "description": "Device response with user code and verification uri.",
+                "required": [
+                    "device_code",
+                    "user_code",
+                    "verification_uri",
+                    "expires_in",
+                    "interval"
+                ],
+                "properties": {
+                    "device_code": {
+                        "title": "Device code",
+                        "description": "The device code.",
+                        "type": "string",
+                        "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    },
+                    "user_code": {
+                        "title": "User code",
+                        "description": "The user code.",
+                        "type": "string",
+                        "example": "AB12-CD34"
+                    },
+                    "verification_uri": {
+                        "title": "Verification uri",
+                        "description": "The verification URI.",
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://api.centia.io/api/v4/oauth"
+                    },
+                    "expires_in": {
+                        "title": "Expiration time",
+                        "description": "The JWT refresh token.",
+                        "type": "integer",
+                        "example": "1800"
+                    },
+                    "interval": {
+                        "title": "Interval",
+                        "description": "The interval.",
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "OAuthDevice": {
+                "description": "Device request for starting a device flow.",
+                "required": [
+                    "client_id"
+                ],
+                "properties": {
+                    "client_id": {
+                        "title": "Client id",
+                        "description": "The client id.",
+                        "type": "string",
+                        "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    }
+                },
+                "type": "object"
+            },
+            "Privilege": {
+                "description": "The privilege system enables the super-user to grant sub-users read or write privileges to tables. Sub-users can grant privileges to tables in their own schemas.",
+                "required": [
+                    "subuser",
+                    "privileges"
+                ],
+                "properties": {
+                    "subuser": {
+                        "title": "Sub-user",
+                        "description": "Name of the sub-user",
+                        "type": "string",
+                        "example": "joe"
+                    },
+                    "privileges": {
+                        "title": "Privileges",
+                        "description": "The privileges granted to the sub-user on a table.",
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "read",
+                            "write"
+                        ],
+                        "example": "all"
+                    }
+                },
+                "type": "object"
+            },
+            "Schema": {
+                "description": "A database contains one or more named schemas, which in turn contain tables. Within one schema, two tables cannot have the same name. The same table name can be used in different schemas without conflict.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name of the column",
+                        "description": "Name of the column",
+                        "type": "string",
+                        "example": "my-schema"
+                    },
+                    "tables": {
+                        "title": "Tables",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Table"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Sequence": {
+                "description": "A sequence is a database object that generates a sequence of integers, often used for auto-incrementing primary key columns.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "The name of the sequence",
+                        "type": "string",
+                        "example": "my_sequence"
+                    },
+                    "data_type": {
+                        "title": "Data type",
+                        "description": "The data type of the sequence",
+                        "type": "string",
+                        "default": "bigint",
+                        "enum": [
+                            "smallint",
+                            "integer",
+                            "bigint"
+                        ],
+                        "example": "bigint"
+                    },
+                    "increment_by": {
+                        "title": "Increment by",
+                        "description": "Specifies which value is added to the current sequence value to create a new value",
+                        "type": "integer",
+                        "default": 1,
+                        "example": 1
+                    },
+                    "min_value": {
+                        "title": "Min value",
+                        "description": "Determines the minimum value a sequence can generate.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "max_value": {
+                        "title": "Max value",
+                        "description": "Determines the maximum value for the sequence.",
+                        "type": "integer",
+                        "example": 9223372036854775807
+                    },
+                    "start_value": {
+                        "title": "Start value",
+                        "description": "he initial value of the sequence",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cache_size": {
+                        "title": "Cache size",
+                        "description": "Specifies how many sequence numbers should be preallocated and stored in memory for faster access.",
+                        "type": "integer",
+                        "default": 1,
+                        "example": 1
+                    },
+                    "owned_by": {
+                        "title": "Qwned by",
+                        "description": "Associates the sequence with a specific table column, so that if that column (or its whole table) is deleted, the sequence will be automatically deleted as well. The format is schema.table.column.",
+                        "type": "string",
+                        "example": "public.my_table.id"
+                    }
+                },
+                "type": "object"
+            },
+            "Sql": {
+                "description": "SQL query execution endpoint. Supports SELECT, INSERT, UPDATE, DELETE and MERGE statements.",
+                "required": [],
+                "properties": {
+                    "q": {
+                        "title": "Query",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
+                        "type": "string",
+                        "example": "SELECT :my_date::date as my_date"
+                    },
+                    "params": {
+                        "title": "Parameters",
+                        "description": "Parameters for prepared statements.",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "example": {
+                            "my_date": "2011 04 01"
+                        }
+                    },
+                    "type_hints": {
+                        "title": "Type hints",
+                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "type": "object",
+                        "example": {
+                            "my_date": "date"
+                        }
+                    },
+                    "type_formats": {
+                        "title": "Type formats",
+                        "description": "Formats for types (like date formatting).",
+                        "type": "object",
+                        "example": {
+                            "my_date": "Y m d"
+                        }
+                    },
+                    "output_format": {
+                        "title": "Output format",
+                        "description": "The wanted output format.",
+                        "type": "string",
+                        "default": "json",
+                        "example": "csv"
+                    },
+                    "srs": {
+                        "title": "Spatial reference system",
+                        "description": "The spatial reference system to use for PostGIS geometry columns. EPSG code.",
+                        "type": "integer",
+                        "default": 4326,
+                        "example": 25832
+                    }
+                },
+                "type": "object"
+            },
+            "Stats": {
+                "description": "Statistics about the whole database.",
+                "required": [
+                    "tables",
+                    "total_size",
+                    "total_size_bytes",
+                    "number_of_tables",
+                    "cost"
+                ],
+                "properties": {
+                    "tables": {
+                        "title": "Tables.",
+                        "description": "List of stats for all tables.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TableStats"
+                        }
+                    },
+                    "total_size": {
+                        "title": "Total size",
+                        "description": "The total size of all tables in human-readable format.",
+                        "type": "integer",
+                        "example": 722018304
+                    },
+                    "total_size_bytes": {
+                        "title": "Total size",
+                        "description": "The total size of all tables in bytes.",
+                        "type": "string",
+                        "example": "689 MB"
+                    },
+                    "number_of_tables": {
+                        "title": "Number of tables",
+                        "description": "The total of table in the database",
+                        "type": "integer",
+                        "example": 21
+                    },
+                    "cost": {
+                        "title": "Cost of queries",
+                        "description": "The cost of queries.",
+                        "type": "number",
+                        "example": 25686.6
+                    }
+                },
+                "type": "object"
+            },
+            "TableStats": {
+                "description": "Table statistics.",
+                "required": [
+                    "table_name",
+                    "schema_name",
+                    "total_size",
+                    "total_size_bytes"
+                ],
+                "properties": {
+                    "table_name": {
+                        "title": "Table name",
+                        "description": "The name of the table.",
+                        "type": "string",
+                        "example": "my_table"
+                    },
+                    "schema_name": {
+                        "title": "Schema name",
+                        "description": "The name of the schema.",
+                        "type": "string",
+                        "example": "my_schema"
+                    },
+                    "total_size": {
+                        "title": "Total size",
+                        "description": "The total size of the table including indices in human-readable format.",
+                        "type": "string",
+                        "example": "2728 kB"
+                    },
+                    "total_size_bytes": {
+                        "title": "Total size in bytes",
+                        "description": "The total size of the table including indices in bytes.",
+                        "type": "integer",
+                        "example": 2793472
+                    },
+                    "table_size": {
+                        "title": "Table size",
+                        "description": "The size of the table in human-readable format.",
+                        "type": "string",
+                        "example": "2168 kB"
+                    },
+                    "table_size_bytes": {
+                        "title": "Table size in bytes",
+                        "description": "The size of the table in bytes.",
+                        "type": "integer",
+                        "example": 2220032
+                    },
+                    "indices_size": {
+                        "title": "Indices size",
+                        "description": "The size of the table's indices in human-readable format",
+                        "type": "string",
+                        "example": "520 kB"
+                    },
+                    "indices_size_bytes": {
+                        "title": "Indices size",
+                        "description": "The size of the table's indices in bytes.",
+                        "type": "integer",
+                        "example": 532480
+                    },
+                    "row_count": {
+                        "title": "Row count",
+                        "description": "The number of rows in the table.",
+                        "type": "integer",
+                        "example": 6338
+                    }
+                },
+                "type": "object"
+            },
+            "Table": {
+                "description": "A table is much like a table on paper: It consists of rows and columns. The number and order of the columns is fixed, and each column has a name. The number of rows is variable — it reflects how much data is stored at a given moment.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of the table",
+                        "type": "string",
+                        "example": "my-column"
+                    },
+                    "columns": {
+                        "title": "Columns",
+                        "description": "Columns in the table.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Column"
+                        }
+                    },
+                    "indices": {
+                        "title": "Indices",
+                        "description": "Indices in the table.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Index"
+                        }
+                    },
+                    "constraints": {
+                        "title": "Constraints",
+                        "description": "Constraints in the table.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Constraint"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "required": [
+                    "name",
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of user.",
+                        "type": "string",
+                        "example": "joe"
+                    },
+                    "email": {
+                        "title": "E-mail",
+                        "description": "Users e-mail.",
+                        "type": "string",
+                        "format": "email",
+                        "example": "joe@example.com"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "description": "Users password. Min. 8 characters and at least one upper case letter and one number.",
+                        "type": "password",
+                        "example": "Abc123!"
+                    },
+                    "properties": {
+                        "title": "Properties",
+                        "description": "An object, which can contain any properties and values.",
+                        "type": "object",
+                        "example": {
+                            "phone": "555-1234567",
+                            "address": "123 Main St",
+                            "city": "New York"
+                        }
+                    },
+                    "default_user": {
+                        "title": "Is default user",
+                        "description": "The default user is the user that is used when no token is provided. Use for public applications where users should not be able to access data without a token.",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Methods",
+            "description": "Methods"
+        },
+        {
+            "name": "Clients",
+            "description": "Clients"
+        },
+        {
+            "name": "Schema",
+            "description": "Schema"
+        },
+        {
+            "name": "Commit",
+            "description": "Commit"
+        },
+        {
+            "name": "File",
+            "description": "File"
+        },
+        {
+            "name": "Rules",
+            "description": "Rules"
+        },
+        {
+            "name": "GraphQL",
+            "description": "GraphQL"
+        },
+        {
+            "name": "OAuth",
+            "description": "OAuth"
+        },
+        {
+            "name": "Privileges",
+            "description": "Privileges"
+        },
+        {
+            "name": "Sql",
+            "description": "Sql"
+        },
+        {
+            "name": "Stats",
+            "description": "Stats"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        }
+    ]
+}
