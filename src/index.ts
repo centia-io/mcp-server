@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -98,6 +99,11 @@ function sanitizeSchemaForMCP(schema: any): any {
     }
   }
 
+  // Drop non‑standard/annotation keywords that some validators reject
+  for (const k of ["example", "examples", "deprecated", "readOnly", "writeOnly", "xml", "style", "explode", "nullable"]) {
+    if (k in clone) delete clone[k];
+  }
+
   if (Array.isArray(clone.enum)) {
     clone.enum = clone.enum.filter(
       (v: any) => !(typeof v === "number" && (!Number.isFinite(v) || Math.abs(v) > Number.MAX_SAFE_INTEGER))
@@ -124,6 +130,134 @@ function sanitizeSchemaForMCP(schema: any): any {
   }
 
   return clone;
+}
+
+// Normalize a schema to a conservative JSON Schema 2020-12 subset accepted by most MCP clients
+function normalizeJsonSchemaForMCP(schema: any): any {
+  if (schema == null) return undefined;
+  if (Array.isArray(schema)) return schema.map((s) => normalizeJsonSchemaForMCP(s));
+  if (typeof schema !== "object") return schema;
+
+  const allowedKeys = new Set([
+    "type",
+    "properties",
+    "required",
+    "description",
+    "enum",
+    "items",
+    "anyOf",
+    "oneOf",
+    "allOf",
+    "const",
+    "default",
+    "minimum",
+    "maximum",
+    "exclusiveMinimum",
+    "exclusiveMaximum",
+    "multipleOf",
+    "minLength",
+    "maxLength",
+    "pattern",
+    "format",
+    "minItems",
+    "maxItems",
+    "uniqueItems",
+    "contains",
+    "additionalProperties",
+    "patternProperties",
+    "title",
+  ]);
+
+  const formatWhitelist = new Set([
+    "email",
+    "uri",
+    "uuid",
+    "ipv4",
+    "ipv6",
+    "date-time",
+    "date",
+    "time",
+  ]);
+
+  const result: any = {};
+  for (const [k, v] of Object.entries(schema)) {
+    if (!allowedKeys.has(k)) continue; // drop unknown keys
+    result[k] = v;
+  }
+
+  // Ensure type validity or provide a safe default
+  const validTypes = new Set(["string", "number", "integer", "boolean", "object", "array", "null"]);
+  if (result.type !== undefined) {
+    if (Array.isArray(result.type)) {
+      const filtered = result.type.filter((t: any) => validTypes.has(t));
+      if (filtered.length > 0) result.type = filtered;
+      else delete result.type;
+    } else if (!validTypes.has(result.type)) {
+      delete result.type;
+    }
+  }
+
+  // Prune/normalize format
+  if (typeof result.format === "string" && !formatWhitelist.has(result.format)) {
+    delete result.format; // remove non-standard formats like 'url' or 'binary'
+  }
+
+  // Normalize required
+  if (result.required) {
+    if (!Array.isArray(result.required)) delete result.required;
+    else {
+      const onlyStrings = result.required.filter((r: any) => typeof r === "string");
+      if (onlyStrings.length > 0) result.required = Array.from(new Set(onlyStrings));
+      else delete result.required;
+    }
+  }
+
+  // Recurse
+  if (result.properties && typeof result.properties === "object") {
+    const newProps: any = {};
+    for (const [k, v] of Object.entries(result.properties)) {
+      const norm = normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(v));
+      if (norm) newProps[k] = norm;
+    }
+    result.properties = newProps;
+    if (Object.keys(result.properties).length === 0) delete result.properties;
+  }
+
+  if (result.items) {
+    result.items = normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(result.items));
+    if (result.items === undefined) delete result.items;
+  }
+
+  for (const key of ["anyOf", "oneOf", "allOf"]) {
+    if (Array.isArray((result as any)[key])) {
+      (result as any)[key] = (result as any)[key]
+        .map((s: any) => normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(s)))
+        .filter(Boolean);
+      if ((result as any)[key].length === 0) delete (result as any)[key];
+    }
+  }
+
+  if (result.enum && Array.isArray(result.enum)) {
+    // Ensure enums are unique and non-empty
+    const uniq = Array.from(new Set(result.enum));
+    if (uniq.length > 0) result.enum = uniq; else delete result.enum;
+  }
+
+  // If nothing constrains the schema, default to a string to keep it simple
+  const hasConstraints =
+    result.type !== undefined ||
+    result.enum !== undefined ||
+    result.const !== undefined ||
+    result.anyOf !== undefined ||
+    result.oneOf !== undefined ||
+    result.allOf !== undefined ||
+    result.properties !== undefined ||
+    result.items !== undefined;
+  if (!hasConstraints) {
+    result.type = "string";
+  }
+
+  return result;
 }
 
 const tools: Tool[] = [];
@@ -156,9 +290,10 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
       const resolvedParam = param.$ref ? resolveSchema(param) : param;
       const paramSchema = resolveSchema(resolvedParam.schema);
       const sanitizedParamSchema = sanitizeSchemaForMCP(paramSchema);
+      const normalizedParamSchema = normalizeJsonSchemaForMCP(sanitizedParamSchema);
       properties[resolvedParam.name] = {
-        ...sanitizedParamSchema,
-        description: resolvedParam.description || sanitizedParamSchema.description,
+        ...normalizedParamSchema,
+        description: resolvedParam.description || normalizedParamSchema?.description,
       };
       if (resolvedParam.required) {
         required.push(resolvedParam.name);
@@ -174,14 +309,14 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
       if (bodySchema.type === "object" && bodySchema.properties) {
         toolMeta.isBodyFlattened = true;
         for (const [key, value] of Object.entries(bodySchema.properties)) {
-          properties[key] = sanitizeSchemaForMCP(value);
+          properties[key] = normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(value));
           toolMeta.bodyParams.push(key);
         }
         if (bodySchema.required) {
           required.push(...bodySchema.required);
         }
       } else {
-        properties.requestBody = sanitizeSchemaForMCP(bodySchema);
+        properties.requestBody = normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(bodySchema));
         toolMeta.bodyParams.push("requestBody");
         if (requestBody.required) {
           required.push("requestBody");
@@ -195,7 +330,7 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
       inputSchema: {
         type: "object",
         properties,
-        required: [...new Set(required)],
+        ...(required.length > 0 ? { required: [...new Set(required)] } : {}),
       },
     });
 
