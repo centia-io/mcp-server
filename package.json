@@ -1,8 +1,13 @@
 {
-  "name": "centia-io-mcp-server",
+  "name": "@centia/mcp-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Centia MCP Server",
   "type": "module",
+  "bin": "./dist/index.js",
+  "files": [
+    "dist",
+    "centia-api.json"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
