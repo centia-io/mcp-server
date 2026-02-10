@@ -107,6 +107,20 @@ Add the server to your Claude Desktop MCP config (e.g., `claude_desktop_config.j
 - `npm run build` — Compile TypeScript to CommonJS/ESM in `dist/` via `tsc`.
 - `npm start` — Run the built server (`node dist/index.js`).
 
+## Using AGENT.md with AI Coding Agents
+This repository includes an `AGENT.md` file that provides specific instructions and best practices for AI coding agents (like Claude Code, Junie, etc.) when working with Centia BaaS.
+
+To ensure your AI agent follows these rules while developing your application:
+
+1. Copy the `AGENT.md` file from this repository to the root or `src/` folder of **your own application's** repository.
+2. When starting a session with your AI agent, it will automatically find and follow the guidelines defined in `AGENT.md`.
+
+The guide covers:
+- **Prime Directive**: Preferring MCP tools and official SDKs.
+- **Tool Priority**: Order of interaction (MCP tools > SDK > HTTP).
+- **Project Structure**: Recommended layout for Centia-based apps.
+- **Security & Auth**: How to handle tokens and OAuth flows correctly.
+
 ## Troubleshooting
 - Tools missing or inputs look odd: ensure `centia-api.json` exists and is valid. The server generates tools from this file at startup.
 - 401/403 errors: set a valid `API_TOKEN` in the environment.
