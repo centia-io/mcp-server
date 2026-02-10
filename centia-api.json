@@ -1,3 +1,4 @@
+
 {
     "openapi": "3.1.0",
     "info": {
@@ -2715,16 +2716,25 @@
                 ],
                 "properties": {
                     "name": {
-                        "title": "Name of the column",
-                        "description": "Name of the column",
+                        "title": "Name",
+                        "description": "Name of the schema.",
                         "type": "string",
                         "example": "my-schema"
                     },
                     "tables": {
                         "title": "Tables",
+                        "description": "Tables in the schema.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Table"
+                        }
+                    },
+                    "sequences": {
+                        "title": "Sequences",
+                        "description": "Sequences in the schema.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Sequence"
                         }
                     }
                 },
@@ -2771,7 +2781,7 @@
                         "title": "Max value",
                         "description": "Determines the maximum value for the sequence.",
                         "type": "integer",
-                        "example": 9223372036854775807
+                        "example": 9223372036854
                     },
                     "start_value": {
                         "title": "Start value",

@@ -69,6 +69,63 @@ function resolveSchema(schema: any): any {
   return schema;
 }
 
+// Sanitize JSON Schemas for MCP tool input to avoid oversized numeric literals
+function sanitizeSchemaForMCP(schema: any): any {
+  if (schema == null) return schema;
+  if (Array.isArray(schema)) {
+    return schema.map((s) => sanitizeSchemaForMCP(s));
+  }
+  if (typeof schema !== "object") return schema;
+
+  const clone: any = { ...schema };
+
+  const numericKeys = [
+    "example",
+    "default",
+    "maximum",
+    "minimum",
+    "exclusiveMaximum",
+    "exclusiveMinimum",
+    "multipleOf",
+    "const",
+  ];
+
+  for (const key of numericKeys) {
+    if (clone[key] !== undefined && typeof clone[key] === "number") {
+      if (!Number.isFinite(clone[key]) || Math.abs(clone[key]) > Number.MAX_SAFE_INTEGER) {
+        delete clone[key];
+      }
+    }
+  }
+
+  if (Array.isArray(clone.enum)) {
+    clone.enum = clone.enum.filter(
+      (v: any) => !(typeof v === "number" && (!Number.isFinite(v) || Math.abs(v) > Number.MAX_SAFE_INTEGER))
+    );
+    if (clone.enum.length === 0) delete clone.enum;
+  }
+
+  if (clone.properties && typeof clone.properties === "object") {
+    const newProps: any = {};
+    for (const [k, v] of Object.entries(clone.properties)) {
+      newProps[k] = sanitizeSchemaForMCP(v);
+    }
+    clone.properties = newProps;
+  }
+
+  if (clone.items) {
+    clone.items = sanitizeSchemaForMCP(clone.items);
+  }
+
+  for (const k of ["allOf", "anyOf", "oneOf"]) {
+    if (Array.isArray((clone as any)[k])) {
+      (clone as any)[k] = (clone as any)[k].map((s: any) => sanitizeSchemaForMCP(s));
+    }
+  }
+
+  return clone;
+}
+
 const tools: Tool[] = [];
 const operationMap = new Map<string, any>();
 
@@ -98,9 +155,10 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
     for (const param of parameters) {
       const resolvedParam = param.$ref ? resolveSchema(param) : param;
       const paramSchema = resolveSchema(resolvedParam.schema);
+      const sanitizedParamSchema = sanitizeSchemaForMCP(paramSchema);
       properties[resolvedParam.name] = {
-        ...paramSchema,
-        description: resolvedParam.description || paramSchema.description,
+        ...sanitizedParamSchema,
+        description: resolvedParam.description || sanitizedParamSchema.description,
       };
       if (resolvedParam.required) {
         required.push(resolvedParam.name);
@@ -116,14 +174,14 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
       if (bodySchema.type === "object" && bodySchema.properties) {
         toolMeta.isBodyFlattened = true;
         for (const [key, value] of Object.entries(bodySchema.properties)) {
-          properties[key] = value;
+          properties[key] = sanitizeSchemaForMCP(value);
           toolMeta.bodyParams.push(key);
         }
         if (bodySchema.required) {
           required.push(...bodySchema.required);
         }
       } else {
-        properties.requestBody = bodySchema;
+        properties.requestBody = sanitizeSchemaForMCP(bodySchema);
         toolMeta.bodyParams.push("requestBody");
         if (requestBody.required) {
           required.push("requestBody");
