@@ -87,6 +87,11 @@ Provisioning must use:
 
 Provisioning is NOT runtime logic.
 
+### SQL API limitations
+Only select, insert, update, delete and merge statements can be executed through the SQL API.
+Any other types of SQL (DDL, transaction control, etc.) will be rejected by the API. 
+Use MCP tools for these.
+
 ---
 
 # 4) Schema Lifecycle Policy (Hard Rule)
