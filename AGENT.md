@@ -257,9 +257,21 @@ export const flow = new PasswordFlow({
   username: process.env.CENTIA_USERNAME!,
   password: process.env.CENTIA_PASSWORD!,
   database: process.env.CENTIA_DATABASE!,
+  clientSecret: process.env.CENTIA_CLIENT_SECRET,
 });
+```
 
-await flow.signIn();
+### Browser signup (see Section 9A)
+
+```ts
+import { SignUp } from "@centia-io/sdk";
+
+const signUp = new SignUp({
+  host: import.meta.env.VITE_CENTIA_HOST,
+  clientId: import.meta.env.VITE_CENTIA_CLIENT_ID,
+  parentDb: import.meta.env.VITE_CENTIA_DATABASE,
+  redirectUri: "https://myapp.com/login"
+});
 ```
 
 Rules:
@@ -271,6 +283,7 @@ Rules:
 - Use `Rpc` / `createApi` for JSON-RPC calls
 - Use `CodeFlow` for browser OAuth
 - Use `PasswordFlow` for server/CLI auth
+- Use `SignUp` for app signup
 
 ---
 
@@ -493,6 +506,22 @@ function onLogoutClick() {
 }
 ```
 
+```ts
+import { SignUp } from "@centia-io/sdk";
+
+const signUp = new SignUp({
+    host: import.meta.env.VITE_CENTIA_HOST,
+    clientId: import.meta.env.VITE_CENTIA_CLIENT_ID,
+    parentDb: import.meta.env.VITE_CENTIA_DATABASE,
+    redirectUri: "https://myapp.com/login"
+});
+
+// Start sign-up when the user clicks "Create account"
+function onSignUpClick() {
+    signUp.signUp(); // Redirects to Centia.io sign-up page
+}
+```
+
 Token storage is SDK-managed via `CodeFlow`.
 
 Forbidden:
@@ -528,7 +557,8 @@ const flow = new PasswordFlow({
   clientId: process.env.CENTIA_CLIENT_ID!,
   username: process.env.CENTIA_USERNAME!,
   password: process.env.CENTIA_PASSWORD!,
-  database: process.env.CENTIA_DATABASE!,
+  database: process.env.CENTIA_DATABASE!, 
+  clientSecret: process.env.CENTIA_CLIENT_SECRET,
 });
 
 await flow.signIn();
@@ -543,6 +573,8 @@ Used for:
 - Provisioning
 - Admin operations
 - Service-to-service calls
+
+`clientSecret` is only required for confidential clients.
 
 ---
 
@@ -764,17 +796,19 @@ Other:
 
 # 18) Environment Variables
 
-| Variable | Context | Required | Description |
-|----------|---------|----------|-------------|
-| `CENTIA_HOST` | Server / provisioning | Yes | Centia API host (e.g. `https://api.centia.io`) |
-| `CENTIA_CLIENT_ID` | Server / provisioning | Yes | OAuth client ID |
-| `CENTIA_USERNAME` | Server / provisioning | Yes | Database username for `PasswordFlow` |
-| `CENTIA_PASSWORD` | Server / provisioning | Yes | Database password for `PasswordFlow` |
-| `CENTIA_DATABASE` | Server / provisioning | Yes | Parent database name |
-| `CENTIA_ACCESS_TOKEN` | MCP / HTTP fallback | No | Pre-issued access token (alternative to `PasswordFlow`) |
-| `CENTIA_OPENAPI_URL` | Development | No | URL to fetch OpenAPI spec from |
-| `VITE_CENTIA_HOST` | Browser apps (Vite) | Yes | Centia API host for frontend |
-| `VITE_CENTIA_CLIENT_ID` | Browser apps (Vite) | Yes | OAuth client ID for frontend |
+| Variable                | Context | Required | Description                                             |
+|-------------------------|---------|----------|---------------------------------------------------------|
+| `CENTIA_HOST`           | Server / provisioning | Yes | Centia API host (e.g. `https://api.centia.io`)          |
+| `CENTIA_CLIENT_ID`      | Server / provisioning | Yes | OAuth client ID                                         |
+| `CENTIA_CLIENT_SECRET`  | Server / provisioning | Yes | OAuth client secret                                     |
+| `CENTIA_USERNAME`       | Server / provisioning | Yes | Database username for `PasswordFlow`                    |
+| `CENTIA_PASSWORD`       | Server / provisioning | Yes | Database password for `PasswordFlow`                    |
+| `CENTIA_DATABASE`       | Server / provisioning | Yes | Parent database name                                    |
+| `CENTIA_ACCESS_TOKEN`   | MCP / HTTP fallback | No | Pre-issued access token (alternative to `PasswordFlow`) |
+| `CENTIA_OPENAPI_URL`    | Development | No | URL to fetch OpenAPI spec from                          |
+| `VITE_CENTIA_HOST`      | Browser apps (Vite) | Yes | Centia API host for frontend                            |
+| `VITE_CENTIA_CLIENT_ID` | Browser apps (Vite) | Yes | OAuth client ID for frontend                            |
+| `VITE_CENTIA_DATABASE`  | Browser apps (Vite) | Yes | Parent database name for frontend                       |
 
 Never commit `.env` files containing secrets. Provide a `.env.example` with placeholder values.
 
