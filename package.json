@@ -1,9 +1,12 @@
 {
   "name": "@centia/mcp-server",
   "version": "1.0.0",
+  "publishConfig": { "access": "public" },
   "description": "Centia MCP Server",
   "type": "module",
-  "bin": "./dist/index.js",
+  "bin": {
+    "mcp-server": "dist/index.js"
+  },
   "files": [
     "dist",
     "centia-api.json"

@@ -60,18 +60,9 @@ MCP Inspector lets you connect to the server and try tools interactively.
 
 1. Start the Inspector UI:
    ```bash
-   npx @modelcontextprotocol/inspector
+   npx @modelcontextprotocol/inspector -- npx @centia/mcp-server
    ```
-2. In the Inspector UI, create a new "STDIO" connection and set the command to one of:
-   - `npm run dev` (development)
-   - `npm start` (after build)
-3. If needed, add environment variables in the Inspector connection dialog (e.g., `API_TOKEN`).
-
-Tip: You can also launch the Inspector directly with a command, depending on your version of the Inspector:
-```bash
-# Example (may vary by Inspector version)
-npx @modelcontextprotocol/inspector --server-command "npm run dev"
-```
+2. If needed, add environment variables in the Inspector connection dialog (e.g., `API_TOKEN`).
 
 ## Using with Claude Desktop
 Add the server to your Claude Desktop MCP config (e.g., `claude_desktop_config.json`).
