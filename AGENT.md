@@ -47,6 +47,7 @@ Applies to (verify availability against installed SDK version):
 - Queries & filtering
 - Pagination
 - JSON-RPC
+- GraphQL
 - Client initialization
 
 Forbidden:
@@ -234,6 +235,54 @@ const api = createApi<MyApi>();
 const users = await api.getUserById({ user_id: 1 });
 ```
 
+### GraphQL:
+
+```ts title="GraphQL query"
+import { Gql, type GqlRequest, type GqlResponse } from "@centia-io/sdk"
+
+const query = `
+query  {
+  getBands {
+    band_id
+    name
+    subgenre
+  }
+}
+`
+const req: GqlRequest = {query}
+const gql = new Gql('public') // Which schema to use
+const res:GqlResponse = await gql.request(req)
+```
+
+```ts title="GraphQL mutation"
+import { Gql, type GqlRequest, type GqlResponse } from "@centia-io/sdk"
+
+const query = `
+mutation UpdateBands($where: JSON, $data: JSON ) {
+  updateBands(where: $where, data: $data) {
+    band_id
+    name
+    website
+  }
+}
+`
+const variables = {
+    "where": {
+        "name": {
+            "eq": "The Segfaults"
+        }
+    },
+    "data": {
+        "website": "https://segfaults.example",
+    }
+}
+const req: GqlRequest = {query, variables}
+const gql = new Gql('public') // Which schema to use
+const res: GqlResponse = await gql.request(req)
+```
+
+
+
 ### Browser auth — CodeFlow (see Section 9A):
 
 ```ts
@@ -289,52 +338,7 @@ Rules:
 
 # 7) GraphQL API
 
-The Centia GraphQL API is auto-generated from your database schema. It is NOT part of `@centia-io/sdk`.
-
-Endpoint: `POST https://api.centia.io/api/graphql/schema/{schema_name}`
-
-Access methods (in priority order):
-
-1. MCP `postGraphQL` tool (agents / provisioning)
-2. `graphql-request` library (runtime app code)
-3. Plain `fetch` (lightweight / no dependencies)
-
-### Agent / MCP usage:
-
-```ts
-postGraphQL({
-  schema: "my_schema",
-  query: "{ getArtists { artist_id legal_name } }",
-});
-```
-
-### Runtime app usage:
-
-For JS/TS application code, use [`graphql-request`](https://github.com/graffle-js/graphql-request):
-
-```sh
-npm install graphql-request
-```
-
-```ts
-import { GraphQLClient, gql } from "graphql-request";
-
-const client = new GraphQLClient(
-  `${process.env.CENTIA_HOST}/api/graphql/schema/my_schema`,
-  { headers: { Authorization: `Bearer ${token}` } }
-);
-
-const query = gql`
-  {
-    getArtists(where: { instrument: { eq: "guitar" } }, limit: 10) {
-      artist_id
-      legal_name
-    }
-  }
-`;
-
-const data = await client.request(query);
-```
+The Centia GraphQL API is auto-generated from your database schema.
 
 ### Query naming convention:
 
