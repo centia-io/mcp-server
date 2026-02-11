@@ -330,6 +330,7 @@ Rules:
 - Env-driven config
 - Use `Sql` / `createSqlBuilder` for database queries
 - Use `Rpc` / `createApi` for JSON-RPC calls
+- Use `Gql` for GraphQL queries and mutations
 - Use `CodeFlow` for browser OAuth
 - Use `PasswordFlow` for server/CLI auth
 - Use `SignUp` for app signup
