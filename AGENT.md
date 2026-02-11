@@ -1,6 +1,6 @@
 # AGENT.md — Centia BaaS Agent Guide
 
-> Last updated: 2026-02-10 · v1.1
+> Last updated: 2026-02-11 · v1.2
 
 This repository is designed to be used with AI coding agents such as Claude Code and Junie.
 
