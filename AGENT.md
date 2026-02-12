@@ -106,6 +106,8 @@ Decision flow:
 1. Is it a straightforward "show data on a map" app? → Use **MapLibre**
 2. Does it need advanced interactivity or a rich plugin ecosystem? → Use **Leaflet.js** or **OpenLayers**
 
+When using any of these libraries, use the **Context7 MCP** tool (if available) to look up current API documentation before writing mapping code. This avoids outdated or incorrect API usage.
+
 ### SQL API limitations
 Only select, insert, update, delete and merge statements can be executed through the SQL API.
 Any other types of SQL (DDL, transaction control, etc.) will be rejected by the API.
