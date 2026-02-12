@@ -88,6 +88,24 @@ Provisioning must use:
 
 Provisioning is NOT runtime logic.
 
+### SQL dialect
+Centia.io uses PostgreSQL with the PostGIS extension enabled. All SQL must be valid PostgreSQL syntax. PostGIS spatial functions and types (e.g. `geometry`, `geography`, `ST_Distance`, `ST_Within`) are available.
+
+### Mapping Libraries
+
+Centia.io is well suited for geospatial applications. When building map-based UIs, choose a mapping library based on complexity:
+
+| Library | When to use |
+|---------|-------------|
+| **MapLibre GL JS** (recommended default) | Simple map apps — displaying data on a map, markers, popups, basic interactivity |
+| **Leaflet.js** | Advanced apps — custom layers, complex interactions, plugin ecosystem |
+| **OpenLayers** | Advanced apps — heavy GIS workflows, projections, vector tiles, WMS/WFS integration |
+
+Decision flow:
+
+1. Is it a straightforward "show data on a map" app? → Use **MapLibre**
+2. Does it need advanced interactivity or a rich plugin ecosystem? → Use **Leaflet.js** or **OpenLayers**
+
 ### SQL API limitations
 Only select, insert, update, delete and merge statements can be executed through the SQL API.
 Any other types of SQL (DDL, transaction control, etc.) will be rejected by the API.
