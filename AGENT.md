@@ -1,6 +1,6 @@
 # AGENT.md — Centia BaaS Agent Guide
 
-> Last updated: 2026-02-11 · v1.2
+> Last updated: 2026-02-12 · v1.5
 
 This repository is designed to be used with AI coding agents such as Claude Code and Junie.
 
@@ -95,7 +95,58 @@ Use MCP tools for these.
 
 ---
 
-# 4) Schema Lifecycle Policy (Hard Rule)
+# 4) Query Method Selection (Hard Rule)
+
+Three query methods are available at runtime. Choose based on the operation:
+
+| Method | When to use | SDK |
+|--------|-------------|-----|
+| **GraphQL** | Straightforward CRUD — select, insert, update, delete with filtering, pagination, and nested relations | `Gql` |
+| **JSON-RPC** | Complex queries — joins, aggregations, CTEs, or any SQL that goes beyond basic CRUD. Keeps SQL server-side and centralizes changes. | `createApi<T>()` / `Rpc` |
+| **SQL** | Last resort — only when GraphQL and JSON-RPC cannot cover the use case (e.g. dynamic query building at runtime) | `Sql` / `createSqlBuilder` |
+
+### Decision flow
+
+1. Can GraphQL handle it (single-table CRUD, filtering, nested relations)? → Use **GraphQL**
+2. Is it a reusable query with complex SQL? → Define a **JSON-RPC method** and call it
+3. Does it require runtime-dynamic query construction? → Use **SQL builder**
+
+### Why this order
+
+- **GraphQL** is auto-generated from the schema — no SQL to write, no strings in code, nested relations for free
+- **JSON-RPC** keeps SQL on the server — one place to update queries, no SQL strings scattered in application code, type-safe via `createApi<T>()`
+- **SQL** embeds query strings in client code — harder to maintain, use only when the other two cannot express the operation
+
+### Examples
+
+CRUD operations → GraphQL:
+```ts
+const gql = new Gql("public");
+const res = await gql.request({
+  query: `{ getUsers(where: { active: { eq: true } }, limit: 10) { id name email } }`
+});
+```
+
+Report with joins/aggregation → JSON-RPC:
+```ts
+// Method defined server-side via postRpc:
+//   q: "SELECT d.name, count(e.*) FROM departments d JOIN employees e ON ... GROUP BY d.name"
+const api = createApi<Api>();
+const report = await api.getDepartmentHeadcount();
+```
+
+Dynamic query built at runtime → SQL builder:
+```ts
+const b = createSqlBuilder(schema);
+let q = b.table("logs").select(["id", "message"]);
+if (level) q = q.andWhere({ level });
+if (since) q = q.andWhere({ created_at: { gte: since } });
+const rows = (await sql.exec(q.toSql())).data;
+```
+
+---
+
+# 5) Schema Lifecycle Policy (Hard Rule)
 
 Schema changes must occur during code-generation / provisioning — never at app runtime.
 
@@ -118,7 +169,7 @@ Runtime apps must assume schema already exists.
 
 ---
 
-# 5) Provisioning Output Structure
+# 6) Provisioning Output Structure
 
 All provisioning artifacts must be stored locally.
 
@@ -153,7 +204,7 @@ Application runtime code must never call provisioning endpoints.
 
 ---
 
-# 6) SDK Usage Standard
+# 7) SDK Usage Standard
 
 All JS/TS apps must initialize SDK centrally.
 
@@ -208,6 +259,8 @@ const deleteReq = b.table("users").delete().where({ id: 2 });
 ```
 
 ### JSON-RPC:
+
+See Section 9 for the full JSON-RPC workflow (creating methods, dry-run, type inference).
 
 ```ts
 import { Rpc } from "@centia-io/sdk";
@@ -283,7 +336,7 @@ const res: GqlResponse = await gql.request(req)
 
 
 
-### Browser auth — CodeFlow (see Section 9A):
+### Browser auth — CodeFlow (see Section 12A):
 
 ```ts
 import { CodeFlow } from "@centia-io/sdk";
@@ -295,7 +348,7 @@ export const codeFlow = new CodeFlow({
 });
 ```
 
-### Server auth — PasswordFlow (see Section 9B):
+### Server auth — PasswordFlow (see Section 12B):
 
 ```ts
 import { PasswordFlow } from "@centia-io/sdk";
@@ -310,7 +363,7 @@ export const flow = new PasswordFlow({
 });
 ```
 
-### Browser signup (see Section 9A)
+### Browser signup (see Section 12A)
 
 ```ts
 import { SignUp } from "@centia-io/sdk";
@@ -337,7 +390,344 @@ Rules:
 
 ---
 
-# 7) GraphQL API
+# 8) Type System
+
+Centia uses PostgreSQL types. These apply to column definitions (`postColumn`, `postTable`), SQL type casting, and RPC `type_hints`.
+
+Docs: https://centia.io/docs/types
+
+---
+
+## Supported Types
+
+### Numeric
+
+| Type | Size | Notes |
+|------|------|-------|
+| `smallint` | 2 bytes | -32768 to 32767 |
+| `integer` | 4 bytes | -2147483648 to 2147483647 |
+| `bigint` | 8 bytes | Large integers |
+| `decimal` / `numeric` | variable | User-defined precision: `decimal(10,2)` |
+| `real` | 4 bytes | Floating point |
+| `double precision` | 8 bytes | Floating point |
+
+### Character
+
+| Type | Notes |
+|------|-------|
+| `varchar(n)` | Variable-length, max `n` characters |
+| `char(n)` / `bpchar` | Fixed-length, space-padded |
+| `text` | Unlimited variable-length |
+
+### Boolean
+
+`boolean` — `true`, `false`, or `null`
+
+### JSON
+
+| Type | Notes |
+|------|-------|
+| `json` | Text-based JSON storage |
+| `jsonb` | Binary format, faster queries and indexing |
+
+### Date / Time
+
+| Type | Example | Notes |
+|------|---------|-------|
+| `date` | `2025-05-01` | Calendar date |
+| `time` | `14:30:00` | Without timezone |
+| `timetz` | `14:30:00+02` | With timezone |
+| `timestamp` | `2025-05-01 14:30:00` | Without timezone |
+| `timestamptz` | `2025-05-01 14:30:00+02` | With timezone |
+| `interval` | `1 year 2 months` | Duration |
+
+### Geometric
+
+| Type | Description |
+|------|-------------|
+| `point` | 2D coordinate (x, y) |
+| `line` | Infinite 2D line |
+| `lseg` | Line segment (start/end points) |
+| `box` | Rectangular box (opposite corners) |
+| `path` | Open or closed series of points |
+| `polygon` | Closed shape (3+ points) |
+| `circle` | Center point and radius |
+
+### Range
+
+| Type | Description |
+|------|-------------|
+| `int4range` | Integer range |
+| `int8range` | Bigint range |
+| `numrange` | Numeric range |
+| `daterange` | Date range |
+| `tsrange` | Timestamp range |
+| `tstzrange` | Timestamp with timezone range |
+
+Range values contain `lower`, `upper`, `lowerInclusive`, `upperInclusive`.
+
+---
+
+## Arrays
+
+Append `[]` to any type to make it an array:
+
+`integer[]`, `text[]`, `timestamptz[]`, `jsonb[]`
+
+Used in column definitions and type hints alike.
+
+---
+
+## Type Casting in SQL
+
+Use `:param::type` to cast parameters in SQL queries:
+
+```sql
+SELECT :name::text, :age::integer, :joined::date
+```
+
+Explicit casts are required for RPC type inference (see Section 9C).
+
+---
+
+## type_hints
+
+Map parameter or column names to PostgreSQL types. Used in `postRpc` and `postSql` when the server cannot infer the type from context alone:
+
+```json
+{ "date": "timestamptz", "days": "integer" }
+```
+
+Valid values: any type listed above.
+
+---
+
+## type_formats
+
+Map column names to output format patterns. Applies to date/time types in responses:
+
+```json
+{ "date": "D M d Y", "time": "H:i:s T" }
+```
+
+Common patterns:
+
+| Token | Output | Description |
+|-------|--------|-------------|
+| `Y` | `2025` | 4-digit year |
+| `m` | `05` | Month (zero-padded) |
+| `d` | `08` | Day (zero-padded) |
+| `D` | `Thu` | Short weekday name |
+| `l` | `Thursday` | Full weekday name |
+| `F` | `May` | Full month name |
+| `H` | `14` | Hour (24h, zero-padded) |
+| `i` | `30` | Minutes (zero-padded) |
+| `s` | `00` | Seconds (zero-padded) |
+| `T` | `UTC` | Timezone abbreviation |
+| `jS` | `8th` | Day with ordinal suffix |
+
+---
+
+# 9) JSON-RPC Methods
+
+JSON-RPC methods wrap SQL statements into named, reusable server-side procedures.
+Benefits: reusability, consistency (type hints/formats defined once), security (SQL stays server-side), and simplicity (clients call by name).
+
+Docs: https://centia.io/docs/methods
+
+---
+
+## A) Provisioning — Create a Method
+
+Use the `postRpc` MCP tool to define a method.
+
+Parameters in SQL use named placeholders with optional type casts:
+
+- `:param` — basic placeholder
+- `:param::type` — with explicit type cast (required for type inference)
+
+```
+postRpc({
+  method: "getDate",
+  q: "select now() as date",
+  type_formats: { date: "D M d Y" }
+})
+```
+
+```
+postRpc({
+  method: "addDays",
+  q: "select date(:date) + :days::int as result",
+  type_hints: { date: "timestamptz" },
+  type_formats: { result: "l jS F Y", date: "D M d Y" }
+})
+```
+
+Fields:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `method` | Yes | Name of the method |
+| `q` | Yes | SQL statement (SELECT, INSERT, UPDATE, DELETE, MERGE) |
+| `type_hints` | No | Map of parameter/column names to PostgreSQL types (e.g. `{ "date": "timestamptz" }`) |
+| `type_formats` | No | Map of column names to output format patterns (e.g. `{ "date": "D M d Y" }`) |
+| `output_format` | No | Response format: `json` (default), `csv`, `ndjson` |
+| `srs` | No | EPSG code for PostGIS geometry columns (default: 4326) |
+
+Use `patchRpc` to update an existing method. Use `deleteRpc` to remove one. Use `getRpc` to inspect definitions.
+
+---
+
+## B) Calling a Method
+
+Use the `postCall` MCP tool. Follows the JSON-RPC 2.0 protocol.
+
+```
+postCall({
+  jsonrpc: "2.0",
+  method: "addDays",
+  params: { date: "2025-05-01", days: 7 },
+  id: "1"
+})
+```
+
+Fields:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `jsonrpc` | Yes | Must be `"2.0"` |
+| `method` | Yes | Name of the method to invoke |
+| `params` | No | Object with parameter names as keys. For batch params, use an array of objects (see below). |
+| `id` | No | Request identifier. Omit for notifications (fire-and-forget, no response). |
+
+### Response structure
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "schema": {
+      "result": { "type": "date", "array": false }
+    },
+    "data": [
+      { "result": "Thursday 8th May 2025" }
+    ]
+  },
+  "id": "1"
+}
+```
+
+### Notifications
+
+Omit `id` to send a notification — the server executes the method but returns no response:
+
+```
+postCall({
+  jsonrpc: "2.0",
+  method: "logEvent",
+  params: { event: "user_signup", userId: 123 }
+})
+```
+
+### Batch params (same method, multiple parameter sets)
+
+Pass an array of objects to `params` to execute the same method with different parameters efficiently:
+
+```
+postCall({
+  jsonrpc: "2.0",
+  method: "insertUser",
+  params: [
+    { name: "Alice", email: "alice@example.com" },
+    { name: "Bob", email: "bob@example.com" }
+  ],
+  id: "1"
+})
+```
+
+### Error codes
+
+| Code | Meaning |
+|------|---------|
+| `-32600` | Invalid Request — malformed JSON-RPC |
+| `-32601` | Method Not Found — method does not exist |
+| `-32602` | Invalid Params — missing or wrong parameters |
+| `-32603` | Internal Error — server-side failure |
+
+---
+
+## C) Dry-Run and TypeScript Type Inference
+
+Docs: https://centia.io/docs/sdk#json-rpc-typescript-interfaces
+
+Use `postCallDry` to test a method without side effects and to infer types.
+Then use `getTypeScript` to retrieve generated TypeScript interfaces.
+
+**Important**: Parameters must have explicit type casts (`:param::type`) in the SQL definition for type inference to work.
+
+### Step 1 — Dry-run the method
+
+```
+postCallDry({
+  jsonrpc: "2.0",
+  method: "getX",
+  params: { x: 1 },
+  id: "1"
+})
+```
+
+This executes the method in a dry-run (no database changes) and caches inferred types on the server.
+
+### Step 2 — Retrieve TypeScript interfaces
+
+```
+getTypeScript()
+```
+
+Returns generated interfaces for all methods that have been dry-run:
+
+```ts
+export interface Api {
+  getX(params: { x: number }): Promise<{ my_int: number }[]>;
+}
+```
+
+### Step 3 — Use in application code with createApi
+
+```ts
+import { createApi } from "@centia-io/sdk";
+import type { Api } from "./api"; // generated file
+
+const api = createApi<Api>();
+const res = await api.getX({ x: 1 });
+```
+
+The `RowOfApiMethod` helper extracts a single row type:
+
+```ts
+import type { RowOfApiMethod } from "@centia-io/sdk";
+type Row = RowOfApiMethod<Api, "getX">;
+```
+
+---
+
+## D) Full Workflow Summary
+
+```
+1. Define method         →  postRpc     (provisioning)
+2. Dry-run to infer types →  postCallDry (provisioning)
+3. Get TypeScript types   →  getTypeScript (provisioning)
+4. Save interface to       src/baas/api.ts
+5. Call at runtime        →  SDK createApi<Api>() or Rpc.call()
+6. Update method          →  patchRpc    (provisioning)
+7. Delete method          →  deleteRpc   (provisioning)
+```
+
+Runtime SDK usage: see Section 7 (`Rpc` and `createApi`).
+
+---
+
+# 10) GraphQL API
 
 The Centia GraphQL API is auto-generated from your database schema.
 
@@ -421,7 +811,7 @@ mutation {
 
 ---
 
-# 8) HTTP Fallback Layer
+# 11) HTTP Fallback Layer
 
 If needed, create:
 
@@ -447,7 +837,7 @@ Source: https://centia.io/docs/…
 
 ---
 
-# 9) Authentication Model Policy
+# 12) Authentication Model Policy
 
 Authentication depends on runtime environment.
 
@@ -600,7 +990,7 @@ Forbidden:
 
 ---
 
-# 10) Auth Responsibility Split
+# 13) Auth Responsibility Split
 
 | Context | Auth Method | SDK Class |
 |--------|--------------|-----------|
@@ -612,7 +1002,7 @@ Forbidden:
 
 ---
 
-# 11) OpenAPI Access Policy
+# 14) OpenAPI Access Policy
 
 Preferred sources:
 
@@ -635,7 +1025,7 @@ OpenAPI is the contract for all endpoints it describes.
 
 ---
 
-# 12) Documentation Access Policy
+# 15) Documentation Access Policy
 
 Primary docs:
 
@@ -663,7 +1053,7 @@ Docs-backed endpoints allowed only when fully specified.
 
 ---
 
-# 13) Safety Rules (Provisioning)
+# 16) Safety Rules (Provisioning)
 
 Before destructive changes, present plan:
 
@@ -684,7 +1074,7 @@ Proceed only if explicitly requested.
 
 ---
 
-# 14) Project Structure Standard
+# 17) Project Structure Standard
 
 ```
 src/
@@ -706,7 +1096,7 @@ vendor/
 
 ---
 
-# 15) Code Quality Rules
+# 18) Code Quality Rules
 
 - TypeScript strict mode preferred
 - Centralize schema/table names
@@ -723,7 +1113,7 @@ if (error) throw new Error(`Query failed: ${error.message}`);
 
 ---
 
-# 16) Delivery Requirements
+# 19) Delivery Requirements
 
 Every generated solution must include:
 
@@ -737,7 +1127,7 @@ Every generated solution must include:
 
 ---
 
-# 17) Available MCP Tools Reference
+# 20) Available MCP Tools Reference
 
 Schema management:
 
@@ -768,10 +1158,12 @@ Query execution:
 - `postSql` — Execute arbitrary SQL (SELECT, INSERT, UPDATE, DELETE, MERGE)
 - `postGraphQL` — Run GraphQL queries/mutations
 
-RPC:
+RPC (see Section 9 for full workflow):
 
-- `getRpc`, `postRpc`, `patchRpc`, `deleteRpc`
+- `getRpc`, `postRpc`, `patchRpc`, `deleteRpc` — Manage method definitions
 - `postCall` — Call an RPC method
+- `postCallDry` — Dry-run a call (infer types, no side effects)
+- `getTypeScript` — Get TypeScript interfaces for all dry-run methods
 
 Auth & users:
 
@@ -795,11 +1187,10 @@ Other:
 
 - `postCommit` — Commit schema changes to Git
 - `getStats` — Get database statistics
-- `getTypeScript` — Get TypeScript interfaces for RPC methods
 
 ---
 
-# 18) Environment Variables
+# 21) Environment Variables
 
 | Variable                | Context | Required | Description                                             |
 |-------------------------|---------|----------|---------------------------------------------------------|
@@ -819,7 +1210,7 @@ Never commit `.env` files containing secrets. Provide a `.env.example` with plac
 
 ---
 
-# 19) Agent Self-Check
+# 22) Agent Self-Check
 
 Before finishing:
 

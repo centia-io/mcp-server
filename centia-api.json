@@ -13,7 +13,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Call a RPC method",
+                "description": "Call a JSON-RPC method with or without parameters. The method must be defined in the database. See /api/v4/methods (postRpc) ",
                 "operationId": "postCall",
                 "requestBody": {
                     "description": "RPC method call",
@@ -28,9 +28,44 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Ok",
                         "content": {
-                            "application/json": {}
+                            "application/json": {},
+                            "application/gpx": {},
+                            "application/octet-stream": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/call/dry": {
+            "post": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Dry run the RPC-JSON call to infer the types and store them. \n        Types are only inferred and stored when dry running calls. Dry runs doesn't make effects on the database.\n        Dry-run before getting TypeScript types from /api/v4/interfaces (getTypeScript)",
+                "operationId": "postCallDry",
+                "requestBody": {
+                    "description": "RPC method call",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Call"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {},
+                            "application/gpx": {},
+                            "application/octet-stream": {}
                         }
                     },
                     "400": {
@@ -925,7 +960,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Get JSON-RPC method(s)",
+                "description": "Get JSON-RPC method definitions.",
                 "operationId": "getRpc",
                 "parameters": [
                     {
@@ -952,11 +987,35 @@
                     }
                 }
             },
+            "delete": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Delete JSON-RPC method(s).",
+                "operationId": "deleteRpc",
+                "parameters": [
+                    {
+                        "name": "method",
+                        "in": "path",
+                        "description": "Name of method",
+                        "required": true,
+                        "example": "myStatement"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Method deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
             "patch": {
                 "tags": [
                     "Methods"
                 ],
-                "description": "Update JSON-RPC method(s)",
+                "description": "Update existing JSON-RPC method(s).",
                 "operationId": "patchRpc",
                 "parameters": [
                     {
@@ -996,7 +1055,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Create JSON-RPC method(s)",
+                "description": "Create JSON-RPC method(s). This means you define a named method which holds your SQL query along with optional instructions on how to interpret and format the data types.",
                 "operationId": "postRpc",
                 "requestBody": {
                     "description": "RPC method to create",
@@ -1018,32 +1077,6 @@
                     },
                     "400": {
                         "description": "Bad request"
-                    }
-                }
-            }
-        },
-        "/api/v4/methods/{id}": {
-            "delete": {
-                "tags": [
-                    "Methods"
-                ],
-                "description": "Delete JSON-RPC method(s)",
-                "operationId": "deleteRpc",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Name of method",
-                        "required": true,
-                        "example": "myStatement"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Method deleted"
-                    },
-                    "404": {
-                        "description": "Not found"
                     }
                 }
             }
@@ -1208,7 +1241,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Get the interfaces for all RPC-JSON methods.",
+                "description": "Get the interfaces for all RPC-JSON methods. Returns TypeScript interfaces inferred from dry-runs via /api/v4/call/dry (postCallDry)",
                 "operationId": "getTypeScript",
                 "responses": {
                     "200": {
@@ -1550,11 +1583,13 @@
                     "200": {
                         "description": "Ok",
                         "content": {
-                            "application/json": {}
+                            "application/json": {},
+                            "application/gpx": {},
+                            "application/octet-stream": {}
                         }
                     },
                     "500": {
-                        "description": "Internal error. Most like an SQL error."
+                        "description": "Internal error. Most likely an SQL error."
                     }
                 }
             }
@@ -1837,7 +1872,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Get rules",
+                "description": "Get user(s)",
                 "operationId": "getUser",
                 "parameters": [
                     {
@@ -1870,7 +1905,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "New user",
+                "description": "Create user(s)",
                 "operationId": "postUser",
                 "requestBody": {
                     "description": "New user",
@@ -1901,7 +1936,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Delete user",
+                "description": "Delete user(s)",
                 "operationId": "deleteUsers",
                 "parameters": [
                     {
@@ -1925,7 +1960,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Update user",
+                "description": "Update user(s)",
                 "operationId": "patchUser",
                 "parameters": [
                     {
@@ -1981,13 +2016,13 @@
                     },
                     "id": {
                         "title": "Identifier",
-                        "description": "An identifier established by the Client that MUST contain a string if included",
+                        "description": "An identifier established by the Client that MUST contain a string if included.",
                         "type": "string",
                         "example": "1"
                     },
                     "method": {
                         "title": "Method name",
-                        "description": "A String containing the name of the method to be invoked or created",
+                        "description": "A String containing the name of the method to be invoked or created.",
                         "type": "string",
                         "example": "getDate"
                     },
@@ -1998,9 +2033,14 @@
                         "items": {
                             "type": "object"
                         },
-                        "example": {
-                            "my_date": "2011 04 01"
-                        }
+                        "example": [
+                            {
+                                "my_date": "2011 04 01"
+                            },
+                            {
+                                "my_string": "hello world"
+                            }
+                        ]
                     }
                 },
                 "type": "object"
@@ -2102,7 +2142,7 @@
                     },
                     "type": {
                         "title": "Type",
-                        "description": "The type of the column, like varchar, integer, boolean etc.",
+                        "description": "The type of the column, like varchar, integer, boolean etc. Array types are denoted by adding [] to the type, e.g. varchar[].",
                         "type": "string",
                         "example": "int"
                     },
@@ -2128,6 +2168,12 @@
                             "by default"
                         ],
                         "example": "always"
+                    },
+                    "comment": {
+                        "title": "Comment",
+                        "description": "Comment on the column.",
+                        "type": "string",
+                        "example": "This is a comment on the column"
                     }
                 },
                 "type": "object"
@@ -2470,7 +2516,7 @@
                     },
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE or DELETE.",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
@@ -2810,7 +2856,7 @@
                 "properties": {
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE. No DDL, transaction control, etc.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
@@ -2821,13 +2867,18 @@
                         "items": {
                             "type": "object"
                         },
-                        "example": {
-                            "my_date": "2011 04 01"
-                        }
+                        "example": [
+                            {
+                                "my_date": "2011 04 01"
+                            },
+                            {
+                                "my_string": "hello world"
+                            }
+                        ]
                     },
                     "type_hints": {
                         "title": "Type hints",
-                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "description": "For JSON represented parameters which are not of JSON/JSONB type.",
                         "type": "object",
                         "example": {
                             "my_date": "date"
@@ -2843,7 +2894,7 @@
                     },
                     "output_format": {
                         "title": "Output format",
-                        "description": "The wanted output format.",
+                        "description": "The wanted output format. json, csv, ndjson, excel or ogr/[any ogr vector format] (e.g 'ogr/ESRI Shape')",
                         "type": "string",
                         "default": "json",
                         "example": "csv"
@@ -3004,6 +3055,12 @@
                         "items": {
                             "$ref": "#/components/schemas/Constraint"
                         }
+                    },
+                    "comment": {
+                        "title": "Comment",
+                        "description": "Comment on the table",
+                        "type": "string",
+                        "example": "This is a comment on the table"
                     }
                 },
                 "type": "object"
