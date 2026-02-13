@@ -1,6 +1,6 @@
 # AGENT.md — Centia BaaS Agent Guide
 
-> Last updated: 2026-02-12 · v1.5
+> Last updated: 2026-02-13 · v1.6
 
 This repository is designed to be used with AI coding agents such as Claude Code and Junie.
 
@@ -1138,7 +1138,28 @@ vendor/
 
 ---
 
-# 18) Code Quality Rules
+# 18) Web Application Tooling Defaults
+
+When scaffolding new web applications, use these defaults unless the project already has an established stack:
+
+| Category | Default | Notes |
+|----------|---------|-------|
+| **Package manager** | `pnpm` | Fast, strict, disk-efficient. Use `pnpm` for all install/run/build commands. |
+| **Build tool** | `Vite` | Required — env vars use `VITE_` prefix (see Section 22). |
+| **UI framework** | `React` (with TypeScript) | Use functional components and hooks. |
+| **Styling** | `Tailwind CSS` | Utility-first. Avoid custom CSS unless Tailwind cannot express the design. |
+| **Routing** | `React Router` | For SPAs. Use latest stable version. |
+
+Rules:
+
+- Do NOT mix package managers (e.g. no `npm install` in a `pnpm` project)
+- Always use TypeScript (`--template react-ts` when scaffolding with Vite)
+- Prefer Tailwind utility classes over CSS modules or styled-components
+- When an existing project uses a different stack, follow the existing conventions
+
+---
+
+# 19) Code Quality Rules
 
 - TypeScript strict mode preferred
 - Centralize schema/table names
@@ -1155,7 +1176,7 @@ if (error) throw new Error(`Query failed: ${error.message}`);
 
 ---
 
-# 19) Delivery Requirements
+# 20) Delivery Requirements
 
 Every generated solution must include:
 
@@ -1169,7 +1190,7 @@ Every generated solution must include:
 
 ---
 
-# 20) Available MCP Tools Reference
+# 21) Available MCP Tools Reference
 
 Schema management:
 
@@ -1232,7 +1253,7 @@ Other:
 
 ---
 
-# 21) Environment Variables
+# 22) Environment Variables
 
 | Variable                | Context | Required | Description                                             |
 |-------------------------|---------|----------|---------------------------------------------------------|
@@ -1252,7 +1273,7 @@ Never commit `.env` files containing secrets. Provide a `.env.example` with plac
 
 ---
 
-# 22) Agent Self-Check
+# 23) Agent Self-Check
 
 Before finishing:
 
