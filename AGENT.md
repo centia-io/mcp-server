@@ -88,10 +88,52 @@ Provisioning must use:
 
 Provisioning is NOT runtime logic.
 
+### SQL dialect
+Centia.io uses PostgreSQL with the PostGIS extension enabled. All SQL must be valid PostgreSQL syntax. PostGIS spatial functions and types (e.g. `geometry`, `geography`, `ST_Distance`, `ST_Within`) are available.
+
+### Mapping Libraries
+
+Centia.io is well suited for geospatial applications. When building map-based UIs, choose a mapping library based on complexity:
+
+| Library | When to use |
+|---------|-------------|
+| **MapLibre GL JS** (recommended default) | Simple map apps — displaying data on a map, markers, popups, basic interactivity |
+| **Leaflet.js** | Advanced apps — custom layers, complex interactions, plugin ecosystem |
+| **OpenLayers** | Advanced apps — heavy GIS workflows, projections, vector tiles, WMS/WFS integration |
+
+Decision flow:
+
+1. Is it a straightforward "show data on a map" app? → Use **MapLibre**
+2. Does it need advanced interactivity or a rich plugin ecosystem? → Use **Leaflet.js** or **OpenLayers**
+
+When using any of these libraries, use the **Context7 MCP** tool (if available) to look up current API documentation before writing mapping code. This avoids outdated or incorrect API usage.
+
 ### SQL API limitations
 Only select, insert, update, delete and merge statements can be executed through the SQL API.
-Any other types of SQL (DDL, transaction control, etc.) will be rejected by the API. 
+Any other types of SQL (DDL, transaction control, etc.) will be rejected by the API.
 Use MCP tools for these.
+
+### Output Formats (SQL & JSON-RPC)
+
+Both the SQL API (`postSql` / `sql.exec()`) and JSON-RPC methods (`postRpc` `output_format` field) support the following output formats via the `output_format` parameter:
+
+| Format | Type | Row Limit | Description |
+|--------|------|-----------|-------------|
+| `json` (default) | Standard | 100 000 | JSON with `schema` and `data` array |
+| `geojson` | Standard | 100 000 | GeoJSON — geospatial data interchange format |
+| `csv` | Standard | 100 000 | Comma-separated values |
+| `excel` | Standard | 100 000 | Excel spreadsheet |
+| `ogr/[format]` | Standard | 100 000 | GDAL/OGR vector formats (e.g. `ogr/ESRI Shapefile`, `ogr/GPKG`, `ogr/GML`) — always downloaded as a zip file |
+| `ndjson` | Streaming | Unlimited | Newline-delimited JSON — suitable for piping and large datasets |
+| `ccsv` | Streaming | Unlimited | Streaming comma-separated values |
+
+Key rules:
+
+- **Standard formats** are delivered as a single response and capped at 100 000 rows.
+- **Streaming formats** (`ndjson`, `ccsv`) have no row limit and can be piped to other tools, enabling processing of large result sets without memory constraints.
+- Default format is `json`, which returns `{ "schema": {...}, "data": [{...}] }`.
+
+Docs: https://centia.io/docs/statement#output-formats
 
 ---
 
@@ -571,7 +613,7 @@ Fields:
 | `q` | Yes | SQL statement (SELECT, INSERT, UPDATE, DELETE, MERGE) |
 | `type_hints` | No | Map of parameter/column names to PostgreSQL types (e.g. `{ "date": "timestamptz" }`) |
 | `type_formats` | No | Map of column names to output format patterns (e.g. `{ "date": "D M d Y" }`) |
-| `output_format` | No | Response format: `json` (default), `csv`, `ndjson` |
+| `output_format` | No | Response format — see Section 3B "Output Formats" for all options (default: `json`) |
 | `srs` | No | EPSG code for PostGIS geometry columns (default: 4326) |
 
 Use `patchRpc` to update an existing method. Use `deleteRpc` to remove one. Use `getRpc` to inspect definitions.
