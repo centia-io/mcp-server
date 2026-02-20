@@ -13,7 +13,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Call a JSON-RPC method with or without parameters. The method must be defined in the database. See /api/v4/methods (postRpc) ",
+                "description": "Call a RPC method",
                 "operationId": "postCall",
                 "requestBody": {
                     "description": "RPC method call",
@@ -28,44 +28,9 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Ok",
+                        "description": "OK",
                         "content": {
-                            "application/json": {},
-                            "application/gpx": {},
-                            "application/octet-stream": {}
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request"
-                    }
-                }
-            }
-        },
-        "/api/v4/call/dry": {
-            "post": {
-                "tags": [
-                    "Methods"
-                ],
-                "description": "Dry run the RPC-JSON call to infer the types and store them. \n        Types are only inferred and stored when dry running calls. Dry runs doesn't make effects on the database.\n        Dry-run before getting TypeScript types from /api/v4/interfaces (getTypeScript)",
-                "operationId": "postCallDry",
-                "requestBody": {
-                    "description": "RPC method call",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Call"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Ok",
-                        "content": {
-                            "application/json": {},
-                            "application/gpx": {},
-                            "application/octet-stream": {}
+                            "application/json": {}
                         }
                     },
                     "400": {
@@ -79,7 +44,7 @@
                 "tags": [
                     "Clients"
                 ],
-                "description": "Get OAuth client(s).",
+                "description": "Get client",
                 "operationId": "getClient",
                 "parameters": [
                     {
@@ -124,7 +89,7 @@
                 "tags": [
                     "Clients"
                 ],
-                "description": "Delete OAuth client(s).",
+                "description": "Delete client",
                 "operationId": "deleteClient",
                 "parameters": [
                     {
@@ -148,7 +113,7 @@
                 "tags": [
                     "Clients"
                 ],
-                "description": "Update existing OAuth client(s).",
+                "description": "Update client",
                 "operationId": "patchClient",
                 "parameters": [
                     {
@@ -188,7 +153,7 @@
                 "tags": [
                     "Clients"
                 ],
-                "description": "Create new OAuth client(s).",
+                "description": "Create a new client OAuth client",
                 "operationId": "postClient",
                 "requestBody": {
                     "description": "New client",
@@ -322,7 +287,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create new column(s).",
+                "description": "Create new column(s)",
                 "operationId": "postColumn",
                 "parameters": [
                     {
@@ -369,7 +334,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Update existing column(s)",
+                "description": "Update column(s)",
                 "operationId": "patchColumn",
                 "parameters": [
                     {
@@ -451,7 +416,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get constraint(s).",
+                "description": "Get constraints",
                 "operationId": "getConstraint",
                 "parameters": [
                     {
@@ -492,11 +457,50 @@
                     }
                 }
             },
+            "post": {
+                "tags": [
+                    "Schema"
+                ],
+                "description": "Get constraints",
+                "operationId": "postConstraint",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New constraint",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Constraint"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            },
             "delete": {
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete constraint(s)",
+                "description": "Get constraint",
                 "operationId": "deleteConstraint",
                 "parameters": [
                     {
@@ -531,47 +535,6 @@
                 }
             }
         },
-        "/api/v4/schemas/{schema}/tables/{table}/constraints": {
-            "post": {
-                "tags": [
-                    "Schema"
-                ],
-                "description": "Create constraint(s).",
-                "operationId": "postConstraint",
-                "parameters": [
-                    {
-                        "name": "schema",
-                        "in": "path",
-                        "description": "Schema name",
-                        "required": true,
-                        "example": "my_schema"
-                    },
-                    {
-                        "name": "table",
-                        "in": "path",
-                        "description": "Table name",
-                        "required": true,
-                        "example": "my_table"
-                    }
-                ],
-                "requestBody": {
-                    "description": "New constraint",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Constraint"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
         "/api/v4/file/upload": {
             "post": {
                 "tags": [
@@ -597,7 +560,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "File uploaded successfully."
                     }
                 }
             }
@@ -635,7 +598,7 @@
                 "tags": [
                     "Rules"
                 ],
-                "description": "Get rule(s).",
+                "description": "Get rule(s)",
                 "operationId": "getRule",
                 "parameters": [
                     {
@@ -666,7 +629,7 @@
                 "tags": [
                     "Rules"
                 ],
-                "description": "Delete rule(s).",
+                "description": "Delete rule(s)",
                 "operationId": "deleteRule",
                 "parameters": [
                     {
@@ -690,7 +653,7 @@
                 "tags": [
                     "Rules"
                 ],
-                "description": "Update existing rule(s).",
+                "description": "Update rule(s)",
                 "operationId": "patchRule",
                 "parameters": [
                     {
@@ -730,7 +693,7 @@
                 "tags": [
                     "Rules"
                 ],
-                "description": "Create rule(s).",
+                "description": "Create rule(s)",
                 "operationId": "postRule",
                 "requestBody": {
                     "description": "New rule",
@@ -802,7 +765,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get index(s).",
+                "description": "Get index(s)",
                 "operationId": "getIndex",
                 "parameters": [
                     {
@@ -907,7 +870,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create index(s).",
+                "description": "Create index(s)",
                 "operationId": "postIndex",
                 "parameters": [
                     {
@@ -962,7 +925,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Get JSON-RPC method definitions.",
+                "description": "Get JSON-RPC method(s)",
                 "operationId": "getRpc",
                 "parameters": [
                     {
@@ -989,35 +952,11 @@
                     }
                 }
             },
-            "delete": {
-                "tags": [
-                    "Methods"
-                ],
-                "description": "Delete JSON-RPC method(s).",
-                "operationId": "deleteRpc",
-                "parameters": [
-                    {
-                        "name": "method",
-                        "in": "path",
-                        "description": "Name of method",
-                        "required": true,
-                        "example": "myStatement"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Method deleted"
-                    },
-                    "404": {
-                        "description": "Not found"
-                    }
-                }
-            },
             "patch": {
                 "tags": [
                     "Methods"
                 ],
-                "description": "Update existing JSON-RPC method(s).",
+                "description": "Update JSON-RPC method(s)",
                 "operationId": "patchRpc",
                 "parameters": [
                     {
@@ -1057,7 +996,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Create JSON-RPC method(s). This means you define a named method which holds your SQL query along with optional instructions on how to interpret and format the data types.",
+                "description": "Create JSON-RPC method(s)",
                 "operationId": "postRpc",
                 "requestBody": {
                     "description": "RPC method to create",
@@ -1079,6 +1018,32 @@
                     },
                     "400": {
                         "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/methods/{id}": {
+            "delete": {
+                "tags": [
+                    "Methods"
+                ],
+                "description": "Delete JSON-RPC method(s)",
+                "operationId": "deleteRpc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Name of method",
+                        "required": true,
+                        "example": "myStatement"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Method deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
                     }
                 }
             }
@@ -1158,7 +1123,7 @@
                 "tags": [
                     "Privileges"
                 ],
-                "description": "Get privileges.",
+                "description": "Get privileges",
                 "operationId": "getPrivileges",
                 "parameters": [
                     {
@@ -1196,7 +1161,7 @@
                 "tags": [
                     "Privileges"
                 ],
-                "description": "Update privileges.",
+                "description": "Update privileges",
                 "operationId": "patchPrivileges",
                 "parameters": [
                     {
@@ -1243,7 +1208,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Get the interfaces for all RPC-JSON methods. Returns TypeScript interfaces inferred from dry-runs via /api/v4/call/dry (postCallDry)",
+                "description": "Get the interfaces for all RPC-JSON methods.",
                 "operationId": "getTypeScript",
                 "responses": {
                     "200": {
@@ -1260,7 +1225,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get schema(s).",
+                "description": "Get schema(s)",
                 "operationId": "getSchema",
                 "parameters": [
                     {
@@ -1303,7 +1268,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete schema(s).",
+                "description": "Delete schema(s)",
                 "operationId": "deleteSchema",
                 "parameters": [
                     {
@@ -1330,7 +1295,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Rename an existing schema.",
+                "description": "Rename a schema",
                 "operationId": "patchSchema",
                 "parameters": [
                     {
@@ -1384,7 +1349,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create schema(s).",
+                "description": "Create schema(s)",
                 "operationId": "postSchema",
                 "requestBody": {
                     "description": "New schema",
@@ -1412,7 +1377,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get sequence(s).",
+                "description": "Get sequence(s)",
                 "operationId": "getSequence",
                 "parameters": [
                     {
@@ -1450,7 +1415,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete sequence(s).",
+                "description": "Delete sequence(s)",
                 "operationId": "deleteSequence",
                 "parameters": [
                     {
@@ -1481,7 +1446,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Update existing sequence(s).",
+                "description": "Update sequence(s)",
                 "operationId": "patchSequence",
                 "parameters": [
                     {
@@ -1528,7 +1493,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create sequence(s).",
+                "description": "Create sequence(s)",
                 "operationId": "postSequence",
                 "parameters": [
                     {
@@ -1585,13 +1550,11 @@
                     "200": {
                         "description": "Ok",
                         "content": {
-                            "application/json": {},
-                            "application/gpx": {},
-                            "application/octet-stream": {}
+                            "application/json": {}
                         }
                     },
                     "500": {
-                        "description": "Internal error. Most likely an SQL error."
+                        "description": "Internal error. Most like an SQL error."
                     }
                 }
             }
@@ -1665,7 +1628,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get table(s).",
+                "description": "Get table(s)",
                 "operationId": "getTable",
                 "parameters": [
                     {
@@ -1740,7 +1703,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete table(s).",
+                "description": "Delete table",
                 "operationId": "deleteTable",
                 "parameters": [
                     {
@@ -1774,7 +1737,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Rename and move existing table(s).",
+                "description": "Rename and move table(s)",
                 "operationId": "patchTable",
                 "parameters": [
                     {
@@ -1810,12 +1773,6 @@
                                                 "description": "Move table to schema",
                                                 "type": "string",
                                                 "example": "my_other_schema"
-                                            },
-                                            "comment": {
-                                                "title": "Comment",
-                                                "description": "Comment on the table",
-                                                "type": "string",
-                                                "example": "This is a comment on the table"
                                             }
                                         },
                                         "type": "object"
@@ -1843,7 +1800,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create table(s).",
+                "description": "Create table(s)",
                 "operationId": "postTable",
                 "parameters": [
                     {
@@ -1875,12 +1832,12 @@
                 }
             }
         },
-        "/api/v4/users/{name}": {
+        "/api/v4/user/{name}": {
             "get": {
                 "tags": [
                     "Users"
                 ],
-                "description": "Get sub-user(s)",
+                "description": "Get user(s)",
                 "operationId": "getUser",
                 "parameters": [
                     {
@@ -1906,12 +1863,45 @@
                         "description": "Not found"
                     }
                 }
-            },
+            }
+        },
+        "/api/v4/users": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "description": "Create user(s)",
+                "operationId": "postUser",
+                "requestBody": {
+                    "description": "New user",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/users/{name}": {
             "delete": {
                 "tags": [
                     "Users"
                 ],
-                "description": "Delete sub-user(s)",
+                "description": "Delete user(s)",
                 "operationId": "deleteUsers",
                 "parameters": [
                     {
@@ -1935,7 +1925,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Update exiting sub-user(s)",
+                "description": "Update user(s)",
                 "operationId": "patchUser",
                 "parameters": [
                     {
@@ -1969,37 +1959,6 @@
                     }
                 }
             }
-        },
-        "/api/v4/users": {
-            "post": {
-                "tags": [
-                    "Users"
-                ],
-                "description": "Create new sub-user(s)",
-                "operationId": "postUser",
-                "requestBody": {
-                    "description": "New user",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/User"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    },
-                    "400": {
-                        "description": "Bad request"
-                    },
-                    "404": {
-                        "description": "Not found"
-                    }
-                }
-            }
         }
     },
     "components": {
@@ -2022,13 +1981,13 @@
                     },
                     "id": {
                         "title": "Identifier",
-                        "description": "An identifier established by the Client that MUST contain a string if included.",
+                        "description": "An identifier established by the Client that MUST contain a string if included",
                         "type": "string",
                         "example": "1"
                     },
                     "method": {
                         "title": "Method name",
-                        "description": "A String containing the name of the method to be invoked or created.",
+                        "description": "A String containing the name of the method to be invoked or created",
                         "type": "string",
                         "example": "getDate"
                     },
@@ -2039,21 +1998,19 @@
                         "items": {
                             "type": "object"
                         },
-                        "example": [
-                            {
-                                "my_date": "2011 04 01"
-                            },
-                            {
-                                "my_string": "hello world"
-                            }
-                        ]
+                        "example": {
+                            "my_date": "2011 04 01"
+                        }
                     }
                 },
                 "type": "object"
             },
             "Client": {
                 "description": "OAuth clients are applications that request and manage access to user resources through the OAuth authorization protocol. These clients act as intermediaries, enabling secure, delegated access to user accounts without directly handling sensitive credentials.",
-                "required": [],
+                "required": [
+                    "name",
+                    "redirect_uri"
+                ],
                 "properties": {
                     "id": {
                         "title": "Client id",
@@ -2145,7 +2102,7 @@
                     },
                     "type": {
                         "title": "Type",
-                        "description": "The type of the column, like varchar, integer, boolean etc. Array types are denoted by adding [] to the type, e.g. varchar[].",
+                        "description": "The type of the column, like varchar, integer, boolean etc.",
                         "type": "string",
                         "example": "int"
                     },
@@ -2234,13 +2191,7 @@
                         "title": "Type",
                         "description": "Type of the constraint.",
                         "type": "string",
-                        "enum": [
-                            "primary",
-                            "foreign",
-                            "unique",
-                            "check"
-                        ],
-                        "example": "primary"
+                        "example": "foreign"
                     },
                     "columns": {
                         "title": "Columns",
@@ -2360,7 +2311,6 @@
                 "type": "object"
             },
             "Rule": {
-                "description": "Rules can deny or allow access to tables or rewrite the SQL statement by adding a where clause. Rules are not attached to tables but applied to the incoming SQL statement before it actually runs in the database engine.",
                 "required": [],
                 "properties": {
                     "id": {
@@ -2526,7 +2476,7 @@
                     },
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE or DELETE.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
@@ -2750,9 +2700,9 @@
                         "type": "string",
                         "example": "joe"
                     },
-                    "privilege": {
-                        "title": "Privilege",
-                        "description": "The privilege granted to the sub-user on a table.",
+                    "privileges": {
+                        "title": "Privileges",
+                        "description": "The privileges granted to the sub-user on a table.",
                         "type": "string",
                         "enum": [
                             "none",
@@ -2866,7 +2816,7 @@
                 "properties": {
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE. No DDL, transaction control, etc.",
+                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
@@ -2877,18 +2827,13 @@
                         "items": {
                             "type": "object"
                         },
-                        "example": [
-                            {
-                                "my_date": "2011 04 01"
-                            },
-                            {
-                                "my_string": "hello world"
-                            }
-                        ]
+                        "example": {
+                            "my_date": "2011 04 01"
+                        }
                     },
                     "type_hints": {
                         "title": "Type hints",
-                        "description": "For JSON represented parameters which are not of JSON/JSONB type.",
+                        "description": "For JSON represented parameters which are not of JSON type.",
                         "type": "object",
                         "example": {
                             "my_date": "date"
@@ -2904,7 +2849,7 @@
                     },
                     "output_format": {
                         "title": "Output format",
-                        "description": "The wanted output format: json, geojson, csv, ccsv ndjson, excel or ogr/[any ogr vector format e.g 'ogr/ESRI Shape']. ccsv and ndjson are streamed instead of returning a whole document or file.",
+                        "description": "The wanted output format.",
                         "type": "string",
                         "default": "json",
                         "example": "csv"
@@ -3076,7 +3021,6 @@
                 "type": "object"
             },
             "User": {
-                "description": "Sub-users are users for your API. While you can use your super-user for single user projects, it is a good idea to create sub-users for projects involving multiple users, which can be granted different privileges in the database.",
                 "required": [
                     "name",
                     "email",
