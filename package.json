@@ -1,6 +1,6 @@
 {
   "name": "@centia-io/mcp-server",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publishConfig": { "access": "public" },
   "description": "Centia MCP Server",
   "type": "module",
