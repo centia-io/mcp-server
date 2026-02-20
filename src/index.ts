@@ -177,6 +177,8 @@ function normalizeJsonSchemaForMCP(schema: any): any {
         "date-time",
         "date",
         "time",
+        "binary",
+        "url",
     ]);
 
     const result: any = {};
@@ -283,6 +285,8 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
             headerParams: [] as string[],
             bodyParams: [] as string[],
             isBodyFlattened: false,
+            contentType: "application/json",
+            binaryParams: [] as string[],
         };
 
         // Handle path/query/header parameters
@@ -304,11 +308,23 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
         }
 
         // Handle request body
-        if (requestBody?.content?.["application/json"]?.schema) {
-            const bodySchema = resolveSchema(requestBody.content["application/json"].schema);
+        const content = requestBody?.content;
+        const jsonContent = content?.["application/json"];
+        const multipartContent = content?.["multipart/form-data"];
+
+        if (jsonContent?.schema || multipartContent?.schema) {
+            const bodySchema = resolveSchema(jsonContent?.schema || multipartContent?.schema);
+            if (multipartContent) {
+                toolMeta.contentType = "multipart/form-data";
+            }
+
             if (bodySchema.type === "object" && bodySchema.properties) {
                 toolMeta.isBodyFlattened = true;
                 for (const [key, value] of Object.entries(bodySchema.properties)) {
+                    const resolvedValue = resolveSchema(value);
+                    if (resolvedValue.format === "binary") {
+                        toolMeta.binaryParams.push(key);
+                    }
                     properties[key] = normalizeJsonSchemaForMCP(sanitizeSchemaForMCP(value));
                     toolMeta.bodyParams.push(key);
                 }
@@ -389,7 +405,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     // Body
     if (toolMeta.bodyParams.length > 0) {
-        if (toolMeta.isBodyFlattened) {
+        if (toolMeta.contentType === "multipart/form-data") {
+            const formData = new FormData();
+            for (const paramName of toolMeta.bodyParams) {
+                if (safeArgs[paramName] !== undefined) {
+                    const value = safeArgs[paramName];
+                    if (toolMeta.binaryParams.includes(paramName) && typeof value === "string") {
+                        if (fs.existsSync(value)) {
+                            const fileContent = fs.readFileSync(value);
+                            const blob = new Blob([fileContent]);
+                            formData.append(paramName, blob, path.basename(value));
+                        } else {
+                            formData.append(paramName, value);
+                        }
+                    } else {
+                        formData.append(paramName, value as any);
+                    }
+                }
+            }
+            config.data = formData;
+        } else if (toolMeta.isBodyFlattened) {
             const body: any = {};
             for (const paramName of toolMeta.bodyParams) {
                 if (safeArgs[paramName] !== undefined) {
