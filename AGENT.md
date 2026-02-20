@@ -1273,6 +1273,89 @@ Never commit `.env` files containing secrets. Provide a `.env.example` with plac
 
 ---
 
+# 24) File Import
+
+Centia supports importing geospatial and tabular files directly into database tables via a two-step workflow: upload then process.
+
+Docs: https://centia.io/docs/import
+
+---
+
+## Workflow
+
+```
+1. Upload file    →  postFileUpload   (uploads to temporary storage)
+2. Process file   →  postFileProcess  (imports into a database table)
+```
+
+Both steps are MCP tools. Never call the raw HTTP endpoints unless the MCP tools are unavailable.
+
+---
+
+## Step 1 — Upload
+
+Use `postFileUpload` to upload the file to temporary storage.
+
+The tool returns a filename that must be passed to `postFileProcess`.
+
+---
+
+## Step 2 — Process
+
+Use `postFileProcess` to import the uploaded file into a table.
+
+Key parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `file` | Yes | Filename returned by `postFileUpload` |
+| `schema` | Yes | Target schema (e.g. `public`) |
+| `import` | No | `true` commits data, `false` validates only (default: `true`) |
+| `append` | No | Insert into an existing table instead of creating a new one (default: `false`) |
+| `truncate` | No | Clear the table before appending (default: `false`) |
+| `timestamp` | No | Add a timestamp column to the table |
+
+PostGIS / projection parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `t_srs` | Target projection fallback (default: EPSG:4326) |
+| `s_srs` | Source projection fallback |
+| `p_multi` | Convert geometries to multi-part types |
+| `x_possible_names` | Longitude column patterns (CSV) |
+| `y_possible_names` | Latitude column patterns (CSV) |
+
+---
+
+## Supported File Formats
+
+| Format | Extension | Notes |
+|--------|-----------|-------|
+| GeoJSON | `.geojson` | Single-layer; geometry auto-detected |
+| ESRI Shapefile | `.zip` | Must be zipped with sidecar files (`.dbf`, `.shx`, `.prj`) |
+| GeoPackage | `.gpkg` | Multi-layer support |
+| Geography Markup Language | `.gml` | Multi-layer support |
+| CSV | `.csv` | Use `x_possible_names` / `y_possible_names` for geometry creation |
+
+---
+
+## Output Structure
+
+Imported files become PostGIS tables with:
+
+- Auto-generated primary key column `gid`
+- Geometry column `the_geom`
+- GiST spatial index on `the_geom`
+- Field types inferred automatically (`integer`, `numeric`, `text`, `boolean`, `timestamp`)
+
+---
+
+## Validation Before Commit
+
+Set `import: false` on `postFileProcess` to validate the file without writing any data. Review the response, then re-run with `import: true` to commit.
+
+---
+
 # 23) Agent Self-Check
 
 Before finishing:
