@@ -270,7 +270,7 @@ export const sql = new Sql();
 
 const res = await sql.exec({
   q: "SELECT * FROM users WHERE id = :id::int",
-  params: { id: 1 },
+  params: [{ id: 1 }],
 });
 console.log(res.data);
 ```
@@ -312,7 +312,7 @@ const rpc = new Rpc();
 const res = await rpc.call({
   jsonrpc: "2.0",
   method: "myMethod",
-  params: { key: "value" },
+  params: [{ key: "value" }],
   id: 1,
 });
 ```
@@ -628,19 +628,19 @@ Use the `postCall` MCP tool. Follows the JSON-RPC 2.0 protocol.
 postCall({
   jsonrpc: "2.0",
   method: "addDays",
-  params: { date: "2025-05-01", days: 7 },
+  params: [{ date: "2025-05-01", days: 7 }],
   id: "1"
 })
 ```
 
 Fields:
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `jsonrpc` | Yes | Must be `"2.0"` |
-| `method` | Yes | Name of the method to invoke |
-| `params` | No | Object with parameter names as keys. For batch params, use an array of objects (see below). |
-| `id` | No | Request identifier. Omit for notifications (fire-and-forget, no response). |
+| Field | Required | Description                                                                                         |
+|-------|----------|-----------------------------------------------------------------------------------------------------|
+| `jsonrpc` | Yes | Must be `"2.0"`                                                                                     |
+| `method` | Yes | Name of the method to invoke                                                                        |
+| `params` | No | Array of objects with parameter names as keys. |
+| `id` | No | Request identifier. Omit for notifications (fire-and-forget, no response).                          |
 
 ### Response structure
 
@@ -667,13 +667,13 @@ Omit `id` to send a notification — the server executes the method but returns 
 postCall({
   jsonrpc: "2.0",
   method: "logEvent",
-  params: { event: "user_signup", userId: 123 }
+  params: [{ event: "user_signup", userId: 123 }]
 })
 ```
 
 ### Batch params (same method, multiple parameter sets)
 
-Pass an array of objects to `params` to execute the same method with different parameters efficiently:
+Pass an array of more objects to `params` to execute the same method with different parameters efficiently and in transactional blocks:
 
 ```
 postCall({
@@ -713,7 +713,7 @@ Then use `getTypeScript` to retrieve generated TypeScript interfaces.
 postCallDry({
   jsonrpc: "2.0",
   method: "getX",
-  params: { x: 1 },
+  params: [{ x: 1 }],
   id: "1"
 })
 ```
