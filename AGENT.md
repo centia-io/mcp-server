@@ -1,32 +1,25 @@
-# AGENT.md — Centia BaaS Agent Guide
+# AGENT.md - Centia BaaS Core Rules
 
-> Last updated: 2026-02-13 · v1.6
+> Last updated: 2026-02-22
 
-This repository is designed to be used with AI coding agents such as Claude Code and Junie.
+This file only contains global hard rules.
+Task-specific guidance has been moved into `skills/*/SKILL.md`.
 
-Follow this guide strictly.
+## 1) Prime Directive
 
----
+- Prefer Centia MCP tools when available.
+- Use `@centia-io/sdk` for all JS/TS runtime code.
+- Use raw HTTP only for provisioning or SDK gaps.
+- Never re-implement SDK functionality with `fetch`/`axios` in runtime app code.
 
-# 1) Prime Directive
+## 2) Tool Priority (Hard Rule)
 
-When working with Centia BaaS:
+Use this order:
 
-- Prefer MCP tools when available.
-- Use the official SDK `@centia-io/sdk` for all TypeScript/JavaScript application runtime code.
-- Use raw HTTP only for provisioning tasks not covered by MCP.
-- Never re-implement SDK functionality using fetch/axios in JS/TS apps.
-
----
-
-# 2) Tool Priority (Hard Rule)
-
-Interaction priority order:
-
-1. Centia MCP tools  
-2. `@centia-io/sdk`  
-3. OpenAPI HTTP calls  
-4. Docs-backed HTTP calls  
+1. Centia MCP tools
+2. `@centia-io/sdk`
+3. OpenAPI-defined HTTP calls
+4. Docs-backed HTTP calls
 
 Never invent endpoints or payloads.
 
@@ -70,4 +63,4 @@ Use the minimal matching skill(s) below for each task:
 
 - SDK client: `src/baas/client.ts`
 - HTTP fallback layer: `src/baas/http.ts`
-- Provisioning assets: `provision/`, `migrations/`, `schema/`
+- Provisioning assets: `provision/`, `migrations/`, `schema/` 
