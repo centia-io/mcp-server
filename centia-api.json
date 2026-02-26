@@ -1041,10 +1041,10 @@
         "/api/v4/meta/{query}": {
             "get": {
                 "tags": [
-                    "Meta"
+                    "Metadata"
                 ],
                 "summary": "Get relation metadata",
-                "operationId": "d97d46624396304a6476a3bf3514e387",
+                "operationId": "getMetaData",
                 "parameters": [
                     {
                         "name": "query",
@@ -1078,10 +1078,10 @@
         "/api/v4/meta": {
             "patch": {
                 "tags": [
-                    "Meta"
+                    "Metadata"
                 ],
                 "summary": "Update relation metadata",
-                "operationId": "fda5134604cfcdf1941b6572944ba464",
+                "operationId": "patchMetaData",
                 "requestBody": {
                     "description": "Metadata updates.",
                     "required": true,
@@ -3475,8 +3475,8 @@
             "description": "GraphQL"
         },
         {
-            "name": "Meta",
-            "description": "Meta"
+            "name": "Metadata",
+            "description": "Metadata"
         },
         {
             "name": "OAuth",

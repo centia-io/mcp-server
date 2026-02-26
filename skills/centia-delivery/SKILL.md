@@ -45,6 +45,10 @@ Auth and access:
 - `getPrivileges`, `patchPrivileges`
 - `getClient`, `postClient`, `patchClient`, `deleteClient`
 
+Metadata:
+
+- `getMetaData`, `patchMetaData`
+
 Import and misc:
 
 - `postFileUpload`, `postFileProcess`

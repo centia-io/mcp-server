@@ -18,6 +18,7 @@ Provisioning includes:
 - constraints
 - policies
 - relations
+- relation metadata (titles, descriptions, tags, field aliases)
 - seed data
 - migrations
 

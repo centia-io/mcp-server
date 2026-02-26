@@ -438,12 +438,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     try {
-        const response = await axios({...config, url});
+        const response = await axios({...config, url, maxRedirects: 0, validateStatus: (status) => status < 400});
         return {
             content: [
                 {
                     type: "text",
-                    text: response.status === 200 ? JSON.stringify(response.data, null, 2) : response.statusText,
+                    text: response.data != null ? JSON.stringify(response.data, null, 2) : response.statusText,
                 },
             ],
         };
