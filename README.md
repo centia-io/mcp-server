@@ -107,19 +107,31 @@ Add the server to your Claude Desktop MCP config (e.g., `claude_desktop_config.j
 - `npm run build` — Compile TypeScript to CommonJS/ESM in `dist/` via `tsc`.
 - `npm start` — Run the built server (`node dist/index.js`).
 
-## Using AGENT.md with AI Coding Agents
-This repository includes an `AGENT.md` file that provides specific instructions and best practices for AI coding agents (like Claude Code, Junie, etc.) when working with Centia BaaS.
+## Using AGENTS.md and Skills with AI Coding Agents
+This repository includes an `AGENTS.md` file with global hard rules and a `skills/` folder with task-specific guidance for AI coding agents (like Claude Code, Junie, etc.) when working with Centia BaaS.
+
+`AGENTS.md` contains the core rules (tool priority, security baselines, destructive-ops policy), while each skill in `skills/*/SKILL.md` covers a specific workflow area.
 
 To ensure your AI agent follows these rules while developing your application:
 
-1. Copy the `AGENT.md` file from this repository to the root or `src/` folder of **your own application's** repository.
-2. When starting a session with your AI agent, it will automatically find and follow the guidelines defined in `AGENT.md`.
+1. Copy `AGENTS.md` and the `skills/` folder from this repository to the root of **your own application's** repository.
+2. When starting a session with your AI agent, it will automatically find and follow the guidelines.
 
-The guide covers:
+**AGENTS.md** covers:
 - **Prime Directive**: Preferring MCP tools and official SDKs.
 - **Tool Priority**: Order of interaction (MCP tools > SDK > HTTP).
-- **Project Structure**: Recommended layout for Centia-based apps.
 - **Security & Auth**: How to handle tokens and OAuth flows correctly.
+- **Destructive Operations Policy**: Requiring explicit confirmation before destructive changes.
+
+**Skills** (`skills/*/SKILL.md`) cover task-specific workflows:
+- `centia-runtime-sdk` — Building JS/TS runtime code with `@centia-io/sdk`
+- `centia-provisioning` — Schema, tables, columns, constraints, indexes, migrations
+- `centia-json-rpc` — JSON-RPC method lifecycle and TypeScript interfaces
+- `centia-auth-model` — Auth across browser, backend, CLI, and provisioning
+- `centia-types-formats` — PostgreSQL types, casts, type hints, output formats
+- `centia-file-import` — File import workflow
+- `centia-openapi-docs` — OpenAPI and docs fallback policy
+- `centia-delivery` — Delivery checklist and quality gate
 
 ## Troubleshooting
 - Tools missing or inputs look odd: ensure `centia-api.json` exists and is valid. The server generates tools from this file at startup.
