@@ -13,10 +13,10 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Call a JSON-RPC method with or without parameters. The method must be defined in the database. See /api/v4/methods (postRpc) ",
+                "description": "Call a JSON-RPC method. The method must exist (see /api/v4/methods).",
                 "operationId": "postCall",
                 "requestBody": {
-                    "description": "RPC method call",
+                    "description": "RPC request payload.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -46,7 +46,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Dry run the RPC-JSON call to infer the types and store them. \n        Types are only inferred and stored when dry running calls. Dry runs doesn't make effects on the database.\n        Dry-run before getting TypeScript types from /api/v4/interfaces (getTypeScript)",
+                "description": "Dry-run an RPC call to infer and store input/output types. Dry-runs do not modify the database. \n        Run this before requesting TypeScript types from /api/v4/interfaces.",
                 "operationId": "postCallDry",
                 "requestBody": {
                     "description": "RPC method call",
@@ -87,6 +87,9 @@
                         "in": "path",
                         "description": "Id of client",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "66f5005bd44c6"
                     }
                 ],
@@ -160,7 +163,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Properties to update. Partial update is allowed.",
+                    "description": "Fields to update. Partial update is allowed.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -191,7 +194,7 @@
                 "description": "Create new OAuth client(s).",
                 "operationId": "postClient",
                 "requestBody": {
-                    "description": "New client",
+                    "description": "Client to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -237,7 +240,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get column(s)",
+                "description": "Get column(s).",
                 "operationId": "getColumn",
                 "parameters": [
                     {
@@ -245,6 +248,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -252,6 +258,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -259,6 +268,9 @@
                         "in": "path",
                         "description": "Column names",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_columns"
                     }
                 ],
@@ -282,7 +294,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete column(s)",
+                "description": "Delete column(s).",
                 "operationId": "deleteColumn",
                 "parameters": [
                     {
@@ -290,6 +302,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -297,6 +312,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -304,6 +322,9 @@
                         "in": "path",
                         "description": "Column names",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_columns"
                     }
                 ],
@@ -330,6 +351,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -337,11 +361,14 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     }
                 ],
                 "requestBody": {
-                    "description": "New column",
+                    "description": "Column to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -369,7 +396,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Update existing column(s)",
+                "description": "Update existing column(s).",
                 "operationId": "patchColumn",
                 "parameters": [
                     {
@@ -377,6 +404,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -384,6 +414,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -391,6 +424,9 @@
                         "in": "path",
                         "description": "Column names",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_columns"
                     }
                 ],
@@ -423,10 +459,10 @@
                 "tags": [
                     "Commit"
                 ],
-                "description": "Commit schema changes to Git and push to remote.",
+                "description": "Commit schema changes to Git and push to the remote repository.",
                 "operationId": "postCommit",
                 "requestBody": {
-                    "description": "New index",
+                    "description": "Commit request payload.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -459,6 +495,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -466,6 +505,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -473,6 +515,9 @@
                         "in": "path",
                         "description": "Constraint name(s)",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_constraint"
                     }
                 ],
@@ -496,7 +541,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete constraint(s)",
+                "description": "Delete constraint(s).",
                 "operationId": "deleteConstraint",
                 "parameters": [
                     {
@@ -504,6 +549,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -511,6 +559,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -518,12 +569,15 @@
                         "in": "path",
                         "description": "Constraint name(s)",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_constraint"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "Column deleted"
+                        "description": "Constraint deleted"
                     },
                     "404": {
                         "description": "Not found"
@@ -544,6 +598,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -551,11 +608,14 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     }
                 ],
                 "requestBody": {
-                    "description": "New constraint",
+                    "description": "Constraint to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -577,7 +637,7 @@
                 "tags": [
                     "File"
                 ],
-                "description": "Upload the file(s) using multipart/form-data to get them staged on the server.",
+                "description": "Upload file(s) via multipart/form-data and stage them on the server.",
                 "operationId": "postFileUpload",
                 "requestBody": {
                     "content": {
@@ -607,10 +667,10 @@
                 "tags": [
                     "File"
                 ],
-                "description": "Process the uploaded file into a target schema/table with desired options (dry-run, append, SRS, etc.).",
+                "description": "Import a staged file into a target schema/table. Supports dry-run, append, SRS, and more.",
                 "operationId": "postFileProcess",
                 "requestBody": {
-                    "description": "New table",
+                    "description": "Import options and target information.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -643,6 +703,9 @@
                         "in": "path",
                         "description": "Rule identifier",
                         "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
                         "example": 2
                     }
                 ],
@@ -674,7 +737,10 @@
                         "in": "path",
                         "description": "Id of rule",
                         "required": true,
-                        "example": "2"
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 2
                     }
                 ],
                 "responses": {
@@ -698,6 +764,9 @@
                         "in": "path",
                         "description": "Rule identifier",
                         "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
                         "example": 2
                     }
                 ],
@@ -733,7 +802,7 @@
                 "description": "Create rule(s).",
                 "operationId": "postRule",
                 "requestBody": {
-                    "description": "New rule",
+                    "description": "Rule to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -762,19 +831,22 @@
                     "GraphQL"
                 ],
                 "summary": "GraphQL POST endpoint.\nAccepts a JSON body: { \"query\": string, \"variables\": object|null }",
-                "description": "Run GraphQL query/mutation",
+                "description": "Run a GraphQL query or mutation.",
                 "operationId": "postGraphQL",
                 "parameters": [
                     {
                         "name": "schema",
                         "in": "path",
-                        "description": "Schema name",
+                        "description": "Schema name.",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     }
                 ],
                 "requestBody": {
-                    "description": "New rule",
+                    "description": "GraphQL request payload.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -802,7 +874,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Get index(s).",
+                "description": "Get index(es).",
                 "operationId": "getIndex",
                 "parameters": [
                     {
@@ -810,6 +882,9 @@
                         "in": "path",
                         "description": "Schema",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -817,6 +892,9 @@
                         "in": "path",
                         "description": "Table",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
@@ -824,6 +902,9 @@
                         "in": "path",
                         "description": "Index",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_index"
                     }
                 ],
@@ -861,7 +942,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Delete index(s)",
+                "description": "Delete index(es).",
                 "operationId": "deleteIndex",
                 "parameters": [
                     {
@@ -907,7 +988,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Create index(s).",
+                "description": "Create index(es).",
                 "operationId": "postIndex",
                 "parameters": [
                     {
@@ -932,7 +1013,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "New index",
+                    "description": "Index to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -957,6 +1038,76 @@
                 }
             }
         },
+        "/api/v4/meta/{query}": {
+            "get": {
+                "tags": [
+                    "Meta"
+                ],
+                "summary": "Get relation metadata",
+                "operationId": "d97d46624396304a6476a3bf3514e387",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "path",
+                        "description": "Schema-qualified relation name, schema name, or tag (tag:name). Comma-separated values are supported.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Meta"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v4/meta": {
+            "patch": {
+                "tags": [
+                    "Meta"
+                ],
+                "summary": "Update relation metadata",
+                "operationId": "fda5134604cfcdf1941b6572944ba464",
+                "requestBody": {
+                    "description": "Metadata updates.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Meta"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Metadata updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v4/methods/{method}": {
             "get": {
                 "tags": [
@@ -970,6 +1121,9 @@
                         "in": "path",
                         "description": "Identifier of RPC method",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "myMethod"
                     }
                 ],
@@ -1001,6 +1155,9 @@
                         "in": "path",
                         "description": "Name of method",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "myStatement"
                     }
                 ],
@@ -1017,7 +1174,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Update existing JSON-RPC method(s).",
+                "description": "Update existing JSON-RPC method definitions.",
                 "operationId": "patchRpc",
                 "parameters": [
                     {
@@ -1025,11 +1182,14 @@
                         "in": "path",
                         "description": "Method name",
                         "required": true,
-                        "example": "66f5005bd44c6"
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "myMethod"
                     }
                 ],
                 "requestBody": {
-                    "description": "RPC method to execute",
+                    "description": "RPC method updates.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1057,10 +1217,10 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Create JSON-RPC method(s). This means you define a named method which holds your SQL query along with optional instructions on how to interpret and format the data types.",
+                "description": "Create JSON-RPC method definitions.",
                 "operationId": "postRpc",
                 "requestBody": {
-                    "description": "RPC method to create",
+                    "description": "RPC method definition(s).",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1088,10 +1248,10 @@
                 "tags": [
                     "OAuth"
                 ],
-                "description": "Create token",
+                "description": "Create token.",
                 "operationId": "postOauth",
                 "requestBody": {
-                    "description": "OAuth flow",
+                    "description": "OAuth token request.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1123,10 +1283,10 @@
                 "tags": [
                     "OAuth"
                 ],
-                "description": "Start device flow",
+                "description": "Start device flow.",
                 "operationId": "postDevice",
                 "requestBody": {
-                    "description": "OAuth device flow",
+                    "description": "Device flow request.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1243,7 +1403,7 @@
                 "tags": [
                     "Methods"
                 ],
-                "description": "Get the interfaces for all RPC-JSON methods. Returns TypeScript interfaces inferred from dry-runs via /api/v4/call/dry (postCallDry)",
+                "description": "Get TypeScript interfaces for RPC methods inferred from /api/v4/call/dry.",
                 "operationId": "getTypeScript",
                 "responses": {
                     "200": {
@@ -1268,13 +1428,20 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
                         "name": "namesOnly",
                         "in": "query",
-                        "description": "Return only schema names without tables and sequences",
-                        "required": false
+                        "description": "Return only schema names (omit tables and sequences).",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
                     }
                 ],
                 "responses": {
@@ -1317,6 +1484,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     }
                 ],
@@ -1344,6 +1514,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     }
                 ],
@@ -1360,7 +1533,7 @@
                                         ],
                                         "properties": {
                                             "name": {
-                                                "description": "New name of schema",
+                                                "description": "New schema name.",
                                                 "type": "string",
                                                 "example": "my_schema_with_new_name"
                                             }
@@ -1393,7 +1566,7 @@
                 "description": "Create schema(s).",
                 "operationId": "postSchema",
                 "requestBody": {
-                    "description": "New schema",
+                    "description": "Schema to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1426,6 +1599,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1433,6 +1609,9 @@
                         "in": "path",
                         "description": "Sequence names",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_sequences"
                     }
                 ],
@@ -1464,6 +1643,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1471,6 +1653,9 @@
                         "in": "path",
                         "description": "Sequence names",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_sequences"
                     }
                 ],
@@ -1495,6 +1680,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1502,6 +1690,9 @@
                         "in": "path",
                         "description": "Sequence names",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_sequences"
                     }
                 ],
@@ -1542,11 +1733,14 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     }
                 ],
                 "requestBody": {
-                    "description": "New sequence",
+                    "description": "Sequence to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1574,10 +1768,10 @@
                 "tags": [
                     "Sql"
                 ],
-                "description": "Execute SQL statements",
+                "description": "Execute SQL statements.",
                 "operationId": "postSql",
                 "requestBody": {
-                    "description": "Sql statement to execute",
+                    "description": "SQL statement(s) to execute.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1607,19 +1801,22 @@
                 "tags": [
                     "Sql"
                 ],
-                "description": "Run SQL statements without token",
+                "description": "Run SQL statements without a token.",
                 "operationId": "postSqlNoToken",
                 "parameters": [
                     {
                         "name": "database",
                         "in": "path",
-                        "description": "Database to use",
+                        "description": "Database name to use.",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "mydb"
                     }
                 ],
                 "requestBody": {
-                    "description": "Sql statement to run",
+                    "description": "SQL statement(s) to run.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1637,7 +1834,7 @@
                         }
                     },
                     "500": {
-                        "description": "Internal error. Most like an SQL error."
+                        "description": "Internal error. Most likely an SQL error."
                     }
                 }
             }
@@ -1647,7 +1844,7 @@
                 "tags": [
                     "Stats"
                 ],
-                "description": "Get statistics",
+                "description": "Get database statistics.",
                 "operationId": "getStats",
                 "responses": {
                     "200": {
@@ -1679,6 +1876,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1686,13 +1886,20 @@
                         "in": "path",
                         "description": "Table name",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     },
                     {
                         "name": "namesOnly",
                         "in": "query",
-                        "description": "Return only table names without columns, indices, constraints and other details.",
-                        "required": false
+                        "description": "Return only table names (omit columns, indexes, constraints, and other details).",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
                     }
                 ],
                 "responses": {
@@ -1710,7 +1917,7 @@
                                 "operationId": "getColumn",
                                 "parameters": {
                                     "schema": "$request.path.schema",
-                                    "table ": "$request.path.table"
+                                    "table": "$request.path.table"
                                 },
                                 "description": "Link to columns."
                             },
@@ -1718,7 +1925,7 @@
                                 "operationId": "getConstraint",
                                 "parameters": {
                                     "schema": "$request.path.schema",
-                                    "table ": "$request.path.table"
+                                    "table": "$request.path.table"
                                 },
                                 "description": "Link to constraints."
                             },
@@ -1726,15 +1933,15 @@
                                 "operationId": "getIndex",
                                 "parameters": {
                                     "schema": "$request.path.schema",
-                                    "table ": "$request.path.table"
+                                    "table": "$request.path.table"
                                 },
-                                "description": "Link to indices."
+                                "description": "Link to indexes."
                             },
                             "getPrivileges": {
                                 "operationId": "getPrivileges",
                                 "parameters": {
                                     "schema": "$request.path.schema",
-                                    "table ": "$request.path.table"
+                                    "table": "$request.path.table"
                                 },
                                 "description": "Link to privileges."
                             }
@@ -1760,6 +1967,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1767,6 +1977,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     }
                 ],
@@ -1786,7 +1999,7 @@
                 "tags": [
                     "Schema"
                 ],
-                "description": "Rename and move existing table(s).",
+                "description": "Rename or move existing table(s).",
                 "operationId": "patchTable",
                 "parameters": [
                     {
@@ -1794,6 +2007,9 @@
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     },
                     {
@@ -1801,6 +2017,9 @@
                         "in": "path",
                         "description": "Table name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_table"
                     }
                 ],
@@ -1819,7 +2038,7 @@
                                                 "example": "my_table_with_new_name"
                                             },
                                             "schema": {
-                                                "description": "Move table to schema",
+                                                "description": "Target schema to move the table to.",
                                                 "type": "string",
                                                 "example": "my_other_schema"
                                             },
@@ -1859,15 +2078,18 @@
                 "operationId": "postTable",
                 "parameters": [
                     {
-                        "name": "name",
+                        "name": "schema",
                         "in": "path",
                         "description": "Schema name",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "my_schema"
                     }
                 ],
                 "requestBody": {
-                    "description": "New table",
+                    "description": "Table to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1892,7 +2114,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Get sub-user(s)",
+                "description": "Get sub-user(s).",
                 "operationId": "getUser",
                 "parameters": [
                     {
@@ -1900,6 +2122,9 @@
                         "in": "path",
                         "description": "User identifier",
                         "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "joe"
                     }
                 ],
@@ -1923,7 +2148,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Delete sub-user(s)",
+                "description": "Delete sub-user(s).",
                 "operationId": "deleteUsers",
                 "parameters": [
                     {
@@ -1931,6 +2156,9 @@
                         "in": "path",
                         "description": "User identifier",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "joe"
                     }
                 ],
@@ -1947,7 +2175,7 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Update exiting sub-user(s)",
+                "description": "Update existing sub-user(s).",
                 "operationId": "patchUser",
                 "parameters": [
                     {
@@ -1955,11 +2183,14 @@
                         "in": "path",
                         "description": "User identifier",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
                         "example": "joe"
                     }
                 ],
                 "requestBody": {
-                    "description": "User",
+                    "description": "User updates.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1971,7 +2202,7 @@
                 },
                 "responses": {
                     "204": {
-                        "description": "Rule updated"
+                        "description": "User updated"
                     },
                     "400": {
                         "description": "Bad request"
@@ -1987,10 +2218,10 @@
                 "tags": [
                     "Users"
                 ],
-                "description": "Create new sub-user(s)",
+                "description": "Create new sub-user(s).",
                 "operationId": "postUser",
                 "requestBody": {
-                    "description": "New user",
+                    "description": "User to create.",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2017,7 +2248,7 @@
     "components": {
         "schemas": {
             "Call": {
-                "description": "JSON-RPC is a stateless, lightweight remote procedure call (RPC) protocol that uses JSON for data interchange. Defined by the JSON-RPC 2.0 specification, it enables clients to invoke methods on a server by sending JSON-formatted requests and receiving JSON-formatted responses, with support for batch calls, notifications, and standardized error handling.",
+                "description": "JSON-RPC 2.0 request payload. Used to call a named RPC method with optional parameters.",
                 "required": [
                     "jsonrpc",
                     "method"
@@ -2034,19 +2265,19 @@
                     },
                     "id": {
                         "title": "Identifier",
-                        "description": "An identifier established by the Client that MUST contain a string if included.",
+                        "description": "Client-supplied request id. If present, must be a string.",
                         "type": "string",
                         "example": "1"
                     },
                     "method": {
                         "title": "Method name",
-                        "description": "A String containing the name of the method to be invoked or created.",
+                        "description": "Name of the RPC method to call.",
                         "type": "string",
                         "example": "getDate"
                     },
                     "params": {
                         "title": "Parameters",
-                        "description": "Parameters for the method. For SELECT methods, only one set of parameters is accepted.",
+                        "description": "Parameters for the method. For SELECT methods, only one parameter set is allowed.",
                         "type": "array",
                         "items": {
                             "type": "object"
@@ -2064,31 +2295,31 @@
                 "type": "object"
             },
             "Client": {
-                "description": "OAuth clients are applications that request and manage access to user resources through the OAuth authorization protocol. These clients act as intermediaries, enabling secure, delegated access to user accounts without directly handling sensitive credentials.",
+                "description": "OAuth client definition used to request and manage user access.",
                 "required": [],
                 "properties": {
                     "id": {
                         "title": "Client id",
-                        "description": "Id of client, which identify the client.",
+                        "description": "Client id.",
                         "type": "string",
                         "example": "my_client_id"
                     },
                     "name": {
                         "title": "Name",
-                        "description": "Name of client. Can help identify the client.",
+                        "description": "Client display name.",
                         "type": "string",
                         "example": "My Application"
                     },
                     "homepage": {
                         "title": "Homepage",
-                        "description": "The homepage (or web-app), which starts the code flow.",
+                        "description": "Homepage or web app URL that starts the code flow.",
                         "type": "string",
                         "format": "uri",
                         "example": "https://mapcentia.com"
                     },
                     "description": {
                         "title": "Description",
-                        "description": "A longer description of the client, which can help identify the client.",
+                        "description": "Longer description to identify the client.",
                         "type": [
                             "string",
                             "null"
@@ -2097,7 +2328,7 @@
                     },
                     "redirect_uri": {
                         "title": "Redirect URIs.",
-                        "description": "The URIs the auth server is allowed to redirect back to.",
+                        "description": "Allowed redirect URIs for this client.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -2116,28 +2347,28 @@
                     },
                     "confirm": {
                         "title": "Confirm",
-                        "description": "Users must confirm client access.",
+                        "description": "Require user confirmation before granting access.",
                         "type": "boolean",
                         "default": true,
                         "example": true
                     },
                     "two_factor": {
                         "title": "Two factor authentication",
-                        "description": "Users must log in with two factor authentication.",
+                        "description": "Require two-factor authentication for login.",
                         "type": "boolean",
                         "default": true,
                         "example": true
                     },
                     "allow_signup": {
                         "title": "Allow users to sign up",
-                        "description": "Users can sign up for a new account in the web-dialog.",
+                        "description": "Allow users to sign up in the web dialog.",
                         "type": "boolean",
                         "default": false,
                         "example": true
                     },
                     "social_signup": {
                         "title": "Enable social signup",
-                        "description": "Users can sign up for a new account with social login.",
+                        "description": "Allow social login during signup.",
                         "type": "boolean",
                         "default": false,
                         "example": true
@@ -2146,37 +2377,37 @@
                 "type": "object"
             },
             "Column": {
-                "description": "Each column has a data type. The data type constrains the set of possible values that can be assigned to a column and assigns semantics to the data stored in the column so that it can be used for computations. For instance, a column declared to be of a numerical type will not accept arbitrary text strings, and the data stored in such a column can be used for mathematical computations. By contrast, a column declared to be of a character string type will accept almost any kind of data but it does not lend itself to mathematical calculations, although other operations such as string concatenation are available.",
+                "description": "Table column definition, including name, data type, nullability, defaults, identity, and comment.",
                 "required": [],
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "Name of the column.",
+                        "description": "Column name.",
                         "type": "string",
                         "example": "my-column"
                     },
                     "type": {
                         "title": "Type",
-                        "description": "The type of the column, like varchar, integer, boolean etc. Array types are denoted by adding [] to the type, e.g. varchar[].",
+                        "description": "Column type, e.g. varchar, integer, boolean. Array types use [] (e.g. varchar[]).",
                         "type": "string",
                         "example": "int"
                     },
                     "is_nullable": {
                         "title": "Is nullable",
-                        "description": "If true the column can be set to null.",
+                        "description": "Whether the column allows NULL values.",
                         "type": "boolean",
-                        "default": "true",
-                        "example": "false"
+                        "default": true,
+                        "example": false
                     },
                     "default_value": {
                         "title": "Default value",
-                        "description": "The column is set to the default value if no value is given.",
+                        "description": "Default value used when no value is provided.",
                         "type": "string",
                         "example": "my-value"
                     },
                     "identity_generation": {
                         "title": "Identity generation of the column",
-                        "description": "An identity column is a special column that is generated automatically from an implicit sequence. It can be used to generate key values.",
+                        "description": "Identity generation mode for auto-generated values.",
                         "type": "string",
                         "enum": [
                             "always",
@@ -2186,7 +2417,7 @@
                     },
                     "comment": {
                         "title": "Comment",
-                        "description": "Comment on the column.",
+                        "description": "Comment for the column.",
                         "type": "string",
                         "example": "This is a comment on the column"
                     }
@@ -2194,7 +2425,7 @@
                 "type": "object"
             },
             "Commit": {
-                "description": "Schema commit.",
+                "description": "Commit schema metadata and table definitions to a Git repository.",
                 "required": [
                     "schema",
                     "repo",
@@ -2203,13 +2434,13 @@
                 "properties": {
                     "schema": {
                         "title": "Schema",
-                        "description": "Schema to commit",
+                        "description": "Schema name to export and commit.",
                         "type": "string",
                         "example": "myschema"
                     },
                     "repo": {
                         "title": "Repository",
-                        "description": "An Git repository URL with credentials.",
+                        "description": "Git repository URL (can include credentials).",
                         "type": "string",
                         "example": "https://user:password@github.com/path/repo.git"
                     },
@@ -2221,7 +2452,7 @@
                     },
                     "meta_query": {
                         "title": "Meta query string",
-                        "description": "Only commit meta for this search.",
+                        "description": "Only include meta entries that match this search query.",
                         "type": "string",
                         "default": null,
                         "example": "tag:mytables"
@@ -2230,7 +2461,7 @@
                 "type": "object"
             },
             "Constraint": {
-                "description": "A constraint is a rule that is enforced on a table to ensure data integrity. Constraints can be used to enforce rules such as uniqueness, foreign key relationships, and check constraints. They help maintain the consistency and accuracy of data in a database.",
+                "description": "Table constraint definition (primary key, foreign key, unique, or check).",
                 "required": [
                     "constraint",
                     "columns"
@@ -2238,13 +2469,13 @@
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "Name of the constraint.",
+                        "description": "Constraint name.",
                         "type": "string",
                         "example": "my-constraint"
                     },
                     "constraint": {
                         "title": "Type",
-                        "description": "Type of the constraint.",
+                        "description": "Constraint type.",
                         "type": "string",
                         "enum": [
                             "primary",
@@ -2256,7 +2487,7 @@
                     },
                     "columns": {
                         "title": "Columns",
-                        "description": "Columns in constraint",
+                        "description": "Columns included in the constraint.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -2269,19 +2500,19 @@
                     },
                     "check": {
                         "title": "Check",
-                        "description": "A check constraint.",
+                        "description": "CHECK expression (for check constraints).",
                         "type": "string",
                         "example": "c1 > 0"
                     },
                     "referenced_table": {
                         "title": "Referenced table",
-                        "description": "Referenced table in a foreign key constraint.",
+                        "description": "Referenced table for a foreign key constraint.",
                         "type": "string",
                         "example": "my_schema.my.table"
                     },
                     "referenced_columns": {
                         "title": "Referenced columns",
-                        "description": "Referenced columns in a foreign key constraint. This will default to the primary key if omitted.",
+                        "description": "Referenced columns for a foreign key. Defaults to the referenced table's primary key.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -2296,7 +2527,7 @@
                 "type": "object"
             },
             "File": {
-                "description": "Use the Files endpoints to upload one or more files (like CSV files) to temporary storage and then process them into a database table.",
+                "description": "Upload files to temporary storage and then import them into database tables.",
                 "required": [
                     "file",
                     "schema"
@@ -2304,66 +2535,66 @@
                 "properties": {
                     "file": {
                         "title": "File",
-                        "description": "File to import to database.",
+                        "description": "Uploaded file name to import.",
                         "type": "string"
                     },
                     "schema": {
                         "title": "Schema",
-                        "description": "Destination schema",
+                        "description": "Destination schema name.",
                         "type": "string"
                     },
                     "import": {
                         "title": "Import",
-                        "description": "If false, a dry-run will be executed.",
+                        "description": "If false, run a dry-run (no changes).",
                         "type": "boolean",
                         "default": false
                     },
                     "t_srs": {
                         "title": "Target srs",
-                        "description": "Fallback target SRS. Will be used if no authority name/code is available.",
+                        "description": "Fallback target SRS. Used if no authority name/code is available.",
                         "type": "string",
                         "default": "EPSG:4326"
                     },
                     "s_srs": {
                         "title": "Source srs",
-                        "description": "Fallback source SRS. Will be used if file doesn't contain projection information.",
+                        "description": "Fallback source SRS. Used if the file has no projection information.",
                         "type": "string",
                         "default": "EPSG:4326"
                     },
                     "append": {
                         "title": "Append",
-                        "description": "Append to existing table instead of creating new.",
+                        "description": "Append to an existing table instead of creating a new one.",
                         "type": "boolean",
                         "default": false
                     },
                     "p_multi": {
                         "title": "Promote to multi",
-                        "description": "Promote single geometries to multi part.",
+                        "description": "Promote single-part geometries to multi-part.",
                         "type": "boolean",
                         "default": false
                     },
                     "truncate": {
                         "title": "Truncate",
-                        "description": "Truncate table before appending. Only have effect if --append is set.",
+                        "description": "Truncate table before appending. Only applies when append is true.",
                         "type": "boolean",
                         "default": false
                     },
                     "timestamp": {
                         "title": "Timestamp",
-                        "description": "Name of timestamp field. Create a timestamp field in the import table. Omit property for no timestamp field.",
+                        "description": "Name of timestamp field to create. Omit to skip creating a timestamp field.",
                         "type": "string",
                         "example": "creation_timestamp"
                     },
                     "x_possible_names": {
                         "title": "Possible names for X",
-                        "description": "Specify the potential names of the columns that can contain X/longitude. Only effects CSV",
+                        "description": "Possible column names for X/longitude (CSV only).",
                         "type": "string",
                         "default": "lon*,Lon*,x,X",
                         "example": "Lon*"
                     },
                     "y_possible_names": {
                         "title": "Possible names for Y",
-                        "description": "Specify the potential names of the columns that can contain Y/latitude. Only effects CSV",
+                        "description": "Possible column names for Y/latitude (CSV only).",
                         "type": "string",
                         "default": "lat*,Lat*,y,Y",
                         "example": "Lat*"
@@ -2372,30 +2603,30 @@
                 "type": "object"
             },
             "Rule": {
-                "description": "Rules can deny or allow access to tables or rewrite the SQL statement by adding a where clause. Rules are not attached to tables but applied to the incoming SQL statement before it actually runs in the database engine.",
+                "description": "Access-control rules applied to incoming SQL before execution (allow, deny, or limit via WHERE clause).",
                 "required": [],
                 "properties": {
                     "id": {
                         "title": "Unique identifier",
-                        "description": "Id of the rule. If omitted the rule will get an id automatically generated.",
+                        "description": "Rule id. If omitted, an id is generated.",
                         "type": "integer",
                         "example": 1000
                     },
                     "priority": {
                         "title": "Priority",
-                        "description": "All rules are checked by priority in descending order. The first that matches will be applied.",
+                        "description": "Rules are evaluated by priority (highest first). First match is applied.",
                         "type": "integer",
                         "example": 10
                     },
                     "username": {
                         "title": "Username",
-                        "description": "Rule match for user name (the user that makes the request).",
+                        "description": "Match by user name (requesting user).",
                         "type": "string",
                         "example": "john"
                     },
                     "service": {
                         "title": "Service",
-                        "description": "Rule match for service.",
+                        "description": "Match by service.",
                         "type": "string",
                         "enum": [
                             "sql",
@@ -2406,7 +2637,7 @@
                     },
                     "request": {
                         "title": "Request",
-                        "description": "Rule match for request.",
+                        "description": "Match by request type.",
                         "type": "string",
                         "enum": [
                             "select",
@@ -2418,25 +2649,25 @@
                     },
                     "table": {
                         "title": "Table",
-                        "description": "Rule match for the requested table(s).",
+                        "description": "Match by table name(s).",
                         "type": "string",
                         "example": "my_table"
                     },
                     "iprange": {
                         "title": "Iprange",
-                        "description": "Rule match for the iprange, which the request originates from.",
+                        "description": "Match by source IP range (CIDR).",
                         "type": "string",
                         "example": "127.0.0.1/32"
                     },
                     "schema": {
                         "title": "Schema",
-                        "description": "Rule match for the requested schema(s).",
+                        "description": "Match by schema name(s).",
                         "type": "string",
                         "example": "my_schema"
                     },
                     "access": {
                         "title": "Access",
-                        "description": "The access level the rule grants.",
+                        "description": "Access level the rule grants.",
                         "type": "string",
                         "enum": [
                             "allow",
@@ -2447,7 +2678,7 @@
                     },
                     "filter": {
                         "title": "Filter",
-                        "description": "A filter for rules with 'limit' access. This is a valid WHERE clause.",
+                        "description": "Filter for 'limit' access (SQL WHERE clause).",
                         "type": "string",
                         "example": "user='john'"
                     }
@@ -2455,20 +2686,20 @@
                 "type": "object"
             },
             "GraphQL": {
-                "description": "The GraphQL API allows you to query and manipulate your database data using a dynamically generated schema. Each table in your schema is automatically mapped to GraphQL types, queries, and mutations.",
+                "description": "GraphQL request payload for the limited GraphQL endpoint backed by database metadata.",
                 "required": [
                     "query"
                 ],
                 "properties": {
                     "query": {
                         "title": "Query",
-                        "description": "GraphQL query. Both query and mutation operations are supported. Queries retrieve data, while mutations modify data.",
+                        "description": "GraphQL query string. Queries read data; mutations modify data.",
                         "type": "string",
                         "example": "query { ... }"
                     },
                     "variables": {
                         "title": "Variables",
-                        "description": "Variables for the GraphQL query. Should be a JSON object with variable names as keys and their values as values.",
+                        "description": "Variables object for the GraphQL query.",
                         "type": "object",
                         "example": {
                             "id": 1
@@ -2476,7 +2707,7 @@
                     },
                     "operationName": {
                         "title": "Operation name",
-                        "description": "Name of the operation to execute. Useful when a query contains multiple operations.",
+                        "description": "Operation name to execute when the document contains multiple operations.",
                         "type": "string",
                         "example": "Artists"
                     }
@@ -2484,7 +2715,7 @@
                 "type": "object"
             },
             "Index": {
-                "description": "Indices in a database use a similar approach as in most non-fiction books: terms and concepts that are frequently looked up by readers are collected in an alphabetic index at the end of the book. The interested reader can scan the index relatively quickly and flip to the appropriate page(s), rather than having to read the entire book to find the material of interest.",
+                "description": "Database indexes speed up lookups by keeping an ordered structure over one or more columns.",
                 "required": [
                     "columns"
                 ],
@@ -2497,7 +2728,7 @@
                     },
                     "columns": {
                         "title": "Columns",
-                        "description": "Column(s) to index. An index can comprise more columns.",
+                        "description": "Column(s) to include in the index.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -2508,7 +2739,7 @@
                     },
                     "method": {
                         "title": "The index method.",
-                        "description": "The index method.",
+                        "description": "Index method to use.",
                         "type": "string",
                         "default": "btree",
                         "enum": [
@@ -2523,8 +2754,72 @@
                 },
                 "type": "object"
             },
+            "Meta": {
+                "description": "Metadata for relations (tables/views) used by clients and tools. Stored outside the physical schema.",
+                "required": [],
+                "properties": {
+                    "relations": {
+                        "description": "Relation metadata provides supplementary information about database relations.\n            Metadata is stored outside the physical schema and does not change table structure or constraints.\n            It is used by clients such as UI applications, query builders, and access layers.",
+                        "type": "object",
+                        "additionalProperties": {
+                            "properties": {
+                                "title": {
+                                    "description": "Human-readable relation title.",
+                                    "type": "string"
+                                },
+                                "abstract": {
+                                    "description": "Description or summary of the relation.",
+                                    "type": "string"
+                                },
+                                "group": {
+                                    "description": "Logical grouping (e.g. for UI categorization).",
+                                    "type": "string"
+                                },
+                                "sort_id": {
+                                    "description": "Sorting weight for presentation.",
+                                    "type": "integer"
+                                },
+                                "tags": {
+                                    "description": "Arbitrary classification tags.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "properties": {
+                                    "description": "Free-form key/value metadata.",
+                                    "type": "object"
+                                },
+                                "fields": {
+                                    "description": "Per-column metadata.",
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "properties": {
+                                            "alias": {
+                                                "description": "Display name used in clients/UI.",
+                                                "type": "string"
+                                            },
+                                            "queryable": {
+                                                "description": "Whether the field can be queried/filtered.",
+                                                "type": "boolean"
+                                            },
+                                            "sort_id": {
+                                                "description": "Sorting weight within the field list.",
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "Method": {
-                "description": "nstead of sending raw SQL every time you want to run a statement, you can wrap your SQL statements inside JSON-RPC methods. This means you define a named method which holds your SQL query along with optional instructions on how to interpret and format the data types.",
+                "description": "Define reusable JSON-RPC methods that wrap SQL statements plus optional type hints and output formats.",
                 "required": [
                     "method",
                     "q"
@@ -2532,19 +2827,19 @@
                 "properties": {
                     "method": {
                         "title": "Method",
-                        "description": "A String containing the name of the method to be created.",
+                        "description": "Name of the method to create.",
                         "type": "string",
                         "example": "getDate"
                     },
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE.",
+                        "description": "SQL statement. Allowed: SELECT, INSERT, UPDATE, DELETE, MERGE.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
                     "type_hints": {
                         "title": "Type hints",
-                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "description": "Type hints for JSON-encoded parameters that are not JSON in the database.",
                         "type": "object",
                         "example": {
                             "my_date": "date"
@@ -2552,7 +2847,7 @@
                     },
                     "type_formats": {
                         "title": "Type formats",
-                        "description": "For JSON represented parameters which are not of JSON type.",
+                        "description": "Formatting rules for typed parameters, e.g. date formats.",
                         "type": "object",
                         "example": {
                             "my_date": "Y m d"
@@ -2560,14 +2855,14 @@
                     },
                     "output_format": {
                         "title": "Output format",
-                        "description": "The wanted output format.",
+                        "description": "Output format for the result.",
                         "type": "string",
                         "default": "json",
                         "example": "csv"
                     },
                     "srs": {
                         "title": "Spatial reference system",
-                        "description": "The spatial reference system to use for PostGIS geometry columns. EPSG code.",
+                        "description": "EPSG code for the spatial reference system used for geometry output.",
                         "type": "integer",
                         "default": 4326,
                         "example": 25832
@@ -2576,14 +2871,14 @@
                 "type": "object"
             },
             "OAuth": {
-                "description": "OAuth is used to authenticate users and grant access to resources. It is a protocol that allows users to authorize third-party applications to access their resources without sharing their credentials.",
+                "description": "OAuth token request payload for supported grant types.",
                 "required": [
                     "grant_type"
                 ],
                 "properties": {
                     "grant_type": {
                         "title": "OAuth grant type",
-                        "description": "The OAuth grant type to use for authentication.",
+                        "description": "OAuth grant type to use.",
                         "type": "string",
                         "enum": [
                             "password",
@@ -2595,7 +2890,7 @@
                     },
                     "username": {
                         "title": "Username",
-                        "description": "Username - either database user or sub-user. Only used in password grant.",
+                        "description": "Username (database user or sub-user). Used only with password grant.",
                         "type": "string",
                         "example": "mydb"
                     },
@@ -2607,37 +2902,37 @@
                     },
                     "database": {
                         "title": "Database",
-                        "description": "The database the user belongs to.",
+                        "description": "Database name the user belongs to.",
                         "type": "string",
                         "example": "mydb"
                     },
                     "client_id": {
                         "title": "Client id",
-                        "description": "The OAuth client id.",
+                        "description": "OAuth client id.",
                         "type": "string",
                         "example": "djskjskdj"
                     },
                     "client_secret": {
                         "title": "Client secret",
-                        "description": "The OAuth client secret.",
+                        "description": "OAuth client secret.",
                         "type": "string",
                         "example": "xxx"
                     },
                     "code": {
                         "title": "Code",
-                        "description": "The code which is exchanged for an access token in authorization_code grant",
+                        "description": "Authorization code exchanged for tokens (authorization_code grant).",
                         "type": "string",
                         "example": "xxx"
                     },
                     "redirect_uri": {
                         "title": "Redirect uri",
-                        "description": "The redirect uris for authorization_code grant.",
+                        "description": "Redirect URI for authorization_code grant.",
                         "type": "string",
                         "example": "xxx"
                     },
                     "code_verifier": {
                         "title": "Code verifier",
-                        "description": "The code verifier for PKCE.",
+                        "description": "PKCE code verifier.",
                         "type": "string",
                         "example": "xxx"
                     }
@@ -2645,7 +2940,7 @@
                 "type": "object"
             },
             "OAuthResponse": {
-                "description": "OAuth grant response. This is the final response with tokens.",
+                "description": "OAuth token response payload.",
                 "required": [
                     "access_token",
                     "token_type",
@@ -2662,7 +2957,7 @@
                     },
                     "token_type": {
                         "title": "Token type",
-                        "description": "Always 'bearer'",
+                        "description": "Always 'bearer'.",
                         "type": "string",
                         "enum": [
                             "bearer"
@@ -2671,19 +2966,19 @@
                     },
                     "expires_in": {
                         "title": "Expiration time",
-                        "description": "The token expiration time.",
+                        "description": "Token lifetime in seconds.",
                         "type": "integer",
                         "example": 3600
                     },
                     "refresh_token": {
                         "title": "JWT refresh token",
-                        "description": "The JWT refresh token.",
+                        "description": "Refresh token.",
                         "type": "string",
                         "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
                     },
                     "scope": {
                         "title": "Scope",
-                        "description": "The scope.",
+                        "description": "Granted scope.",
                         "type": "string",
                         "example": "sql"
                     }
@@ -2691,7 +2986,7 @@
                 "type": "object"
             },
             "OAuthDeviceResponse": {
-                "description": "Device response with user code and verification uri.",
+                "description": "Device flow response with user code and verification URI.",
                 "required": [
                     "device_code",
                     "user_code",
@@ -2702,32 +2997,32 @@
                 "properties": {
                     "device_code": {
                         "title": "Device code",
-                        "description": "The device code.",
+                        "description": "Device code.",
                         "type": "string",
                         "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
                     },
                     "user_code": {
                         "title": "User code",
-                        "description": "The user code.",
+                        "description": "User code to show to the user.",
                         "type": "string",
                         "example": "AB12-CD34"
                     },
                     "verification_uri": {
                         "title": "Verification uri",
-                        "description": "The verification URI.",
+                        "description": "Verification URI where the user completes authorization.",
                         "type": "string",
                         "format": "url",
                         "example": "https://api.centia.io/api/v4/oauth"
                     },
                     "expires_in": {
                         "title": "Expiration time",
-                        "description": "The JWT refresh token.",
+                        "description": "Device code lifetime in seconds.",
                         "type": "integer",
                         "example": "1800"
                     },
                     "interval": {
                         "title": "Interval",
-                        "description": "The interval.",
+                        "description": "Polling interval in seconds.",
                         "type": "integer",
                         "example": 5
                     }
@@ -2735,14 +3030,14 @@
                 "type": "object"
             },
             "OAuthDevice": {
-                "description": "Device request for starting a device flow.",
+                "description": "Device flow request payload.",
                 "required": [
                     "client_id"
                 ],
                 "properties": {
                     "client_id": {
                         "title": "Client id",
-                        "description": "The client id.",
+                        "description": "OAuth client id.",
                         "type": "string",
                         "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
                     }
@@ -2750,7 +3045,7 @@
                 "type": "object"
             },
             "Privilege": {
-                "description": "The privilege system enables the super-user to grant sub-users read or write privileges to tables. Sub-users can grant privileges to tables in their own schemas.",
+                "description": "Privileges define read/write access for sub-users on tables.",
                 "required": [
                     "subuser",
                     "privileges"
@@ -2758,33 +3053,33 @@
                 "properties": {
                     "subuser": {
                         "title": "Sub-user",
-                        "description": "Name of the sub-user",
+                        "description": "Sub-user name.",
                         "type": "string",
                         "example": "joe"
                     },
                     "privilege": {
                         "title": "Privilege",
-                        "description": "The privilege granted to the sub-user on a table.",
+                        "description": "Privilege level for the sub-user on the table.",
                         "type": "string",
                         "enum": [
                             "none",
                             "read",
                             "write"
                         ],
-                        "example": "all"
+                        "example": "read"
                     }
                 },
                 "type": "object"
             },
             "Schema": {
-                "description": "A database contains one or more named schemas, which in turn contain tables. Within one schema, two tables cannot have the same name. The same table name can be used in different schemas without conflict.",
+                "description": "Schema definition, including tables and sequences.",
                 "required": [
                     "name"
                 ],
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "Name of the schema.",
+                        "description": "Schema name.",
                         "type": "string",
                         "example": "my-schema"
                     },
@@ -2808,20 +3103,20 @@
                 "type": "object"
             },
             "Sequence": {
-                "description": "A sequence is a database object that generates a sequence of integers, often used for auto-incrementing primary key columns.",
+                "description": "Sequence definition for generating incremental numeric values.",
                 "required": [
                     "name"
                 ],
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "The name of the sequence",
+                        "description": "Sequence name.",
                         "type": "string",
                         "example": "my_sequence"
                     },
                     "data_type": {
                         "title": "Data type",
-                        "description": "The data type of the sequence",
+                        "description": "Data type used by the sequence.",
                         "type": "string",
                         "default": "bigint",
                         "enum": [
@@ -2833,39 +3128,39 @@
                     },
                     "increment_by": {
                         "title": "Increment by",
-                        "description": "Specifies which value is added to the current sequence value to create a new value",
+                        "description": "Value added to the current sequence value to create a new value.",
                         "type": "integer",
                         "default": 1,
                         "example": 1
                     },
                     "min_value": {
                         "title": "Min value",
-                        "description": "Determines the minimum value a sequence can generate.",
+                        "description": "Minimum value the sequence can generate.",
                         "type": "integer",
                         "example": 1
                     },
                     "max_value": {
                         "title": "Max value",
-                        "description": "Determines the maximum value for the sequence.",
+                        "description": "Maximum value the sequence can generate.",
                         "type": "integer",
                         "example": 9223372036854
                     },
                     "start_value": {
                         "title": "Start value",
-                        "description": "he initial value of the sequence",
+                        "description": "The initial value of the sequence",
                         "type": "integer",
                         "example": 1
                     },
                     "cache_size": {
                         "title": "Cache size",
-                        "description": "Specifies how many sequence numbers should be preallocated and stored in memory for faster access.",
+                        "description": "How many sequence numbers to preallocate and cache.",
                         "type": "integer",
                         "default": 1,
                         "example": 1
                     },
                     "owned_by": {
-                        "title": "Qwned by",
-                        "description": "Associates the sequence with a specific table column, so that if that column (or its whole table) is deleted, the sequence will be automatically deleted as well. The format is schema.table.column.",
+                        "title": "Owned by",
+                        "description": "Associates the sequence with a table column so it is dropped with that column/table. Format: schema.table.column.",
                         "type": "string",
                         "example": "public.my_table.id"
                     }
@@ -2873,18 +3168,18 @@
                 "type": "object"
             },
             "Sql": {
-                "description": "SQL query execution endpoint. Supports SELECT, INSERT, UPDATE, DELETE and MERGE statements.",
+                "description": "Execute SQL statements. Supports SELECT, INSERT, UPDATE, DELETE, and MERGE (no DDL or transaction control).",
                 "required": [],
                 "properties": {
                     "q": {
                         "title": "Query",
-                        "description": "SQL statement. SELECT, INSERT, UPDATE, DELETE or MERGE. No DDL, transaction control, etc.",
+                        "description": "SQL statement to run. Allowed: SELECT, INSERT, UPDATE, DELETE, MERGE. Not allowed: DDL, transaction control.",
                         "type": "string",
                         "example": "SELECT :my_date::date as my_date"
                     },
                     "params": {
                         "title": "Parameters",
-                        "description": "Parameters for statements. For SELECT statements, only one set of parameters is accepted.",
+                        "description": "Parameters for the statement. For SELECT, only one parameter set is allowed.",
                         "type": "array",
                         "items": {
                             "type": "object"
@@ -2900,7 +3195,7 @@
                     },
                     "type_hints": {
                         "title": "Type hints",
-                        "description": "For JSON represented parameters which are not of JSON/JSONB type.",
+                        "description": "Type hints for JSON-encoded parameters that are not JSON/JSONB in the database.",
                         "type": "object",
                         "example": {
                             "my_date": "date"
@@ -2908,7 +3203,7 @@
                     },
                     "type_formats": {
                         "title": "Type formats",
-                        "description": "Formats for types (like date formatting).",
+                        "description": "Formatting rules for typed parameters, e.g. date formats.",
                         "type": "object",
                         "example": {
                             "my_date": "Y m d"
@@ -2916,14 +3211,14 @@
                     },
                     "output_format": {
                         "title": "Output format",
-                        "description": "The wanted output format: json, geojson, csv, ccsv ndjson, excel or ogr/[any ogr vector format e.g 'ogr/ESRI Shape']. ccsv and ndjson are streamed instead of returning a whole document or file.",
+                        "description": "Output format. Supported: json, geojson, csv, ccsv, ndjson, excel, or ogr/<format> (e.g. ogr/ESRI Shape). ccsv and ndjson are streamed.",
                         "type": "string",
                         "default": "json",
                         "example": "csv"
                     },
                     "srs": {
                         "title": "Spatial reference system",
-                        "description": "The spatial reference system to use for PostGIS geometry columns. EPSG code.",
+                        "description": "EPSG code for the spatial reference system used for PostGIS geometry output.",
                         "type": "integer",
                         "default": 4326,
                         "example": 25832
@@ -2932,7 +3227,7 @@
                 "type": "object"
             },
             "Stats": {
-                "description": "Statistics about the whole database.",
+                "description": "Database-level statistics, including sizes and per-table stats.",
                 "required": [
                     "tables",
                     "total_size",
@@ -2943,7 +3238,7 @@
                 "properties": {
                     "tables": {
                         "title": "Tables.",
-                        "description": "List of stats for all tables.",
+                        "description": "Per-table statistics.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/TableStats"
@@ -2951,25 +3246,25 @@
                     },
                     "total_size": {
                         "title": "Total size",
-                        "description": "The total size of all tables in human-readable format.",
+                        "description": "Total size of all tables in bytes.",
                         "type": "integer",
                         "example": 722018304
                     },
                     "total_size_bytes": {
                         "title": "Total size",
-                        "description": "The total size of all tables in bytes.",
+                        "description": "Total size of all tables in human-readable format.",
                         "type": "string",
                         "example": "689 MB"
                     },
                     "number_of_tables": {
                         "title": "Number of tables",
-                        "description": "The total of table in the database",
+                        "description": "Number of tables in the database.",
                         "type": "integer",
                         "example": 21
                     },
                     "cost": {
                         "title": "Cost of queries",
-                        "description": "The cost of queries.",
+                        "description": "Aggregate cost of queries (as reported by the database).",
                         "type": "number",
                         "example": 25686.6
                     }
@@ -2977,7 +3272,7 @@
                 "type": "object"
             },
             "TableStats": {
-                "description": "Table statistics.",
+                "description": "Per-table statistics.",
                 "required": [
                     "table_name",
                     "schema_name",
@@ -2999,7 +3294,7 @@
                     },
                     "total_size": {
                         "title": "Total size",
-                        "description": "The total size of the table including indices in human-readable format.",
+                        "description": "Total size of the table including indexes, human-readable.",
                         "type": "string",
                         "example": "2728 kB"
                     },
@@ -3023,7 +3318,7 @@
                     },
                     "indices_size": {
                         "title": "Indices size",
-                        "description": "The size of the table's indices in human-readable format",
+                        "description": "Size of the table's indexes, human-readable.",
                         "type": "string",
                         "example": "520 kB"
                     },
@@ -3043,14 +3338,14 @@
                 "type": "object"
             },
             "Table": {
-                "description": "A table is much like a table on paper: It consists of rows and columns. The number and order of the columns is fixed, and each column has a name. The number of rows is variable — it reflects how much data is stored at a given moment.",
+                "description": "Table definition including columns, indexes, constraints, and comments.",
                 "required": [
                     "name"
                 ],
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "Name of the table",
+                        "description": "Table name.",
                         "type": "string",
                         "example": "my-column"
                     },
@@ -3064,7 +3359,7 @@
                     },
                     "indices": {
                         "title": "Indices",
-                        "description": "Indices in the table.",
+                        "description": "Indexes defined on the table.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Index"
@@ -3072,7 +3367,7 @@
                     },
                     "constraints": {
                         "title": "Constraints",
-                        "description": "Constraints in the table.",
+                        "description": "Constraints defined on the table.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Constraint"
@@ -3080,7 +3375,7 @@
                     },
                     "comment": {
                         "title": "Comment",
-                        "description": "Comment on the table",
+                        "description": "Comment for the table.",
                         "type": "string",
                         "example": "This is a comment on the table"
                     }
@@ -3088,7 +3383,7 @@
                 "type": "object"
             },
             "User": {
-                "description": "Sub-users are users for your API. While you can use your super-user for single user projects, it is a good idea to create sub-users for projects involving multiple users, which can be granted different privileges in the database.",
+                "description": "Sub-users are API users managed under a super-user and can be granted specific database privileges.",
                 "required": [
                     "name",
                     "email",
@@ -3097,26 +3392,27 @@
                 "properties": {
                     "name": {
                         "title": "Name",
-                        "description": "Name of user.",
+                        "description": "User name.",
                         "type": "string",
                         "example": "joe"
                     },
                     "email": {
                         "title": "E-mail",
-                        "description": "Users e-mail.",
+                        "description": "User email address.",
                         "type": "string",
                         "format": "email",
                         "example": "joe@example.com"
                     },
                     "password": {
                         "title": "Password",
-                        "description": "Users password. Min. 8 characters and at least one upper case letter and one number.",
-                        "type": "password",
+                        "description": "User password. Minimum 8 characters with at least one uppercase letter and one number.",
+                        "type": "string",
+                        "format": "password",
                         "example": "Abc123!"
                     },
                     "properties": {
                         "title": "Properties",
-                        "description": "An object, which can contain any properties and values.",
+                        "description": "Arbitrary custom properties for the user.",
                         "type": "object",
                         "example": {
                             "phone": "555-1234567",
@@ -3126,7 +3422,7 @@
                     },
                     "default_user": {
                         "title": "Is default user",
-                        "description": "The default user is the user that is used when no token is provided. Use for public applications where users should not be able to access data without a token.",
+                        "description": "Whether this is the default user when no token is provided (public access).",
                         "type": "boolean",
                         "example": true
                     }
@@ -3177,6 +3473,10 @@
         {
             "name": "GraphQL",
             "description": "GraphQL"
+        },
+        {
+            "name": "Meta",
+            "description": "Meta"
         },
         {
             "name": "OAuth",
