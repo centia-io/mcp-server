@@ -30,6 +30,19 @@ Provisioning is not runtime logic.
 - Runtime app code must never call provisioning endpoints.
 - Schema changes happen only in provisioning/codegen flows.
 
+## PATCH returns 303 See Other
+
+All provisioning PATCH endpoints return `303 See Other` with a `Location` header pointing to the updated resource. HTTP clients that automatically follow redirects will receive an unexpected `200 OK` from the subsequent GET instead of the expected `303`.
+
+External clients **must** disable automatic redirect-following:
+
+- `fetch`: `{ redirect: 'manual' }` in `RequestInit`
+- `axios`: `{ maxRedirects: 0 }` (catch the resulting error)
+- `curl`: omit the `-L` flag
+- Postman: disable "Automatically follow redirects" in Settings
+
+The SDK already handles this via `redirect: 'manual'` in all fetch calls.
+
 ## SQL dialect and API limits
 
 - SQL dialect is PostgreSQL with PostGIS enabled.
