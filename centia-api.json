@@ -195,7 +195,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Client"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Client"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Client"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -379,7 +389,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Column"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Column"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Column"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -636,7 +656,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Constraint"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Constraint"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Constraint"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -833,7 +863,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Rule"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Rule"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Rule"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -1068,7 +1108,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Index"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Index"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Index"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -1285,7 +1335,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Method"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Method"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Method"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -1402,7 +1462,17 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Privilege"
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Privilege"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Privilege"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -1641,7 +1711,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Schema"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Schema"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Schema"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -1825,7 +1905,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Sequence"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Sequence"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Sequence"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -2184,7 +2274,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Table"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Table"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Table"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -2326,7 +2426,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/User"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
