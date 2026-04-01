@@ -55,9 +55,11 @@ Use the minimal matching skill(s) below for each task:
 - JSON-RPC lifecycle and typed API: `skills/centia-json-rpc/SKILL.md`
 - Auth model by runtime context: `skills/centia-auth-model/SKILL.md`
 - PostgreSQL types and output formats: `skills/centia-types-formats/SKILL.md`
+- Realtime WebSocket events: `skills/centia-realtime/SKILL.md`
 - File import workflow: `skills/centia-file-import/SKILL.md`
 - OpenAPI and docs fallback: `skills/centia-openapi-docs/SKILL.md`
 - Delivery checklist and MCP reference: `skills/centia-delivery/SKILL.md`
+- Danish address/matrikel search component: `skills/danish-search/SKILL.md`
 
 ## 7) Default Paths
 

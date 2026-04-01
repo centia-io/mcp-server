@@ -678,6 +678,100 @@
                 }
             }
         },
+        "/api/v4/schemas/{schema}/tables/{table}/events": {
+            "get": {
+                "tags": [
+                    "Events"
+                ],
+                "description": "Check if event trigger is enabled.",
+                "operationId": "getEvents",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Events"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Events"
+                ],
+                "description": "Install event trigger.",
+                "operationId": "postEvents",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "example": "my_table"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Privileges.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Events"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Event trigger installed."
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
         "/api/v4/file/upload": {
             "post": {
                 "tags": [
@@ -721,14 +815,24 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/File"
+                                "$ref": "#/components/schemas/FileProcessRequest"
                             }
                         }
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "Files processed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/FileProcessResponse"
+                                    }
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Not found"
@@ -1505,12 +1609,22 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Privileges",
+                    "description": "Privileges.",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Privilege"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Privilege"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Privilege"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
@@ -2736,7 +2850,22 @@
                 },
                 "type": "object"
             },
-            "File": {
+            "Events": {
+                "description": "Events for a table.",
+                "required": [
+                    "enabled"
+                ],
+                "properties": {
+                    "enabled": {
+                        "title": "Enabled",
+                        "description": "Enable or disable events for this table.",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "FileProcessRequest": {
                 "description": "Upload files to temporary storage and then import them into database tables.",
                 "required": [
                     "file",
@@ -2808,6 +2937,64 @@
                         "type": "string",
                         "default": "lat*,Lat*,y,Y",
                         "example": "Lat*"
+                    }
+                },
+                "type": "object"
+            },
+            "FileProcessResponse": {
+                "description": "Upload files to temporary storage and then import them into database tables.",
+                "required": [
+                    "driver",
+                    "count",
+                    "geom_type",
+                    "index",
+                    "name",
+                    "has_wkt",
+                    "auth_str",
+                    "error"
+                ],
+                "properties": {
+                    "driver": {
+                        "title": "Driver",
+                        "description": "Driver name.",
+                        "type": "string"
+                    },
+                    "count": {
+                        "title": "Count",
+                        "description": "Count of rows.",
+                        "type": "integer"
+                    },
+                    "geom_type": {
+                        "title": "Geometry type",
+                        "description": "Type of geometry if PostGIS table is created.",
+                        "type": "string",
+                        "example": "Multipolygon"
+                    },
+                    "index": {
+                        "title": "Index",
+                        "description": "Index of multi layered geometry files like GML and GeoPackage",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of created table.",
+                        "type": "string"
+                    },
+                    "has_wkt": {
+                        "title": "Has WKT",
+                        "description": "If file has WKT projection information.",
+                        "type": "boolean"
+                    },
+                    "auth_str": {
+                        "title": "Authority string",
+                        "description": "EPSG Authority string.",
+                        "type": "string",
+                        "example": "EPSG:25832"
+                    },
+                    "error": {
+                        "title": "Error",
+                        "description": "Error message.",
+                        "type": "string"
                     }
                 },
                 "type": "object"
@@ -3254,6 +3441,49 @@
                 },
                 "type": "object"
             },
+            "Outbox": {
+                "description": "",
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Unique identifier",
+                        "description": "",
+                        "type": "integer",
+                        "example": 1000
+                    },
+                    "operation": {
+                        "title": "Operation",
+                        "description": "",
+                        "type": "integer",
+                        "example": 1000
+                    },
+                    "schema": {
+                        "title": "Schema",
+                        "description": "",
+                        "type": "string",
+                        "example": "my_schema"
+                    },
+                    "pk_value": {
+                        "title": "Primary key value",
+                        "description": "",
+                        "type": "any",
+                        "example": "my_schema"
+                    },
+                    "payload": {
+                        "title": "Payload",
+                        "description": "",
+                        "type": "any",
+                        "example": "my_schema"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "description": "",
+                        "type": "timestamp",
+                        "example": ""
+                    }
+                },
+                "type": "object"
+            },
             "Privilege": {
                 "description": "Privileges define read/write access for sub-users on tables.",
                 "required": [
@@ -3671,6 +3901,10 @@
         {
             "name": "Commit",
             "description": "Commit"
+        },
+        {
+            "name": "Events",
+            "description": "Events"
         },
         {
             "name": "File",
