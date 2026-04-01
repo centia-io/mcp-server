@@ -15,6 +15,7 @@ Use the smallest matching skill set for the task.
 | `centia-types-formats` | Choosing PostgreSQL types, casts, `type_hints`, `type_formats`, output formats |
 | `centia-file-import` | Importing files with `postFileUpload` and `postFileProcess` |
 | `centia-openapi-docs` | Using OpenAPI/docs as fallback when MCP/SDK are insufficient |
+| `centia-realtime` | Realtime WebSocket events, subscriptions with shapes, enabling table change events |
 | `centia-delivery` | Final delivery checklist, MCP coverage check, and handoff quality gate |
 
 ## Core Rule
