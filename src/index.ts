@@ -10,13 +10,49 @@ import axios, {AxiosRequestConfig} from "axios";
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
+import {
+    createConfigstoreTokenStore,
+    createTokenProvider,
+    CodeFlow,
+    NotLoggedInError,
+    SessionExpiredError,
+    type TokenProvider,
+} from "@centia-io/sdk";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const apiSpecPath = path.join(__dirname, "..", "centia-api.json");
 const apiSpec = JSON.parse(fs.readFileSync(apiSpecPath, "utf-8"));
 
-const API_BASE_URL = process.env.API_BASE_URL || "https://api.centia.io";
-const API_TOKEN = process.env.API_TOKEN;
+const DEFAULT_HOST = "https://api.centia.io";
+const tokenStore = createConfigstoreTokenStore("gc2-env"); // shared with gc2-cli
+
+async function getApiBaseUrl(): Promise<string> {
+    if (process.env.API_BASE_URL) return process.env.API_BASE_URL;
+    const stored = await tokenStore.get();
+    return stored.host || DEFAULT_HOST;
+}
+
+let cachedProvider: TokenProvider | null = null;
+async function getTokenProvider(): Promise<TokenProvider> {
+    if (!cachedProvider) {
+        const host = await getApiBaseUrl();
+        // TODO: register a separate "gc2-mcp" OAuth client server-side and switch
+        const authService = new CodeFlow({
+            host,
+            clientId: "gc2-cli",
+            redirectUri: "http://127.0.0.1:5657/auth/callback",
+        }).service;
+        cachedProvider = createTokenProvider({store: tokenStore, authService});
+    }
+    return cachedProvider;
+}
+
+async function getAccessToken(): Promise<string> {
+    // Env wins for CI / headless
+    if (process.env.API_TOKEN) return process.env.API_TOKEN;
+    const provider = await getTokenProvider();
+    return provider.getAccessToken();
+}
 
 const server = new Server(
     {
@@ -366,15 +402,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error(`Tool not found: ${name}`);
     }
 
-    let url = `${API_BASE_URL}${toolMeta.path}`;
+    let url = `${await getApiBaseUrl()}${toolMeta.path}`;
     const config: AxiosRequestConfig = {
         method: toolMeta.method,
         headers: {},
         params: {},
     };
 
-    if (API_TOKEN) {
-        config.headers!["Authorization"] = `Bearer ${API_TOKEN}`;
+    try {
+        config.headers!["Authorization"] = `Bearer ${await getAccessToken()}`;
+    } catch (e) {
+        if (e instanceof NotLoggedInError) {
+            return {
+                isError: true,
+                content: [{
+                    type: "text",
+                    text: "Not logged in to Centia. Run `gc2 login` (npm i -g @mapcentia/gc2-cli) " +
+                        "or set API_TOKEN env var.",
+                }],
+            };
+        }
+        if (e instanceof SessionExpiredError) {
+            return {
+                isError: true,
+                content: [{
+                    type: "text",
+                    text: "Centia session expired. Run `gc2 login` again.",
+                }],
+            };
+        }
+        throw e;
     }
 
     const safeArgs = args || {};
@@ -437,30 +494,80 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
     }
 
+    const sendRequest = () => axios({
+        ...config,
+        url,
+        maxRedirects: 0,
+        validateStatus: (status) => status < 400,
+    });
+
+    const formatSuccess = (response: any) => ({
+        content: [
+            {
+                type: "text" as const,
+                text: response.data != null ? JSON.stringify(response.data, null, 2) : response.statusText,
+            },
+        ],
+    });
+
     try {
-        const response = await axios({...config, url, maxRedirects: 0, validateStatus: (status) => status < 400});
-        return {
-            content: [
-                {
-                    type: "text",
-                    text: response.data != null ? JSON.stringify(response.data, null, 2) : response.statusText,
-                },
-            ],
-        };
+        return formatSuccess(await sendRequest());
     } catch (error: any) {
+        // 401: force a token refresh and retry once. Skip when an explicit
+        // API_TOKEN env is in use — refresh isn't possible there.
+        if (error.response?.status === 401 && !process.env.API_TOKEN) {
+            try {
+                await tokenStore.set({token: undefined});
+                const refreshed = await getAccessToken();
+                config.headers!["Authorization"] = `Bearer ${refreshed}`;
+                return formatSuccess(await sendRequest());
+            } catch (retryError: any) {
+                if (retryError instanceof NotLoggedInError || retryError instanceof SessionExpiredError) {
+                    return {
+                        isError: true,
+                        content: [{
+                            type: "text",
+                            text: "Centia session expired. Run `gc2 login` again.",
+                        }],
+                    };
+                }
+                error = retryError;
+            }
+        }
         return {
             isError: true,
             content: [
                 {
                     type: "text",
-                    text: error.response.data.message || error.message,
+                    text: error.response?.data?.message || error.message,
                 },
             ],
         };
     }
 });
 
+async function logAuthStatus() {
+    if (process.env.API_TOKEN) {
+        console.error("Centia MCP: using API_TOKEN env");
+        return;
+    }
+    const stored = await tokenStore.get();
+    if (!stored.token) {
+        console.error("Centia MCP: no login found. Run `gc2 login` or set API_TOKEN.");
+        return;
+    }
+    try {
+        const claims = JSON.parse(
+            Buffer.from(stored.token.split(".")[1], "base64").toString("utf-8")
+        );
+        console.error(`Centia MCP: logged in as ${claims.uid} on ${stored.host || DEFAULT_HOST}`);
+    } catch {
+        console.error("Centia MCP: token present but unreadable");
+    }
+}
+
 async function main() {
+    await logAuthStatus();
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error("Centia MCP Server running on stdio");

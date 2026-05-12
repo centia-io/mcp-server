@@ -12,11 +12,22 @@ A Model Context Protocol (MCP) server that exposes the Centia API as MCP tools g
 npm install
 ```
 
-## Configuration
-The server accepts the following environment variables:
+## Authentication
+
+The MCP server uses the same login as the [`gc2-cli`](https://www.npmjs.com/package/@mapcentia/gc2-cli):
+
+```bash
+npm i -g @mapcentia/gc2-cli
+gc2 connect https://api.centia.io   # only if not the default
+gc2 login                            # browser, device, or password
+```
+
+The MCP server reads `~/.config/configstore/gc2-env.json` (managed by `gc2-cli`) and refreshes the access token automatically when it expires.
+
+For headless / CI use, set `API_TOKEN` (and optionally `API_BASE_URL`) — env vars take precedence over the stored session:
 
 - `API_BASE_URL` (optional) — Base URL for the Centia API. Default: `https://api.centia.io`
-- `API_TOKEN` (recommended) — Personal access token for Centia. Most endpoints/tools require authentication; set this to enable them.
+- `API_TOKEN` (optional) — Static personal access token. Bypasses the stored `gc2-cli` session.
 
 The API surface is defined in `centia-api.json` (already included in the repo). The server reads it at runtime to generate tools.
 
@@ -48,7 +59,7 @@ npm start
 ```
 This compiles TypeScript to `dist/` and starts `node dist/index.js`.
 
-If you need environment variables:
+If you prefer a static token over the stored `gc2-cli` session (e.g. CI):
 ```bash
 API_TOKEN=your_token_here npm start
 # or
@@ -73,15 +84,13 @@ Add the server to your Claude Desktop MCP config (e.g., `claude_desktop_config.j
   "mcpServers": {
     "centia": {
       "command": "npx",
-      "args": ["-y", "@centia/mcp-server"],
-      "env": {
-        "API_TOKEN": "YOUR_CENTIA_TOKEN",
-        "API_BASE_URL": "https://api.centia.io"
-      }
+      "args": ["-y", "@centia/mcp-server"]
     }
   }
 }
 ```
+
+Run `gc2 login` once and the server will pick up the session. To force a static token instead, add `"env": { "API_TOKEN": "YOUR_CENTIA_TOKEN" }`.
 
 ### Using local source
 ```json
@@ -90,10 +99,6 @@ Add the server to your Claude Desktop MCP config (e.g., `claude_desktop_config.j
     "centia": {
       "command": "npm",
       "args": ["run", "start"],
-      "env": {
-        "API_TOKEN": "YOUR_CENTIA_TOKEN",
-        "API_BASE_URL": "https://api.centia.io"
-      },
       "cwd": "/absolute/path/to/your/mcp-server"
     }
   }
@@ -135,7 +140,7 @@ To ensure your AI agent follows these rules while developing your application:
 
 ## Troubleshooting
 - Tools missing or inputs look odd: ensure `centia-api.json` exists and is valid. The server generates tools from this file at startup.
-- 401/403 errors: set a valid `API_TOKEN` in the environment.
+- 401/403 errors: run `gc2 login` (or set a valid `API_TOKEN` in the environment for headless use).
 - JSON Schema validation errors: schemas are auto‑normalized/sanitized for MCP, but if you updated `centia-api.json`, re-run and check logs for details.
 - ESM/CommonJS issues: this project uses ESM (`"type": "module"`). Use Node.js 18+ and run scripts via npm as shown above.
 

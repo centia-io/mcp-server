@@ -3203,6 +3203,17 @@
                                             "sort_id": {
                                                 "description": "Sorting weight within the field list.",
                                                 "type": "integer"
+                                            },
+                                            "properties": {
+                                                "description": "Free-form key/value or array metadata.",
+                                                "oneOf": [
+                                                    {
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "type": "array"
+                                                    }
+                                                ]
                                             }
                                         },
                                         "type": "object"
