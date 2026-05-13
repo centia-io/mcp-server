@@ -93,6 +93,12 @@ function resolveSchema(schema: any): any {
         }
         return merged;
     }
+    if (Array.isArray(schema.oneOf)) {
+        return {...schema, oneOf: schema.oneOf.map((s: any) => resolveSchema(s))};
+    }
+    if (Array.isArray(schema.anyOf)) {
+        return {...schema, anyOf: schema.anyOf.map((s: any) => resolveSchema(s))};
+    }
     if (schema.type === "object" && schema.properties) {
         const properties: any = {};
         for (const [key, value] of Object.entries(schema.properties)) {
