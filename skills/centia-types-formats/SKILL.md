@@ -21,15 +21,24 @@ Common groups:
 - Range: `int4range`, `int8range`, `numrange`, `daterange`, `tsrange`, `tstzrange`
 - Arrays: append `[]` (for example `integer[]`, `text[]`)
 
-## SQL casting rule
+## SQL parameter syntax
 
-Always cast parameters when needed for correctness and inference:
+Centia uses **PDO-style named parameters** (`:name`). Positional placeholders (`$1`, `$2`, …) are NOT supported and fail with `SQLSTATE[HY093]: Invalid parameter number`.
+
+Pass a single-object `params` array where keys match the placeholder names:
+
+```json
+{
+  "q": "SELECT * FROM schema.relation WHERE id = :id AND code = :code",
+  "params": [{ "id": 42, "code": "A1" }]
+}
+```
+
+Always cast parameters when types are ambiguous or for JSON-RPC type inference:
 
 ```sql
 SELECT :name::text, :age::integer, :joined::date
 ```
-
-For JSON-RPC type inference, explicit casts are required.
 
 ## type_hints
 
