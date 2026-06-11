@@ -170,7 +170,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Client updated"
                     },
                     "400": {
@@ -468,7 +468,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Column updated"
                     },
                     "400": {
@@ -713,7 +713,17 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Events"
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Client"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Client"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -748,19 +758,28 @@
                         "example": "my_table"
                     }
                 ],
-                "requestBody": {
-                    "description": "Privileges.",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Events"
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Event"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Event"
+                                            }
+                                        }
+                                    ]
+                                }
                             }
                         }
-                    }
-                },
-                "responses": {
-                    "201": {
+                    },
+                    "303": {
                         "description": "Event trigger installed."
                     },
                     "400": {
@@ -942,7 +961,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Rule updated"
                     },
                     "400": {
@@ -1258,6 +1277,16 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "noRestriction",
+                        "in": "query",
+                        "description": "Leaves out column restrictions on the returned metadata. Restrictions can be quite extensive.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
                     }
                 ],
                 "responses": {
@@ -1298,7 +1327,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Metadata updated"
                     },
                     "400": {
@@ -1414,7 +1443,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Method updated"
                     },
                     "400": {
@@ -1630,7 +1659,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Privileges updated"
                     },
                     "400": {
@@ -1800,8 +1829,8 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "303": {
+                        "description": "Renamed"
                     },
                     "400": {
                         "description": "Bad request"
@@ -1982,7 +2011,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Sequence updated"
                     },
                     "400": {
@@ -2060,7 +2089,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Sql"
+                                "$ref": "#/components/schemas/SqlRequest"
                             }
                         }
                     }
@@ -2075,7 +2104,14 @@
                         }
                     },
                     "500": {
-                        "description": "Internal error. Most likely an SQL error."
+                        "description": "Internal error. Most likely an SQL error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SqlResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2351,7 +2387,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "Table updated"
                     },
                     "400": {
@@ -2515,7 +2551,7 @@
                     }
                 },
                 "responses": {
-                    "204": {
+                    "303": {
                         "description": "User updated"
                     },
                     "400": {
@@ -2564,6 +2600,141 @@
                     },
                     "404": {
                         "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/views/backup": {
+            "post": {
+                "tags": [
+                    "View"
+                ],
+                "description": "Store all view definitions from the given schema(s) into the view store.",
+                "operationId": "postViewBackup",
+                "requestBody": {
+                    "description": "List of schema names to back up.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": [
+                                "my_schema"
+                            ]
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "description": "Number of views stored.",
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/views/restore": {
+            "post": {
+                "tags": [
+                    "View"
+                ],
+                "description": "Recreate stored star views into the target schema(s).",
+                "operationId": "postViewRestore",
+                "requestBody": {
+                    "description": "Restore instructions.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ViewRestore"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "description": "Number of views created.",
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/views/{view}": {
+            "get": {
+                "tags": [
+                    "View"
+                ],
+                "description": "Get stored star view definitions for a schema.",
+                "operationId": "getViews",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "query",
+                        "description": "Schema name to read stored views for.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/View"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
                     }
                 }
             }
@@ -2850,8 +3021,8 @@
                 },
                 "type": "object"
             },
-            "Events": {
-                "description": "Events for a table.",
+            "Event": {
+                "description": "Event for a table.",
                 "required": [
                     "enabled"
                 ],
@@ -3618,10 +3789,18 @@
                 },
                 "type": "object"
             },
-            "Sql": {
+            "SqlRequest": {
                 "description": "Execute SQL statements. Supports SELECT, INSERT, UPDATE, DELETE, and MERGE (no DDL or transaction control).",
-                "required": [],
+                "required": [
+                    "q"
+                ],
                 "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Unique identifier for the request. The server will return the same identifier in the response. \n            Useful for tracking requests in a websocket context. If omitted the server will generate a random UUID in the response.",
+                        "type": "string",
+                        "example": "my_id"
+                    },
                     "q": {
                         "title": "Query",
                         "description": "SQL statement to run. Allowed: SELECT, INSERT, UPDATE, DELETE, MERGE. Not allowed: DDL, transaction control.",
@@ -3673,6 +3852,82 @@
                         "type": "integer",
                         "default": 4326,
                         "example": 25832
+                    }
+                },
+                "type": "object"
+            },
+            "SqlResponse": {
+                "description": "Response from executing SQL statements where output format is set to 'json'. Contains the result of the query and metadata.",
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Unique identifier for the request, which is the same as the one in the request payload.\n            Useful for tracking requests in a websocket context.",
+                        "type": "string",
+                        "example": "my_id"
+                    },
+                    "statement": {
+                        "title": "Statement",
+                        "description": "The actual SQL statement that was executed after access rules was applied.",
+                        "type": "string",
+                        "example": "SELECT :my_date::date as my_date'"
+                    },
+                    "affected_rows": {
+                        "title": "Affected rows",
+                        "description": "If the query was an INSERT, UPDATE, or DELETE, the number of rows affected.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "data": {
+                        "title": "Data",
+                        "description": "Rows returned by the query.",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "example": [
+                            {
+                                "my_date": "2011-04-01",
+                                "my_string": "hello world"
+                            }
+                        ]
+                    },
+                    "schema": {
+                        "title": "Schema",
+                        "description": "Column names and types of the query result.",
+                        "type": "object",
+                        "example": {
+                            "my_date": {
+                                "type": "date",
+                                "array": false
+                            },
+                            "my_string": {
+                                "type": "string",
+                                "array": false
+                            }
+                        },
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/SqlSchema"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "SqlSchema": {
+                "description": "",
+                "required": [],
+                "properties": {
+                    "type": {
+                        "title": "Type",
+                        "description": "Type of the column.",
+                        "type": "string",
+                        "example": "date"
+                    },
+                    "array": {
+                        "title": "Is array",
+                        "description": "Is the column an array?",
+                        "type": "boolean",
+                        "example": false
                     }
                 },
                 "type": "object"
@@ -3879,6 +4134,78 @@
                     }
                 },
                 "type": "object"
+            },
+            "ViewRestore": {
+                "description": "Instructions for recreating stored star views into target schema(s).",
+                "required": [
+                    "from"
+                ],
+                "properties": {
+                    "from": {
+                        "title": "From",
+                        "description": "Source schema name(s) to read stored view definitions from.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "my_schema"
+                        ]
+                    },
+                    "to": {
+                        "title": "To",
+                        "description": "Target schema name(s) the views are (re)created in. Must have the same number of entries as 'from'. Defaults to 'from' when omitted.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "my_other_schema"
+                        ]
+                    },
+                    "include": {
+                        "title": "Include",
+                        "description": "Optional allow-list of view names. When supplied, only views with these names are recreated.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "my_view"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "View": {
+                "description": "A stored star view definition. Star views are SELECT-* views whose definitions are kept in the view store so they can be re-created in other schemas.",
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Name of the view.",
+                        "type": "string",
+                        "example": "my_view"
+                    },
+                    "schemaname": {
+                        "title": "Schema name",
+                        "description": "Name of the schema the view belongs to.",
+                        "type": "string",
+                        "example": "my_schema"
+                    },
+                    "definition": {
+                        "title": "Definition",
+                        "description": "The view's SQL definition, with the SELECT list rewritten as a star (*) projection.",
+                        "type": "string",
+                        "example": "SELECT my_table.* FROM my_schema.my_table"
+                    },
+                    "ismat": {
+                        "title": "Is materialized",
+                        "description": "Whether the view is a materialized view.",
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -3952,6 +4279,10 @@
         {
             "name": "Users",
             "description": "Users"
+        },
+        {
+            "name": "View",
+            "description": "View"
         }
     ]
 }
