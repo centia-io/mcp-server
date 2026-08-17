@@ -53,7 +53,14 @@ Classes, styles, and labels are converted server-side into a MapServer mapfile; 
 - Numeric fields are **strings**; empty string `''` means unset. `sortid` is a real integer (convention: steps of 10; defaults to highest existing + 10).
 - Colors are hex `#RRGGBB`. Opacity is `'0'`–`'100'`.
 - Many style/label numeric fields accept a `[column]` reference for data-driven values (size, angle, offsets).
-- Class `expression` is a MapServer expression evaluated against the layer's `theme_column` (CLASSITEM), e.g. `[type]='road'`, or a standalone logical expression when `theme_column` is empty.
+
+## Class expressions and label text
+
+- Do **not** use the layer properties `theme_column` (CLASSITEM) and `label_column` (LABELITEM). They are the legacy mechanism and must not be combined with class expressions / label `text` — leave both empty (`''`).
+- Classify with a standalone logical MapServer `expression` on each class, and label with the label's `text` expression (e.g. `[name]`).
+- Quoting in class expressions depends on the column type:
+  - **String columns:** quote *both* sides, including the `[column]` reference: `'[Status]'='Forslag'` (`'string'='string'`).
+  - **Numeric columns:** no quotes on either side: `[tal]=1` (`1=1`).
 
 ## Enum quick reference
 
@@ -83,6 +90,8 @@ Classes, styles, and labels are converted server-side into a MapServer mapfile; 
 | Numeric values as JSON numbers | Most def/class/style/label numerics are strings; `''` = unset |
 | Adding a class via `PATCH /layers/{layer}` | That route key-merges layer properties only; use `postLayerClass` or atomic `postLayer` |
 | Stripping unrecognized keys before writing back | Legacy flat keys must round-trip unchanged |
+| Setting `theme_column`/`label_column` alongside class expressions or label `text` | The two mechanisms must not be combined — leave both properties empty and use expressions/`text` |
+| String expression written `[Status]='Forslag'` | Quote the column reference too for string columns: `'[Status]'='Forslag'`; numeric columns stay unquoted: `[tal]=1` |
 
 ## WMS preview
 
