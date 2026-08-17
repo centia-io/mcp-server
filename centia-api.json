@@ -859,6 +859,288 @@
                 }
             }
         },
+        "/api/v4/functions/{name}": {
+            "get": {
+                "tags": [
+                    "Functions"
+                ],
+                "description": "Get function definition(s).",
+                "operationId": "getFunctions",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Function name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "resizeImage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Function"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Function"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Functions"
+                ],
+                "description": "Delete a function.",
+                "operationId": "deleteFunctions",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Function name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "resizeImage"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Function deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Functions"
+                ],
+                "description": "Update a function. Changing the code bumps its version.",
+                "operationId": "patchFunctions",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Function name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "resizeImage"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Function updates.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Function"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Function updated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/functions": {
+            "post": {
+                "tags": [
+                    "Functions"
+                ],
+                "description": "Create function(s).",
+                "operationId": "postFunctions",
+                "requestBody": {
+                    "description": "Function definition(s).",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Function"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Function"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/functions/{name}/invocations": {
+            "post": {
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Synchronously invoke a function. The result is returned and an invocation\nrecord is stored (retrievable via GET .../invocations/{id}).",
+                "description": "Invoke a function with an event payload. Pass ?async=true (or header X-Invocation-Type: Event) to queue it and return 202 immediately.",
+                "operationId": "invokeFunction",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Function name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "resizeImage"
+                    },
+                    {
+                        "name": "async",
+                        "in": "query",
+                        "description": "Queue the invocation instead of running it synchronously.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "dry",
+                        "in": "query",
+                        "description": "Run once to infer + store input/output type schemas (for TypeScript generation). Side effects are NOT rolled back.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Event payload passed to the handler.",
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ok (sync)",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "202": {
+                        "description": "Accepted (async); poll the invocation for status",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Function not found"
+                    },
+                    "501": {
+                        "description": "Runtime not configured"
+                    }
+                }
+            }
+        },
+        "/api/v4/functions/{name}/invocations/{id}": {
+            "get": {
+                "tags": [
+                    "Functions"
+                ],
+                "summary": "Get the status/result of one invocation, or list recent invocations for a\nfunction when no id is given.",
+                "description": "Get an invocation record, or list recent invocations.",
+                "operationId": "getInvocation",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Function name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "resizeImage"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Invocation id",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/function-interfaces": {
+            "get": {
+                "tags": [
+                    "Functions"
+                ],
+                "description": "Get a TypeScript interface for functions, inferred from dry-runs.",
+                "operationId": "getFunctionTypeScript",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "text/plain": {}
+                        }
+                    }
+                }
+            }
+        },
         "/api/v4/rules/{id}": {
             "get": {
                 "tags": [
@@ -1261,6 +1543,664 @@
                 }
             }
         },
+        "/api/v4/layers/{layer}/classes/{class}/labels/{label}": {
+            "get": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Get label(s).",
+                "operationId": "getLabel",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Label id(s)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "c9d0e1f2"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Label"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Label"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Delete label(s).",
+                "operationId": "deleteLabel",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Label id(s)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "c9d0e1f2"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Label deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Update a label (key-merge).",
+                "operationId": "patchLabel",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "label",
+                        "in": "path",
+                        "description": "Label id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "c9d0e1f2"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Label",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Label"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Label updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers/{layer}/classes/{class}/labels": {
+            "post": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Create label(s).",
+                "operationId": "postLabel",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Label to create.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Label"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Label"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers/{layer}": {
+            "get": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Get layer(s).",
+                "operationId": "getLayer",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key: schema.table.geometry_column",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "namesOnly",
+                        "in": "query",
+                        "description": "Return only layer keys.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Layer"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Layer"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Update layer properties (key-merge on the def JSON).",
+                "operationId": "patchLayer",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key: schema.table.geometry_column",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Layer properties",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Layer"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Layer updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers": {
+            "post": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Configure existing layer(s): set properties and replace classes.",
+                "operationId": "postLayer",
+                "requestBody": {
+                    "description": "Layer configuration.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Layer"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Layer"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers/{layer}/classes/{class}": {
+            "get": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Get class(es).",
+                "operationId": "getLayerClass",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id(s)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/LayerClass"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LayerClass"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Delete class(es).",
+                "operationId": "deleteLayerClass",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id(s)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Class deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Update a class (key-merge). styles/labels are managed via their own routes.",
+                "operationId": "patchLayerClass",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Class",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LayerClass"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Class updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers/{layer}/classes": {
+            "post": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Create class(es).",
+                "operationId": "postLayerClass",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Class to create.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/LayerClass"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/LayerClass"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/map/schema/{schema}": {
+            "get": {
+                "tags": [
+                    "Map"
+                ],
+                "description": "Get the map view configuration (center, zoom, extent) for a schema.",
+                "operationId": "getMap",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Map"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not authorized"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Map"
+                ],
+                "description": "Set the map view configuration (center, zoom, extent) for a schema. Only the provided properties are updated.",
+                "operationId": "patchMap",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Map view configuration. Any subset of center, zoom and extent.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Map"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "403": {
+                        "description": "Not authorized"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
         "/api/v4/meta/{query}": {
             "get": {
                 "tags": [
@@ -1562,6 +2502,126 @@
                     },
                     "400": {
                         "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/ows/schema/{schema}": {
+            "get": {
+                "tags": [
+                    "Ows"
+                ],
+                "description": "Token-authenticated OWS (WMS/WFS/UTFGRID) endpoint. Anonymous and HTTP-Basic clients use the legacy /ows endpoint.",
+                "operationId": "getOws",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OWS response (image, XML, or grid) streamed from the backend"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Ows"
+                ],
+                "description": "OWS POST (WFS XML) endpoint.",
+                "operationId": "postOws",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OWS response streamed from the backend"
+                    }
+                }
+            }
+        },
+        "/api/v4/ows/schema/{schema}/database/{database}": {
+            "get": {
+                "tags": [
+                    "Ows"
+                ],
+                "description": "Anonymous and HTTP-Basic clients OWS endpoint (WMS/WFS/UTFGRID).",
+                "operationId": "getOwsNoToken",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OWS response (image, XML, or grid) streamed from the backend"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Ows"
+                ],
+                "description": "Anonymous and HTTP-Basic clients OWS POST (WFS XML) endpoint.",
+                "operationId": "postOwsNoToken",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OWS response streamed from the backend"
                     }
                 }
             }
@@ -2183,6 +3243,243 @@
                 }
             }
         },
+        "/api/v4/layers/{layer}/classes/{class}/styles/{style}": {
+            "get": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Get style(s).",
+                "operationId": "getStyle",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "style",
+                        "in": "path",
+                        "description": "Style id(s)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "e5f6a7b8"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Style"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Style"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Delete style(s).",
+                "operationId": "deleteStyle",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "style",
+                        "in": "path",
+                        "description": "Style id(s)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "e5f6a7b8"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Style deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Update a style (key-merge).",
+                "operationId": "patchStyle",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    },
+                    {
+                        "name": "style",
+                        "in": "path",
+                        "description": "Style id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "e5f6a7b8"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Style",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Style"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Style updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/layers/{layer}/classes/{class}/styles": {
+            "post": {
+                "tags": [
+                    "Layer"
+                ],
+                "description": "Create style(s).",
+                "operationId": "postStyle",
+                "parameters": [
+                    {
+                        "name": "layer",
+                        "in": "path",
+                        "description": "Layer key",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Class id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "a1b2c3d4"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Style to create.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Style"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/Style"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
         "/api/v4/schemas/{schema}/tables/{table}": {
             "get": {
                 "tags": [
@@ -2738,6 +4035,452 @@
                     }
                 }
             }
+        },
+        "/api/v4/wfs/schema/{schema}/srs/{srs}/{timeSlice}": {
+            "get": {
+                "tags": [
+                    "Wfs"
+                ],
+                "description": "Token-authenticated WFS endpoint (GetCapabilities, DescribeFeatureType, GetFeature). Anonymous and HTTP-Basic clients use /api/v4/wfs/schema/{schema}/database/{database}.",
+                "operationId": "getWfs",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "path",
+                        "description": "Output EPSG code (SRID). Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25832
+                    },
+                    {
+                        "name": "timeSlice",
+                        "in": "path",
+                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2020-01-01"
+                    },
+                    {
+                        "name": "SERVICE",
+                        "in": "query",
+                        "description": "OGC service.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "WFS"
+                        },
+                        "example": "WFS"
+                    },
+                    {
+                        "name": "REQUEST",
+                        "in": "query",
+                        "description": "WFS operation.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "GetCapabilities",
+                                "DescribeFeatureType",
+                                "GetFeature"
+                            ]
+                        },
+                        "example": "GetFeature"
+                    },
+                    {
+                        "name": "VERSION",
+                        "in": "query",
+                        "description": "WFS protocol version.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "1.1.0",
+                            "enum": [
+                                "1.0.0",
+                                "1.1.0"
+                            ]
+                        },
+                        "example": "1.1.0"
+                    },
+                    {
+                        "name": "TYPENAME",
+                        "in": "query",
+                        "description": "Feature type (table) name(s), comma-separated.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "OUTPUTFORMAT",
+                        "in": "query",
+                        "description": "Output format.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "gml3"
+                    },
+                    {
+                        "name": "SRSNAME",
+                        "in": "query",
+                        "description": "Requested output CRS.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "urn:ogc:def:crs:EPSG::25832"
+                    },
+                    {
+                        "name": "BBOX",
+                        "in": "query",
+                        "description": "Bounding-box filter (minx,miny,maxx,maxy).",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "724000,6174000,725000,6175000"
+                    },
+                    {
+                        "name": "MAXFEATURES",
+                        "in": "query",
+                        "description": "Maximum number of features to return.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 100
+                    },
+                    {
+                        "name": "FILTER",
+                        "in": "query",
+                        "description": "OGC Filter Encoding XML.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "WFS response (Capabilities, schema, or GML feature collection) streamed as XML",
+                        "content": {
+                            "text/xml": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — missing or invalid token"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Wfs"
+                ],
+                "description": "WFS POST endpoint for XML-encoded GetFeature and Transaction (WFS-T) requests.",
+                "operationId": "postWfs",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "path",
+                        "description": "Output EPSG code (SRID). Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25832
+                    },
+                    {
+                        "name": "timeSlice",
+                        "in": "path",
+                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2020-01-01"
+                    }
+                ],
+                "requestBody": {
+                    "description": "WFS XML document (GetFeature query or Transaction).",
+                    "required": true,
+                    "content": {
+                        "text/xml": {
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "WFS response (feature collection or transaction summary) streamed as XML",
+                        "content": {
+                            "text/xml": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — missing or invalid token"
+                    }
+                }
+            }
+        },
+        "/api/v4/wfs/schema/{schema}/database/{database}/srs/{srs}/{timeSlice}": {
+            "get": {
+                "tags": [
+                    "Wfs"
+                ],
+                "description": "Anonymous and HTTP-Basic WFS endpoint (GetCapabilities, DescribeFeatureType, GetFeature) for clients such as QGIS. Read access is anonymous for anonymously-readable layers; protected layers are challenged with HTTP Basic auth.",
+                "operationId": "getWfsNoToken",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "path",
+                        "description": "Output EPSG code (SRID). Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25832
+                    },
+                    {
+                        "name": "timeSlice",
+                        "in": "path",
+                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2020-01-01"
+                    },
+                    {
+                        "name": "SERVICE",
+                        "in": "query",
+                        "description": "OGC service.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "WFS"
+                        },
+                        "example": "WFS"
+                    },
+                    {
+                        "name": "REQUEST",
+                        "in": "query",
+                        "description": "WFS operation.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "GetCapabilities",
+                                "DescribeFeatureType",
+                                "GetFeature"
+                            ]
+                        },
+                        "example": "GetFeature"
+                    },
+                    {
+                        "name": "VERSION",
+                        "in": "query",
+                        "description": "WFS protocol version.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "1.1.0",
+                            "enum": [
+                                "1.0.0",
+                                "1.1.0"
+                            ]
+                        },
+                        "example": "1.1.0"
+                    },
+                    {
+                        "name": "TYPENAME",
+                        "in": "query",
+                        "description": "Feature type (table) name(s), comma-separated.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "OUTPUTFORMAT",
+                        "in": "query",
+                        "description": "Output format.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "gml3"
+                    },
+                    {
+                        "name": "SRSNAME",
+                        "in": "query",
+                        "description": "Requested output CRS.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "urn:ogc:def:crs:EPSG::25832"
+                    },
+                    {
+                        "name": "BBOX",
+                        "in": "query",
+                        "description": "Bounding-box filter (minx,miny,maxx,maxy).",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "724000,6174000,725000,6175000"
+                    },
+                    {
+                        "name": "MAXFEATURES",
+                        "in": "query",
+                        "description": "Maximum number of features to return.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 100
+                    },
+                    {
+                        "name": "FILTER",
+                        "in": "query",
+                        "description": "OGC Filter Encoding XML.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "WFS response (Capabilities, schema, or GML feature collection) streamed as XML",
+                        "content": {
+                            "text/xml": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — HTTP Basic auth required/failed for a protected layer"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Wfs"
+                ],
+                "description": "Anonymous and HTTP-Basic WFS POST endpoint for XML-encoded GetFeature and Transaction (WFS-T) requests. Transactions on a protected layer require HTTP Basic auth.",
+                "operationId": "postWfsNoToken",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "path",
+                        "description": "Output EPSG code (SRID). Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25832
+                    },
+                    {
+                        "name": "timeSlice",
+                        "in": "path",
+                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2020-01-01"
+                    }
+                ],
+                "requestBody": {
+                    "description": "WFS XML document (GetFeature query or Transaction).",
+                    "required": true,
+                    "content": {
+                        "text/xml": {
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "WFS response (feature collection or transaction summary) streamed as XML",
+                        "content": {
+                            "text/xml": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized — HTTP Basic auth required/failed for a protected layer"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3170,6 +4913,86 @@
                 },
                 "type": "object"
             },
+            "Function": {
+                "description": "A Lambda-like function executed in a sandboxed runtime.",
+                "required": [
+                    "name",
+                    "runtime",
+                    "handler",
+                    "code"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Unique function name.",
+                        "type": "string",
+                        "example": "resizeImage"
+                    },
+                    "runtime": {
+                        "title": "Runtime",
+                        "description": "Execution runtime.",
+                        "type": "string",
+                        "enum": [
+                            "nodejs20",
+                            "python312"
+                        ],
+                        "example": "nodejs20"
+                    },
+                    "handler": {
+                        "title": "Handler",
+                        "description": "Entry point, e.g. file.exportedFunction.",
+                        "type": "string",
+                        "example": "index.handler"
+                    },
+                    "package": {
+                        "title": "Package",
+                        "description": "How 'code' is packaged: inline source, or a base64-encoded zip (multi-file bundle).",
+                        "type": "string",
+                        "default": "inline",
+                        "enum": [
+                            "inline",
+                            "zip"
+                        ]
+                    },
+                    "code": {
+                        "title": "Code",
+                        "description": "Function source (package=inline), or a base64-encoded zip archive (package=zip).",
+                        "type": "string",
+                        "example": "export const handler = async (event) => ({ ok: true });"
+                    },
+                    "env": {
+                        "title": "Environment",
+                        "description": "Environment variables passed to the runtime.",
+                        "type": "object",
+                        "example": {
+                            "LOG_LEVEL": "info"
+                        }
+                    },
+                    "memory_mb": {
+                        "title": "Memory",
+                        "description": "Memory limit in MB.",
+                        "type": "integer",
+                        "default": 128,
+                        "example": 256
+                    },
+                    "timeout_s": {
+                        "title": "Timeout",
+                        "description": "Wall-clock timeout in seconds.",
+                        "type": "integer",
+                        "default": 30,
+                        "example": 60
+                    },
+                    "triggers": {
+                        "title": "Triggers",
+                        "description": "Trigger bindings (schedule, event, http).",
+                        "type": "object",
+                        "example": {
+                            "schedule": "0 * * * *"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "Rule": {
                 "description": "Access-control rules applied to incoming SQL before execution (allow, deny, or limit via WHERE clause).",
                 "required": [],
@@ -3318,6 +5141,497 @@
                             "hash"
                         ],
                         "example": "btree"
+                    }
+                },
+                "type": "object"
+            },
+            "Label": {
+                "description": "Label entry of a class. Property keys follow MapServer LABEL parameters.",
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Fixed server-assigned id.",
+                        "type": "string",
+                        "example": "c9d0e1f2"
+                    },
+                    "sortid": {
+                        "title": "Sort id",
+                        "description": "Render order. Defaults to highest existing + 10.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "name": {
+                        "title": "Name",
+                        "description": "Display name (UI only).",
+                        "type": "string",
+                        "example": "Name label"
+                    },
+                    "on": {
+                        "title": "On",
+                        "description": "Whether the label is enabled.",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "text": {
+                        "title": "Text",
+                        "description": "Label text expression.",
+                        "type": "string",
+                        "example": "[name]"
+                    },
+                    "force": {
+                        "title": "Force",
+                        "description": "Forces the label to always be drawn even if it would overlap other labels/features. Maps to MapServer LABEL FORCE.",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "minscaledenom": {
+                        "title": "Min scale denominator",
+                        "description": "Minimum scale denominator at which this label is drawn. Maps to MapServer LABEL MINSCALEDENOM. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "maxscaledenom": {
+                        "title": "Max scale denominator",
+                        "description": "Maximum scale denominator at which this label is drawn. Maps to MapServer LABEL MAXSCALEDENOM. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "500000"
+                    },
+                    "position": {
+                        "title": "Position",
+                        "description": "Label placement relative to its anchor point: auto, or a combination of upper/center/lower and left/center/right (e.g. 'ul' = upper-left, 'cc' = centered on the point). Maps to MapServer LABEL POSITION.",
+                        "type": "string",
+                        "enum": [
+                            "auto",
+                            "ul",
+                            "uc",
+                            "ur",
+                            "cl",
+                            "cc",
+                            "cr",
+                            "ll",
+                            "lc",
+                            "lr"
+                        ],
+                        "example": "auto"
+                    },
+                    "size": {
+                        "title": "Size",
+                        "description": "Label font size in pixels; may reference a numeric attribute as [column]. Maps to MapServer LABEL SIZE. Defaults to 11 when empty. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "11"
+                    },
+                    "color": {
+                        "title": "Color",
+                        "description": "Label text color. Maps to MapServer LABEL COLOR. Defaults to black when empty.",
+                        "type": "string",
+                        "example": "#000000"
+                    },
+                    "outlinecolor": {
+                        "title": "Outline color",
+                        "description": "Halo/outline color drawn around the label text to improve legibility. Maps to MapServer LABEL OUTLINECOLOR. Defaults to white when empty.",
+                        "type": "string",
+                        "example": "#ffffff"
+                    },
+                    "buffer": {
+                        "title": "Buffer",
+                        "description": "Minimum distance, in pixels, kept clear around the label so it does not crowd other labels. Maps to MapServer LABEL BUFFER. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "repeatdistance": {
+                        "title": "Repeat distance",
+                        "description": "Distance, in pixels, at which the label is repeated along a line feature. Maps to MapServer LABEL REPEATDISTANCE. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "150"
+                    },
+                    "angle": {
+                        "title": "Angle",
+                        "description": "Rotation angle of the label text in degrees, or one of the keywords 'auto', 'auto2' or 'follow' for automatic orientation along the feature. May also reference a [column]. Maps to MapServer LABEL ANGLE.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "backgroundcolor": {
+                        "title": "Background",
+                        "description": "Fill color of a rectangle drawn behind the label text, rendered as a MapServer STYLE with GEOMTRANSFORM 'labelpoly' nested inside the LABEL. Empty disables the background.",
+                        "type": "string",
+                        "example": "#ffffff"
+                    },
+                    "backgroundpadding": {
+                        "title": "Padding",
+                        "description": "Padding, in pixels, around the label text; used as the WIDTH of the background rectangle style when backgroundcolor is set. Defaults to 1. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "offsetx": {
+                        "title": "Offset X",
+                        "description": "Horizontal pixel offset applied to the label position. Maps to the X component of MapServer LABEL OFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "offsety": {
+                        "title": "Offset Y",
+                        "description": "Vertical pixel offset applied to the label position. Maps to the Y component of MapServer LABEL OFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "font": {
+                        "title": "Font",
+                        "description": "Base font family name, combined with fontweight to resolve a FONTSET alias defined in the server's fonts.txt (e.g. 'arial' + 'bold' -> 'arialbold'). Available families depend on server configuration; 'arial' and 'courier' are provided out of the box. Contributes to MapServer LABEL FONT.",
+                        "type": "string",
+                        "example": "arial"
+                    },
+                    "fontweight": {
+                        "title": "Font weight",
+                        "description": "Font weight/style, appended to font to select the concrete FONTSET alias. Contributes to MapServer LABEL FONT.",
+                        "type": "string",
+                        "enum": [
+                            "normal",
+                            "bold",
+                            "italic",
+                            "bolditalic"
+                        ],
+                        "example": "normal"
+                    },
+                    "expression": {
+                        "title": "Expression",
+                        "description": "MapServer LABEL-level EXPRESSION; when set, this label entry is only rendered for features matching the expression.",
+                        "type": "string",
+                        "example": "[type]='primary'"
+                    },
+                    "maxsize": {
+                        "title": "Max size",
+                        "description": "Maximum font size, in pixels, used when scaling text. Maps to MapServer LABEL MAXSIZE. Defaults to 256. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "256"
+                    },
+                    "minfeaturesize": {
+                        "title": "Min feature size",
+                        "description": "Minimum size, in pixels, a feature must have to be labeled (line length for lines, smallest bounding-box dimension for polygons); the keyword 'auto' labels only features larger than their own rendered label. Maps to MapServer LABEL MINFEATURESIZE.",
+                        "type": "string",
+                        "example": "auto"
+                    }
+                },
+                "type": "object"
+            },
+            "Layer": {
+                "description": "Layer definition: properties (the def JSON) and classes with styles and labels.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "description": "Layer key: schema.table.geometry_column.",
+                        "type": "string",
+                        "example": "my_schema.my_table.the_geom"
+                    },
+                    "properties": {
+                        "title": "Properties",
+                        "description": "Layer properties (the def JSON). All values are stored as strings (empty string when unset), except where noted.",
+                        "properties": {
+                            "theme_column": {
+                                "title": "Class item",
+                                "description": "Column (attribute) evaluated against each class's expression. Maps to MapServer LAYER CLASSITEM. Empty means classes are matched without a CLASSITEM (e.g. numeric/logical expressions only).",
+                                "type": "string",
+                                "example": "type"
+                            },
+                            "label_column": {
+                                "title": "Label item",
+                                "description": "Column whose value is exposed to legacy label text/expressions. Maps to MapServer LAYER LABELITEM.",
+                                "type": "string",
+                                "example": "name"
+                            },
+                            "opacity": {
+                                "title": "Opacity",
+                                "description": "Layer opacity percentage (0-100), applied via a MapServer LAYER COMPOSITE OPACITY block. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "80"
+                            },
+                            "label_max_scale": {
+                                "title": "Label max scale denominator",
+                                "description": "Maximum scale denominator at which labels are drawn; labels stop appearing when zoomed out beyond this scale. Maps to MapServer LAYER LABELMAXSCALEDENOM. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "50000"
+                            },
+                            "label_min_scale": {
+                                "title": "Label min scale denominator",
+                                "description": "Minimum scale denominator at which labels are drawn; labels stop appearing when zoomed in closer than this scale. Maps to MapServer LAYER LABELMINSCALEDENOM. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "1000"
+                            },
+                            "cluster": {
+                                "title": "Clustering distance",
+                                "description": "Point clustering MAXDISTANCE (layer SIZEUNITS, usually pixels) for an elliptical MapServer CLUSTER block (REGION \"ellipse\"). Empty disables clustering. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "20"
+                            },
+                            "meta_tiles": {
+                                "title": "Meta tiles",
+                                "description": "Legacy flag that used to toggle metatiling for the tile cache. Metatiling is now effectively controlled by meta_size (any value greater than 1 enables it); this key is kept for backward compatibility.",
+                                "type": "string",
+                                "example": ""
+                            },
+                            "meta_size": {
+                                "title": "Meta tile size",
+                                "description": "Number of tile columns/rows fetched per WMS request when building the tile cache (mapcache METATILE size x size). Defaults to 3 when empty. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "4"
+                            },
+                            "meta_buffer": {
+                                "title": "Meta buffer size (px)",
+                                "description": "Buffer, in pixels, drawn around each (meta)tile and cropped off afterwards to prevent edge artifacts (mapcache METABUFFER). Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "10"
+                            },
+                            "ttl": {
+                                "title": "Time to live (TTL)",
+                                "description": "Tile time-to-live in seconds, used as the mapcache EXPIRES value and sent via the HTTP Expires/Cache-Control headers; does not itself purge cached tiles. Values below 30 are floored to 30. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "3600"
+                            },
+                            "auto_expire": {
+                                "title": "Auto expire",
+                                "description": "Age, in seconds, after which an existing cached tile is re-requested and refreshed the next time it is accessed (mapcache AUTO_EXPIRE); overrides ttl for that purpose when set. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "86400"
+                            },
+                            "maxscaledenom": {
+                                "title": "Max scale denominator",
+                                "description": "Maximum scale denominator at which this layer is drawn (the more-zoomed-out bound). Maps to MapServer LAYER MAXSCALEDENOM. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "500000"
+                            },
+                            "minscaledenom": {
+                                "title": "Min scale denominator",
+                                "description": "Minimum scale denominator at which this layer is drawn (the more-zoomed-in bound). Maps to MapServer LAYER MINSCALEDENOM. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "1"
+                            },
+                            "symbolscaledenom": {
+                                "title": "Symbol scale denominator",
+                                "description": "Scale denominator at which symbols and text are rendered at their true SIZE; MapServer scales them as the map scale diverges from this value. Maps to MapServer LAYER SYMBOLSCALEDENOM. Numeric value stored as a string.",
+                                "type": "string",
+                                "example": "50000"
+                            },
+                            "geotype": {
+                                "title": "Geom type",
+                                "description": "Explicit geometry type override for the layer. 'Default' derives the type from the source geometry column.",
+                                "type": "string",
+                                "enum": [
+                                    "Default",
+                                    "POINT",
+                                    "LINE",
+                                    "POLYGON"
+                                ],
+                                "example": "Default"
+                            },
+                            "offsite": {
+                                "title": "Offsite",
+                                "description": "Pixel value(s) MapServer should treat as background/ignore, given as an RGB triplet obtainable from image-processing software. Maps to MapServer LAYER OFFSITE.",
+                                "type": "string",
+                                "example": "255 255 255"
+                            },
+                            "format": {
+                                "title": "Format",
+                                "description": "Tile image format written to the tile cache. The jpeg_* values select JPEG quality presets (60/75/95 respectively) defined in the mapcache config. Defaults to PNG when empty.",
+                                "type": "string",
+                                "enum": [
+                                    "PNG",
+                                    "jpeg_low",
+                                    "jpeg_medium",
+                                    "jpeg_high"
+                                ],
+                                "example": "PNG"
+                            },
+                            "lock": {
+                                "title": "Lock",
+                                "description": "Locks the tile cache so it cannot be cleared/busted via the cache-clear endpoints.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "layers": {
+                                "title": "Layers",
+                                "description": "Comma-separated list of additional schema-qualified layer names merged into the WMS GetMap LAYERS request when building tiles for this layer, so several layers render into one cached tile.",
+                                "type": "string",
+                                "example": "public.roads,public.rivers"
+                            },
+                            "bands": {
+                                "title": "Bands",
+                                "description": "Raster band selection passed as MapServer PROCESSING \"BANDS=...\"; one band is treated as greyscale, three as RGB, four as RGBA. Comma-separated band indices.",
+                                "type": "string",
+                                "example": "4,2,1"
+                            },
+                            "cache": {
+                                "title": "Cache",
+                                "description": "Tile cache backend used by mapcache for this layer's tileset. Defaults to the site-wide mapcache type when empty.",
+                                "type": "string",
+                                "enum": [
+                                    "disk",
+                                    "sqlite",
+                                    "s3",
+                                    "memcache"
+                                ],
+                                "example": "disk"
+                            },
+                            "s3_tile_set": {
+                                "title": "S3 tile set name",
+                                "description": "Overrides the tile-set path segment used when cache is 's3'. Defaults to the layer name when empty.",
+                                "type": "string",
+                                "example": "my_tileset"
+                            },
+                            "label_no_clip": {
+                                "title": "No clipping of labels",
+                                "description": "Skips clipping of shapes when determining label anchor points (MapServer PROCESSING \"LABEL_NO_CLIP=True\"), avoiding label position jitter and duplicate labels across tiled requests.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "polyline_no_clip": {
+                                "title": "No clipping of polylines",
+                                "description": "Skips clipping of shapes when rendering styled (dashed/symbolised) lines (MapServer PROCESSING \"POLYLINE_NO_CLIP=True\"), avoiding style discontinuities and edge effects across tiled requests.",
+                                "type": "boolean",
+                                "example": false
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "classes": {
+                        "title": "Classes",
+                        "description": "Classes with styles and labels.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LayerClass"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "LayerClass": {
+                "description": "Class definition with styles and labels.",
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Fixed server-assigned id.",
+                        "type": "string",
+                        "example": "a1b2c3d4"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "description": "Class name.",
+                        "type": "string",
+                        "example": "My class"
+                    },
+                    "sortid": {
+                        "title": "Sort id",
+                        "description": "Render/display order.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "expression": {
+                        "title": "Expression",
+                        "description": "MapServer class expression.",
+                        "type": "string",
+                        "example": "[type]='road'"
+                    },
+                    "styles": {
+                        "title": "Styles",
+                        "description": "Style entries.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Style"
+                        }
+                    },
+                    "labels": {
+                        "title": "Labels",
+                        "description": "Label entries.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Label"
+                        }
+                    },
+                    "minscaledenom": {
+                        "title": "Min scale denominator",
+                        "description": "Minimum scale denominator at which this class is drawn. Maps to MapServer CLASS MINSCALEDENOM. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "maxscaledenom": {
+                        "title": "Max scale denominator",
+                        "description": "Maximum scale denominator at which this class is drawn. Maps to MapServer CLASS MAXSCALEDENOM. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "500000"
+                    },
+                    "leader": {
+                        "title": "Leader: on",
+                        "description": "Enables a MapServer LEADER block that connects a label to its feature with a line when the label must be offset from its anchor.",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "leader_gridstep": {
+                        "title": "Leader: gridstep",
+                        "description": "Grid step used to search for a valid label position around the feature. Maps to LEADER GRIDSTEP. Defaults to 5 when leader is on and this is empty. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "5"
+                    },
+                    "leader_maxdistance": {
+                        "title": "Leader: maxdistance",
+                        "description": "Maximum distance, in pixels, the label may be moved from the feature via the leader line. Maps to LEADER MAXDISTANCE. Defaults to 30 when leader is on and this is empty. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "30"
+                    },
+                    "leader_color": {
+                        "title": "Leader: color",
+                        "description": "Color of the leader line. Maps to the LEADER STYLE COLOR. Defaults to black when leader is on and this is empty.",
+                        "type": "string",
+                        "example": "#000000"
+                    }
+                },
+                "type": "object"
+            },
+            "Map": {
+                "description": "Per-schema map view configuration (initial center, zoom and extent).",
+                "properties": {
+                    "center": {
+                        "title": "Center",
+                        "description": "Map center as [x, y] in EPSG:3857.",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "number"
+                        },
+                        "example": [
+                            1386651,
+                            7503372
+                        ]
+                    },
+                    "zoom": {
+                        "title": "Zoom",
+                        "description": "Initial zoom level.",
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "example": 12
+                    },
+                    "extent": {
+                        "title": "Extent",
+                        "description": "Map extent as [minx, miny, maxx, maxy] in EPSG:3857.",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "number"
+                        },
+                        "example": [
+                            1354000,
+                            7478000,
+                            1419000,
+                            7528000
+                        ]
                     }
                 },
                 "type": "object"
@@ -4043,6 +6357,147 @@
                 },
                 "type": "object"
             },
+            "Style": {
+                "description": "Style entry of a class. Property keys follow MapServer STYLE parameters.",
+                "required": [],
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "description": "Fixed server-assigned id.",
+                        "type": "string",
+                        "example": "e5f6a7b8"
+                    },
+                    "sortid": {
+                        "title": "Sort id",
+                        "description": "Render order. Defaults to highest existing + 10.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "name": {
+                        "title": "Name",
+                        "description": "Display name (UI only).",
+                        "type": "string",
+                        "example": "Fill"
+                    },
+                    "color": {
+                        "title": "Color",
+                        "description": "Fill color.",
+                        "type": "string",
+                        "example": "#008000"
+                    },
+                    "width": {
+                        "title": "Width",
+                        "description": "Line width.",
+                        "type": "string",
+                        "example": "2"
+                    },
+                    "outlinecolor": {
+                        "title": "Outline color",
+                        "description": "Outline color of the style, e.g. the stroke drawn around a polygon fill or symbol. Maps to MapServer STYLE OUTLINECOLOR.",
+                        "type": "string",
+                        "example": "#000000"
+                    },
+                    "symbol": {
+                        "title": "Symbol",
+                        "description": "Name of the MapServer SYMBOL to draw: a built-in vector symbol (circle, square, triangle, hatch1, dashed1, dot-dot, dashed-line-short, dashed-line-long, dash-dot, dash-dot-dot, arrow, arrow2) or a custom symbol defined in the map's SYMBOLSET. Maps to STYLE SYMBOL. Empty draws a plain fill/line with no symbol.",
+                        "type": "string",
+                        "example": "circle"
+                    },
+                    "size": {
+                        "title": "Size",
+                        "description": "Symbol/marker size in layer SIZEUNITS (usually pixels); may reference a numeric attribute as [column] for data-driven sizing. Maps to STYLE SIZE. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "8"
+                    },
+                    "angle": {
+                        "title": "Angle",
+                        "description": "Rotation angle of the symbol/pattern in degrees (-360 to 360), the literal 'auto', or a [column] reference for data-driven rotation. Maps to STYLE ANGLE.",
+                        "type": "string",
+                        "example": "45"
+                    },
+                    "gap": {
+                        "title": "Gap",
+                        "description": "Center-to-center distance between symbols for decorated lines and polygon fills, in layer SIZEUNITS. For lines, a negative value aligns the symbol's X axis to the line's tangent instead of the output device's X axis. Maps to STYLE GAP. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "10"
+                    },
+                    "opacity": {
+                        "title": "Opacity",
+                        "description": "Opacity of this style, from 0 (fully transparent) to 100 (fully opaque). Maps to STYLE OPACITY. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "100"
+                    },
+                    "pattern": {
+                        "title": "Pattern",
+                        "description": "Dash pattern for line work (lines, polygon outlines, hatch lines) as alternating on/off lengths in layer SIZEUNITS, e.g. '10 5' for a 10-unit dash followed by a 5-unit gap. Maps to STYLE PATTERN ... END.",
+                        "type": "string",
+                        "example": "10 5"
+                    },
+                    "linecap": {
+                        "title": "Line cap",
+                        "description": "Line cap style used for line ends. Maps to STYLE LINECAP. Defaults to round.",
+                        "type": "string",
+                        "enum": [
+                            "round",
+                            "butt",
+                            "square"
+                        ],
+                        "example": "round"
+                    },
+                    "geomtransform": {
+                        "title": "Geomtransform",
+                        "description": "Geometry transformation applied before rendering this style, e.g. drawing at the feature's centroid or bounding box instead of its native geometry. Maps to STYLE GEOMTRANSFORM.",
+                        "type": "string",
+                        "enum": [
+                            "bbox",
+                            "centroid",
+                            "end",
+                            "labelpnt",
+                            "labelpoly",
+                            "start",
+                            "vertices"
+                        ],
+                        "example": "centroid"
+                    },
+                    "minsize": {
+                        "title": "Min size",
+                        "description": "Minimum size, in pixels, to draw the symbol regardless of scaling. Maps to STYLE MINSIZE. Defaults to 0. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "1"
+                    },
+                    "maxsize": {
+                        "title": "Max size",
+                        "description": "Maximum size, in pixels, to draw the symbol regardless of scaling. Maps to STYLE MAXSIZE. Defaults to 500. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "50"
+                    },
+                    "offsetx": {
+                        "title": "Offset X",
+                        "description": "Horizontal geometry offset in layer SIZEUNITS (usually pixels); may reference a [column]. Maps to the X component of STYLE OFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "offsety": {
+                        "title": "Offset Y",
+                        "description": "Vertical geometry offset in layer SIZEUNITS (usually pixels); may reference a [column]. Maps to the Y component of STYLE OFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "polaroffsetr": {
+                        "title": "Polar offset radius",
+                        "description": "Radius/distance component of a polar-coordinate offset. Maps to the radius component of STYLE POLAROFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    },
+                    "polaroffsetd": {
+                        "title": "Polar offset angle",
+                        "description": "Angle (counter-clockwise), in degrees, component of a polar-coordinate offset. Maps to the angle component of STYLE POLAROFFSET. Numeric value stored as a string.",
+                        "type": "string",
+                        "example": "0"
+                    }
+                },
+                "type": "object"
+            },
             "Table": {
                 "description": "Table definition including columns, indexes, constraints, and comments.",
                 "required": [
@@ -4131,6 +6586,21 @@
                         "description": "Whether this is the default user when no token is provided (public access).",
                         "type": "boolean",
                         "example": true
+                    },
+                    "user_group": {
+                        "title": "Groups",
+                        "description": "Groups the sub-user belongs to (each group is itself a sub-user name). Per-layer privileges are inherited from all groups in the full, transitive chain — the highest privilege wins. On POST/PATCH send a JSON array of group names; a JSON-array string is also accepted for back-compat, and null clears the membership. GET returns a decoded array (or null).",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "editors",
+                            "gis_admins"
+                        ]
                     }
                 },
                 "type": "object"
@@ -4249,6 +6719,10 @@
             "description": "File"
         },
         {
+            "name": "Functions",
+            "description": "Functions"
+        },
+        {
             "name": "Rules",
             "description": "Rules"
         },
@@ -4257,12 +6731,24 @@
             "description": "GraphQL"
         },
         {
+            "name": "Layer",
+            "description": "Layer"
+        },
+        {
+            "name": "Map",
+            "description": "Map"
+        },
+        {
             "name": "Metadata",
             "description": "Metadata"
         },
         {
             "name": "OAuth",
             "description": "OAuth"
+        },
+        {
+            "name": "Ows",
+            "description": "Ows"
         },
         {
             "name": "Privileges",
@@ -4283,6 +6769,10 @@
         {
             "name": "View",
             "description": "View"
+        },
+        {
+            "name": "Wfs",
+            "description": "Wfs"
         }
     ]
 }
