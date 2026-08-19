@@ -2201,6 +2201,128 @@
                 }
             }
         },
+        "/api/v4/mapcache/database/{database}/{path}": {
+            "get": {
+                "tags": [
+                    "Mapcache"
+                ],
+                "description": "Authorizing MapCache proxy (WMTS, TMS, WMS, Google Maps). Accepts anonymous, HTTP Basic and Bearer token. Tile requests are authorized against the tileset's layer.",
+                "operationId": "getMapcache",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "description": "MapCache service path, e.g. \"wmts/1.0.0/my_schema.my_table/default/g20/8/136/78.png\" or \"wms\".",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tile or MapCache response streamed from the backend"
+                    },
+                    "401": {
+                        "description": "HTTP Basic authentication required"
+                    },
+                    "403": {
+                        "description": "Not authorized for the requested tileset"
+                    }
+                }
+            }
+        },
+        "/api/v4/mapcache/database/{database}/tileset/{tileset}": {
+            "delete": {
+                "tags": [
+                    "Mapcache"
+                ],
+                "description": "Delete a MapCache tileset's cached tiles. A FULL delete (no bbox/zoom) wipes the backend store directly — synchronous for sqlite/bdb (200), background for disk (202); s3/memcache are not supported for a full delete (400 — use a scoped delete or TTL/lifecycle). A SCOPED delete (bbox and/or zoom) runs mapcache_seed -m delete as a background job (202). Requires write/owner authorization.",
+                "operationId": "deleteMapcacheTileset",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "tileset",
+                        "in": "path",
+                        "description": "Tileset name, i.e. the layer \"schema.table\" (vector variants \"schema.table.mvt\"/\".json\").",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.roads"
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "Optional extent to delete (triggers a scoped mapcache_seed delete): minx,miny,maxx,maxy in the grid SRS.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "890000,7260000,1730000,7870000"
+                    },
+                    {
+                        "name": "zoom",
+                        "in": "query",
+                        "description": "Optional zoom range to delete (triggers a scoped mapcache_seed delete): minzoom,maxzoom (or a single zoom).",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "0,12"
+                    },
+                    {
+                        "name": "grid",
+                        "in": "query",
+                        "description": "Grid name for a scoped delete (default g20).",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "g20"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tile cache deleted (synchronous backend wipe)"
+                    },
+                    "202": {
+                        "description": "Deletion job started (scoped seed, or background disk wipe)"
+                    },
+                    "400": {
+                        "description": "Bad request, or full delete unsupported for the backend (s3/memcache)"
+                    },
+                    "401": {
+                        "description": "Authentication required"
+                    },
+                    "403": {
+                        "description": "Not authorized"
+                    },
+                    "404": {
+                        "description": "Database cache config or tileset not found (scoped delete)"
+                    }
+                }
+            }
+        },
         "/api/v4/meta/{query}": {
             "get": {
                 "tags": [
@@ -2506,12 +2628,12 @@
                 }
             }
         },
-        "/api/v4/ows/schema/{schema}": {
+        "/api/v4/ows/schema/{schema}/database/{database}": {
             "get": {
                 "tags": [
                     "Ows"
                 ],
-                "description": "Token-authenticated OWS (WMS/WFS/UTFGRID) endpoint. Anonymous and HTTP-Basic clients use the legacy /ows endpoint.",
+                "description": "OWS (WMS/WFS/UTFGRID) endpoint. Accepts Bearer token, HTTP Basic and anonymous clients; 'Read/write' layers challenge token-less requests with HTTP Basic auth.",
                 "operationId": "getOws",
                 "parameters": [
                     {
@@ -2523,11 +2645,24 @@
                             "type": "string"
                         },
                         "example": "my_schema"
+                    },
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OWS response (image, XML, or grid) streamed from the backend"
+                    },
+                    "401": {
+                        "description": "HTTP Basic authentication required"
                     }
                 }
             },
@@ -2535,7 +2670,7 @@
                 "tags": [
                     "Ows"
                 ],
-                "description": "OWS POST (WFS XML) endpoint.",
+                "description": "OWS POST (WFS XML) endpoint. Accepts Bearer token, HTTP Basic and anonymous clients.",
                 "operationId": "postOws",
                 "parameters": [
                     {
@@ -2547,66 +2682,6 @@
                             "type": "string"
                         },
                         "example": "my_schema"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OWS response streamed from the backend"
-                    }
-                }
-            }
-        },
-        "/api/v4/ows/schema/{schema}/database/{database}": {
-            "get": {
-                "tags": [
-                    "Ows"
-                ],
-                "description": "Anonymous and HTTP-Basic clients OWS endpoint (WMS/WFS/UTFGRID).",
-                "operationId": "getOwsNoToken",
-                "parameters": [
-                    {
-                        "name": "schema",
-                        "in": "path",
-                        "description": "Schema name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_schema"
-                    },
-                    {
-                        "name": "database",
-                        "in": "path",
-                        "description": "Database name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_database"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OWS response (image, XML, or grid) streamed from the backend"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Ows"
-                ],
-                "description": "Anonymous and HTTP-Basic clients OWS POST (WFS XML) endpoint.",
-                "operationId": "postOwsNoToken",
-                "parameters": [
-                    {
-                        "name": "schema",
-                        "in": "path",
-                        "description": "Schema name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_schema"
                     },
                     {
                         "name": "database",
@@ -2622,6 +2697,9 @@
                 "responses": {
                     "200": {
                         "description": "OWS response streamed from the backend"
+                    },
+                    "401": {
+                        "description": "HTTP Basic authentication required"
                     }
                 }
             }
@@ -4036,12 +4114,12 @@
                 }
             }
         },
-        "/api/v4/wfs/schema/{schema}/srs/{srs}/{timeSlice}": {
+        "/api/v4/wfs/schema/{schema}/database/{database}/srs/{srs}/ts/{timeSlice}": {
             "get": {
                 "tags": [
                     "Wfs"
                 ],
-                "description": "Token-authenticated WFS endpoint (GetCapabilities, DescribeFeatureType, GetFeature). Anonymous and HTTP-Basic clients use /api/v4/wfs/schema/{schema}/database/{database}.",
+                "description": "WFS endpoint (GetCapabilities, DescribeFeatureType, GetFeature). Accepts Bearer token, HTTP Basic and anonymous clients; protected layers challenge token-less requests with HTTP Basic auth.",
                 "operationId": "getWfs",
                 "parameters": [
                     {
@@ -4055,6 +4133,16 @@
                         "example": "my_schema"
                     },
                     {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
                         "name": "srs",
                         "in": "path",
                         "description": "Output EPSG code (SRID). Optional path segment.",
@@ -4078,7 +4166,7 @@
                         "name": "SERVICE",
                         "in": "query",
                         "description": "OGC service.",
-                        "required": true,
+                        "required": false,
                         "schema": {
                             "type": "string",
                             "default": "WFS"
@@ -4183,7 +4271,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized — missing or invalid token"
+                        "description": "Unauthorized — invalid token, or HTTP Basic auth required/failed for a protected layer"
                     }
                 }
             },
@@ -4191,7 +4279,7 @@
                 "tags": [
                     "Wfs"
                 ],
-                "description": "WFS POST endpoint for XML-encoded GetFeature and Transaction (WFS-T) requests.",
+                "description": "WFS POST endpoint for XML-encoded GetFeature and Transaction (WFS-T) requests. Accepts Bearer token, HTTP Basic and anonymous clients; transactions on a protected layer require credentials.",
                 "operationId": "postWfs",
                 "parameters": [
                     {
@@ -4205,229 +4293,6 @@
                         "example": "my_schema"
                     },
                     {
-                        "name": "srs",
-                        "in": "path",
-                        "description": "Output EPSG code (SRID). Optional path segment.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 25832
-                    },
-                    {
-                        "name": "timeSlice",
-                        "in": "path",
-                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "2020-01-01"
-                    }
-                ],
-                "requestBody": {
-                    "description": "WFS XML document (GetFeature query or Transaction).",
-                    "required": true,
-                    "content": {
-                        "text/xml": {
-                            "schema": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "WFS response (feature collection or transaction summary) streamed as XML",
-                        "content": {
-                            "text/xml": {}
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized — missing or invalid token"
-                    }
-                }
-            }
-        },
-        "/api/v4/wfs/schema/{schema}/database/{database}/srs/{srs}/{timeSlice}": {
-            "get": {
-                "tags": [
-                    "Wfs"
-                ],
-                "description": "Anonymous and HTTP-Basic WFS endpoint (GetCapabilities, DescribeFeatureType, GetFeature) for clients such as QGIS. Read access is anonymous for anonymously-readable layers; protected layers are challenged with HTTP Basic auth.",
-                "operationId": "getWfsNoToken",
-                "parameters": [
-                    {
-                        "name": "schema",
-                        "in": "path",
-                        "description": "Schema name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_schema"
-                    },
-                    {
-                        "name": "database",
-                        "in": "path",
-                        "description": "Database name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_database"
-                    },
-                    {
-                        "name": "srs",
-                        "in": "path",
-                        "description": "Output EPSG code (SRID). Optional path segment.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 25832
-                    },
-                    {
-                        "name": "timeSlice",
-                        "in": "path",
-                        "description": "Version time slice (ISO date) for versioned layers. Optional path segment.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "2020-01-01"
-                    },
-                    {
-                        "name": "SERVICE",
-                        "in": "query",
-                        "description": "OGC service.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "WFS"
-                        },
-                        "example": "WFS"
-                    },
-                    {
-                        "name": "REQUEST",
-                        "in": "query",
-                        "description": "WFS operation.",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "GetCapabilities",
-                                "DescribeFeatureType",
-                                "GetFeature"
-                            ]
-                        },
-                        "example": "GetFeature"
-                    },
-                    {
-                        "name": "VERSION",
-                        "in": "query",
-                        "description": "WFS protocol version.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "1.1.0",
-                            "enum": [
-                                "1.0.0",
-                                "1.1.0"
-                            ]
-                        },
-                        "example": "1.1.0"
-                    },
-                    {
-                        "name": "TYPENAME",
-                        "in": "query",
-                        "description": "Feature type (table) name(s), comma-separated.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_table"
-                    },
-                    {
-                        "name": "OUTPUTFORMAT",
-                        "in": "query",
-                        "description": "Output format.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "gml3"
-                    },
-                    {
-                        "name": "SRSNAME",
-                        "in": "query",
-                        "description": "Requested output CRS.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "urn:ogc:def:crs:EPSG::25832"
-                    },
-                    {
-                        "name": "BBOX",
-                        "in": "query",
-                        "description": "Bounding-box filter (minx,miny,maxx,maxy).",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "724000,6174000,725000,6175000"
-                    },
-                    {
-                        "name": "MAXFEATURES",
-                        "in": "query",
-                        "description": "Maximum number of features to return.",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "example": 100
-                    },
-                    {
-                        "name": "FILTER",
-                        "in": "query",
-                        "description": "OGC Filter Encoding XML.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "WFS response (Capabilities, schema, or GML feature collection) streamed as XML",
-                        "content": {
-                            "text/xml": {}
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized — HTTP Basic auth required/failed for a protected layer"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Wfs"
-                ],
-                "description": "Anonymous and HTTP-Basic WFS POST endpoint for XML-encoded GetFeature and Transaction (WFS-T) requests. Transactions on a protected layer require HTTP Basic auth.",
-                "operationId": "postWfsNoToken",
-                "parameters": [
-                    {
-                        "name": "schema",
-                        "in": "path",
-                        "description": "Schema name",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "my_schema"
-                    },
-                    {
                         "name": "database",
                         "in": "path",
                         "description": "Database name",
@@ -4477,7 +4342,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized — HTTP Basic auth required/failed for a protected layer"
+                        "description": "Unauthorized — invalid token, or HTTP Basic auth required/failed for a protected layer"
                     }
                 }
             }
@@ -5594,7 +5459,7 @@
                 "properties": {
                     "center": {
                         "title": "Center",
-                        "description": "Map center as [x, y] in EPSG:3857.",
+                        "description": "Map center as [longitude, latitude] in EPSG:4326.",
                         "type": [
                             "array",
                             "null"
@@ -5603,8 +5468,8 @@
                             "type": "number"
                         },
                         "example": [
-                            1386651,
-                            7503372
+                            12.4571,
+                            55.7906
                         ]
                     },
                     "zoom": {
@@ -5618,7 +5483,7 @@
                     },
                     "extent": {
                         "title": "Extent",
-                        "description": "Map extent as [minx, miny, maxx, maxy] in EPSG:3857.",
+                        "description": "Map extent as [minx, miny, maxx, maxy] in EPSG:4326. This is used to set the initial extent of the map and to set the extent in OWS services.",
                         "type": [
                             "array",
                             "null"
@@ -5627,10 +5492,10 @@
                             "type": "number"
                         },
                         "example": [
-                            1354000,
-                            7478000,
-                            1419000,
-                            7528000
+                            8,
+                            54.5,
+                            15.5,
+                            57.5
                         ]
                     }
                 },
@@ -6737,6 +6602,10 @@
         {
             "name": "Map",
             "description": "Map"
+        },
+        {
+            "name": "Mapcache",
+            "description": "Mapcache"
         },
         {
             "name": "Metadata",

@@ -95,6 +95,6 @@ Classes, styles, and labels are converted server-side into a MapServer mapfile; 
 
 ## WMS preview
 
-Preview rendering with `GET /api/v4/ows/schema/{schema}?SERVICE=WMS&...&LAYERS={schema}.{table}` with a Bearer token. Binary GetMap responses are a documented SDK gap — use raw HTTP there (see `centia-runtime-sdk` for the fallback boundary).
+Preview rendering with `GET /api/v4/ows/schema/{schema}/database/{database}?SERVICE=WMS&...&LAYERS={schema}.{table}`. Since GC2 `cd168572` (`dev/multiple_styles`) this single endpoint serves Bearer, HTTP Basic, and anonymous clients; the old token-only route `/api/v4/ows/schema/{schema}` is **removed**. A Bearer token must match `{database}` — a mismatch returns 401 (OGC ServiceException), never a silent downgrade to anonymous. Binary GetMap responses are a documented SDK gap — use raw HTTP there (see `centia-runtime-sdk` for the fallback boundary).
 
 Access control for layers and OWS is covered in `centia-privileges`.

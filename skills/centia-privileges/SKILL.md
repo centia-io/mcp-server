@@ -48,6 +48,8 @@ Orthogonal to per-user grants, each layer has an `authentication` level (capital
 | `Write` | Read allowed | Read allowed for all; write requires `write` (owner bypasses) |
 | `Read` / `None` | Read open | No per-user enforcement on read |
 
+OGC endpoints are merged, database-qualified routes (`/api/v4/ows/schema/{schema}/database/{database}`, `/api/v4/wfs/schema/{schema}/database/{database}/srs/...`; the old token-only variants are removed). Auth is decided per request: Bearer token (must match `{database}`, else 401 — never a silent anonymous downgrade), anonymous for publicly readable layers, or an HTTP Basic challenge for protected layers. WFS-T always requires credentials with `write`.
+
 ## Common mistakes
 
 | Mistake | Reality |
