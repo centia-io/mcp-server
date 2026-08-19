@@ -10,8 +10,8 @@ import axios, {AxiosRequestConfig} from "axios";
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
+import {createConfigstoreTokenStore} from "@centia-io/sdk/node";
 import {
-    createConfigstoreTokenStore,
     createTokenProvider,
     CodeFlow,
     NotLoggedInError,
