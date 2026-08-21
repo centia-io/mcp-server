@@ -57,6 +57,7 @@ Use the minimal matching skill(s) below for each task:
 - PostgreSQL types and output formats: `skills/centia-types-formats/SKILL.md`
 - Map view config and layer styling (classes/styles/labels): `skills/centia-map-styling/SKILL.md`
 - Sub-user privileges and rights inheritance: `skills/centia-privileges/SKILL.md`
+- Key/value store (app state, flags, preferences): `skills/centia-keyvalue/SKILL.md`
 - Realtime WebSocket events: `skills/centia-realtime/SKILL.md`
 - File import workflow: `skills/centia-file-import/SKILL.md`
 - OpenAPI and docs fallback: `skills/centia-openapi-docs/SKILL.md`

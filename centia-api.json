@@ -1543,6 +1543,151 @@
                 }
             }
         },
+        "/api/v4/keyvalue/{key}": {
+            "get": {
+                "tags": [
+                    "Keyvalue"
+                ],
+                "description": "Get a key, or list all visible keys.",
+                "operationId": "getKeyvalue",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "description": "Key to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_key"
+                    },
+                    {
+                        "name": "paths",
+                        "in": "query",
+                        "description": "Project only the named JSON sub-trees of the value. Comma-separated paths, each a dot-separated segment sequence, e.g. 'user.name,active'. The result value is keyed by each path string.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "user.name,active"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Keyvalue"
+                ],
+                "description": "Create a key owned by the caller.",
+                "operationId": "postKeyvalue",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "description": "Key to create",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_key"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Key/value definition.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Keyvalue"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "409": {
+                        "description": "Key already exists"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Keyvalue"
+                ],
+                "description": "Delete a key.",
+                "operationId": "deleteKeyvalue",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "description": "Key to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_key"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Key deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Keyvalue"
+                ],
+                "description": "Update a key's value and/or public flag.",
+                "operationId": "patchKeyvalue",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "description": "Key to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_key"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Partial key/value update.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Keyvalue"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Key updated"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
         "/api/v4/layers/{layer}/classes/{class}/labels/{label}": {
             "get": {
                 "tags": [
@@ -5010,6 +5155,30 @@
                 },
                 "type": "object"
             },
+            "Keyvalue": {
+                "description": "A key/value entry with an owner and a public flag.",
+                "required": [
+                    "value"
+                ],
+                "properties": {
+                    "value": {
+                        "title": "Value",
+                        "description": "Arbitrary JSON value to store.",
+                        "type": "object",
+                        "example": {
+                            "a": 1
+                        }
+                    },
+                    "public": {
+                        "title": "Public",
+                        "description": "When true the key is readable by any user in the database.",
+                        "type": "boolean",
+                        "default": false,
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
             "Label": {
                 "description": "Label entry of a class. Property keys follow MapServer LABEL parameters.",
                 "required": [],
@@ -6594,6 +6763,10 @@
         {
             "name": "GraphQL",
             "description": "GraphQL"
+        },
+        {
+            "name": "Keyvalue",
+            "description": "Keyvalue"
         },
         {
             "name": "Layer",
