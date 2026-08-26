@@ -20,7 +20,7 @@ Lives on the GeoCloud2 branch `dev/multiple_styles` (commits `25900b64`…`844d8
 | Get by key(s) | `GET .../features/{feature}` / `getFeature` — `{feature}` is one key **or a comma list** (`1,2,3`); `?srs` = output SRID (default 4326) | `200`: **one match → bare GeoJSON `Feature`; several → `FeatureCollection`**; `404` `FEATURE_NOT_FOUND` if none match (partial matches return `200` with the found ones) |
 | Create | `POST .../features` (no key in path); body = `Feature` or `FeatureCollection`; `?srs` = SRID of incoming geometry / `postFeature` | `201` + `Location: .../features/{keys}` (comma list of the new keys — parse it for generated keys); `400` `NOTHING_INSERTED` if the layer is not editable |
 | Update | `PATCH .../features/{feature}` (key optional) / `patchFeature` | `303 See Other` + `Location`; `404` `FEATURE_NOT_FOUND` if nothing updated |
-| Delete | `DELETE .../features/{feature}` (exactly one key) / `deleteFeature` | `204`; `404` `FEATURE_NOT_FOUND` |
+| Delete | `DELETE .../features/{feature}` (one key **or a comma list**, like GET) / `deleteFeature` | `204`; `404` `FEATURE_NOT_FOUND` if nothing was deleted (partial matches delete the found ones → `204`) |
 
 No PUT/upsert. No collection GET — reading a whole table is a SQL API or WFS job (`GET .../features` without a key → 400 `FEATURE_ID_REQUIRED`). Keys containing `'` are rejected (400 `INVALID_FEATURE_ID`).
 

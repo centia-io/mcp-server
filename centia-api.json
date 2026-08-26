@@ -854,7 +854,7 @@
                 "tags": [
                     "Feature"
                 ],
-                "description": "Delete a single feature by its primary key through a WFS-T transaction.",
+                "description": "Delete one or more features by primary key through a WFS-T transaction. Pass a single key or a comma-separated list (e.g. 1,2,3).",
                 "operationId": "deleteFeature",
                 "parameters": [
                     {
@@ -880,12 +880,12 @@
                     {
                         "name": "feature",
                         "in": "path",
-                        "description": "Primary key value of the feature",
+                        "description": "Primary key value, or a comma-separated list of values (e.g. 1,2,3)",
                         "required": true,
                         "schema": {
                             "type": "string"
                         },
-                        "example": "1"
+                        "example": "1,2"
                     }
                 ],
                 "responses": {
@@ -893,7 +893,7 @@
                         "description": "Deleted"
                     },
                     "404": {
-                        "description": "Feature not found"
+                        "description": "No features found"
                     }
                 }
             },
