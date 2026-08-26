@@ -791,6 +791,246 @@
                 }
             }
         },
+        "/api/v4/schemas/{schema}/tables/{table}/features/{feature}": {
+            "get": {
+                "tags": [
+                    "Feature"
+                ],
+                "description": "Get one or more features as GeoJSON by primary key. Pass a single key or a comma-separated list (e.g. 1,2,3). Read auth, geofence rules and versioning filters are applied by the WFS engine.",
+                "operationId": "getFeature",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "feature",
+                        "in": "path",
+                        "description": "Primary key value, or a comma-separated list of values (e.g. 1,2,3)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1,2"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "query",
+                        "description": "Output EPSG code (SRID) of the GeoJSON geometry. Defaults to 4326.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 4326
+                        },
+                        "example": 25832
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A GeoJSON Feature for a single match, or a FeatureCollection for several"
+                    },
+                    "404": {
+                        "description": "No features found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Feature"
+                ],
+                "description": "Delete a single feature by its primary key through a WFS-T transaction.",
+                "operationId": "deleteFeature",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "feature",
+                        "in": "path",
+                        "description": "Primary key value of the feature",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "404": {
+                        "description": "Feature not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Feature"
+                ],
+                "description": "Update features from a GeoJSON Feature or FeatureCollection through a WFS-T transaction. Each feature must carry its primary-key value in properties.",
+                "operationId": "patchFeature",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "feature",
+                        "in": "path",
+                        "description": "Primary key value. Optional — when omitted, each feature must carry its key in properties.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "query",
+                        "description": "EPSG code (SRID) of the incoming GeoJSON geometry. Defaults to 4326.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 4326
+                        },
+                        "example": 25832
+                    }
+                ],
+                "requestBody": {
+                    "description": "GeoJSON Feature or FeatureCollection.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Feature"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Updated. Location header points at the feature(s)."
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Feature not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tables/{table}/features": {
+            "post": {
+                "tags": [
+                    "Feature"
+                ],
+                "description": "Insert features from a GeoJSON Feature or FeatureCollection through a WFS-T transaction. A primary-key value in properties is used as the new key; otherwise one is generated.",
+                "operationId": "postFeature",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "description": "Schema name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema"
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "description": "Table name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_table"
+                    },
+                    {
+                        "name": "srs",
+                        "in": "query",
+                        "description": "EPSG code (SRID) of the incoming GeoJSON geometry. Defaults to 4326.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 4326
+                        },
+                        "example": 25832
+                    }
+                ],
+                "requestBody": {
+                    "description": "GeoJSON Feature or FeatureCollection.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Feature"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created. Location header points at the new feature(s)."
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
         "/api/v4/file/upload": {
             "post": {
                 "tags": [
@@ -4789,6 +5029,39 @@
                 },
                 "type": "object"
             },
+            "Feature": {
+                "description": "A GeoJSON Feature or FeatureCollection.",
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "title": "Type",
+                        "description": "'Feature' or 'FeatureCollection'.",
+                        "type": "string",
+                        "example": "FeatureCollection"
+                    },
+                    "features": {
+                        "title": "Features",
+                        "description": "The features (FeatureCollection only).",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "properties": {
+                        "title": "Properties",
+                        "description": "Feature properties (Feature only).",
+                        "type": "object"
+                    },
+                    "geometry": {
+                        "title": "Geometry",
+                        "description": "GeoJSON geometry (Feature only).",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "FileProcessRequest": {
                 "description": "Upload files to temporary storage and then import them into database tables.",
                 "required": [
@@ -6747,6 +7020,10 @@
         {
             "name": "Events",
             "description": "Events"
+        },
+        {
+            "name": "Feature",
+            "description": "Feature"
         },
         {
             "name": "File",

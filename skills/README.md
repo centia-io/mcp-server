@@ -18,6 +18,7 @@ Use the smallest matching skill set for the task.
 | `centia-map-styling` | Configuring map center/zoom/extent or layer cartography: classes, styles, labels |
 | `centia-privileges` | Granting sub-user privileges, groups, rights inheritance, layer authentication levels |
 | `centia-keyvalue` | Storing/reading JSON state (settings, flags, preferences) in the key/value store |
+| `centia-feature` | Reading/creating/updating/deleting single features as GeoJSON by primary key |
 | `centia-realtime` | Realtime WebSocket events, subscriptions with shapes, enabling table change events |
 | `centia-delivery` | Final delivery checklist, MCP coverage check, and handoff quality gate |
 

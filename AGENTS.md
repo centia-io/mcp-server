@@ -58,6 +58,7 @@ Use the minimal matching skill(s) below for each task:
 - Map view config and layer styling (classes/styles/labels): `skills/centia-map-styling/SKILL.md`
 - Sub-user privileges and rights inheritance: `skills/centia-privileges/SKILL.md`
 - Key/value store (app state, flags, preferences): `skills/centia-keyvalue/SKILL.md`
+- Feature CRUD as GeoJSON by primary key: `skills/centia-feature/SKILL.md`
 - Realtime WebSocket events: `skills/centia-realtime/SKILL.md`
 - File import workflow: `skills/centia-file-import/SKILL.md`
 - OpenAPI and docs fallback: `skills/centia-openapi-docs/SKILL.md`
