@@ -21,6 +21,7 @@ Use the smallest matching skill set for the task.
 | `centia-feature` | Reading/creating/updating/deleting single features as GeoJSON by primary key |
 | `centia-realtime` | Realtime WebSocket events, subscriptions with shapes, enabling table change events |
 | `centia-delivery` | Final delivery checklist, MCP coverage check, and handoff quality gate |
+| `danish-search` | Danish address/matrikel typeahead search component (`@centia-io/danish-search`) |
 
 ## Core Rule
 
