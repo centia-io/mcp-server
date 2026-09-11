@@ -39,7 +39,7 @@ Query and API:
 
 Auth and access:
 
-- `postOauth`, `postDevice`
+- `postOauth`, `postDevice`, `postGuest`
 - `getUser`, `postUser`, `patchUser`, `deleteUsers`
 - `getRule`, `postRule`, `patchRule`, `deleteRule`
 - `getPrivileges`, `patchPrivileges`

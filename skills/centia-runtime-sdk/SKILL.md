@@ -32,7 +32,7 @@ Prefer exports:
 - `Gql`
 - `createApi`
 - `createSqlBuilder`
-- `CodeFlow`, `PasswordFlow`, `SignUp` (by runtime context)
+- `CodeFlow`, `PasswordFlow`, `GuestFlow`, `SignUp` (by runtime context, see `centia-auth-model`)
 
 ## GraphQL notes
 
