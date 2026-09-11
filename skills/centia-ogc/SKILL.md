@@ -52,6 +52,7 @@ Same per-layer model as WMS/WFS (`centia-privileges`): anonymous callers read la
 | Existing `Read/write` collection, identity without privilege | 403 `INSUFFICIENT_PRIVILEGES` |
 | Geofence deny | 403 `FORBIDDEN` |
 | Bad/unknown parameter, bad CRS, interval datetime, items on a raster | 400 |
+| Map backend (MapServer) failure, e.g. missing mapfile | 502 `MAP_BACKEND_ERROR` (JSON, never an HTML page with 200) |
 
 `/collections` simply omits what the caller may not read. Errors use the v4 JSON shape `{"success":false,"message":…,"code":…,"errorCode":…}`.
 
