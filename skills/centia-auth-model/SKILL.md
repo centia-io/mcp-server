@@ -48,7 +48,7 @@ flow.signOut()       // clears tokens
 - Prerequisites: a default user must exist on the database (otherwise 404 `NO_DEFAULT_USER_FOUND`) and an OAuth client must be registered (`postClient`); unknown client → 401 `invalid_grant`, wrong secret → 401 `invalid_client`.
 - Use it for read-only/public UIs and for token-only endpoints (Feature, SQL, GraphQL, RPC) that need a bearer even for public data. Never grant the default user write or admin privileges to make a guest app "work".
 - In browsers use a **public** client so no secret ships in the bundle; switch to `CodeFlow` once the user signs in.
-- Errors are thrown as plain `Error` with status and response body, like the other auth flows — not `CentiaApiError`. `GuestFlow` ships in `@centia-io/sdk` >= 0.2.14 (unreleased as of 2026-09-11; latest is 0.2.13).
+- Errors are thrown as plain `Error` with status and response body, like the other auth flows — not `CentiaApiError`. `GuestFlow` ships in `@centia-io/sdk` >= 0.2.14.
 
 ## Server and CLI
 
