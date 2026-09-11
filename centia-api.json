@@ -3013,6 +3013,41 @@
                 }
             }
         },
+        "/api/v4/oauth/guest": {
+            "post": {
+                "tags": [
+                    "OAuth"
+                ],
+                "description": "Get a guest token.",
+                "operationId": "postGuest",
+                "requestBody": {
+                    "description": "Get a guest token. A default user must be present.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OAuthGuest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OAuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
         "/api/v4/ogc/database/{database}": {
             "get": {
                 "tags": [
@@ -6890,6 +6925,34 @@
                         "description": "OAuth client id.",
                         "type": "string",
                         "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    }
+                },
+                "type": "object"
+            },
+            "OAuthGuest": {
+                "description": "Guest token request payload.",
+                "required": [
+                    "client_id",
+                    "database"
+                ],
+                "properties": {
+                    "database": {
+                        "title": "Database",
+                        "description": "Database name the guest token will be created for.",
+                        "type": "string",
+                        "example": "my_database"
+                    },
+                    "client_id": {
+                        "title": "Client id",
+                        "description": "OAuth client id.",
+                        "type": "string",
+                        "example": "MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3"
+                    },
+                    "client_secret": {
+                        "title": "Client secret",
+                        "description": "OAuth client secret.",
+                        "type": "string",
+                        "example": "xxx"
                     }
                 },
                 "type": "object"
