@@ -4731,6 +4731,576 @@
                     }
                 }
             }
+        },
+        "/api/v4/ogc/database/{database}": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "OGC API landing page for a database (Bearer, HTTP Basic or anonymous).",
+                "operationId": "getOgcLandingPage",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Landing page with links to conformance, collections and the OpenAPI document"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/conformance": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "Conformance classes implemented by this OGC API.",
+                "operationId": "getOgcConformance",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "conformsTo list"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/collections": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "OWS-enabled layers as OGC API collections (id = schema.table), filtered by the caller's access.",
+                "operationId": "getOgcCollections",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size (default 100, max 1000)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 100
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Collections to skip",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collections with extent, crs list and links"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/collections/{collectionId}": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "One collection.",
+                "operationId": "getOgcCollection",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id (schema.table)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collection"
+                    },
+                    "401": {
+                        "description": "Read/write collection: credentials required"
+                    },
+                    "403": {
+                        "description": "Read/write collection: insufficient privileges"
+                    },
+                    "404": {
+                        "description": "Unknown collection"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/collections/{collectionId}/items": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "Features of a collection as a GeoJSON FeatureCollection. Geofence rules, versioning and workflow are applied by the WFS engine.",
+                "operationId": "getOgcItems",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id (schema.table)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size (default 10, max 10000)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Features to skip",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "minx,miny,maxx,maxy in bbox-crs",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "9,55,10,56"
+                    },
+                    {
+                        "name": "bbox-crs",
+                        "in": "query",
+                        "description": "CRS URI of bbox (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "crs",
+                        "in": "query",
+                        "description": "Output CRS URI from the collection crs list (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "datetime",
+                        "in": "query",
+                        "description": "ISO 8601 instant: the version valid at that time (versioned layers only)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GeoJSON FeatureCollection (application/geo+json) with Content-Crs header"
+                    },
+                    "400": {
+                        "description": "Invalid or unknown parameter"
+                    },
+                    "401": {
+                        "description": "Credentials required for a Read/write layer"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges, or denied by a geofence rule"
+                    },
+                    "404": {
+                        "description": "Unknown collection"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/collections/{collectionId}/items/{featureId}": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "One feature by primary key as a GeoJSON Feature.",
+                "operationId": "getOgcItem",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id (schema.table)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table"
+                    },
+                    {
+                        "name": "featureId",
+                        "in": "path",
+                        "description": "Primary key value",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1"
+                    },
+                    {
+                        "name": "crs",
+                        "in": "query",
+                        "description": "Output CRS URI (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "datetime",
+                        "in": "query",
+                        "description": "ISO 8601 instant (versioned layers only)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GeoJSON Feature (application/geo+json)"
+                    },
+                    "404": {
+                        "description": "Unknown feature or collection"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/collections/{collectionId}/map": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "Map of one collection rendered by the WMS backend; geofence rules and versioning (datetime) are applied.",
+                "operationId": "getOgcCollectionMap",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id (schema.table)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.my_table"
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "minx,miny,maxx,maxy in bbox-crs (default: the collection extent)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "9,55,10,56"
+                    },
+                    {
+                        "name": "bbox-crs",
+                        "in": "query",
+                        "description": "CRS URI of bbox (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "crs",
+                        "in": "query",
+                        "description": "Output CRS URI from the collection crs list (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "width",
+                        "in": "query",
+                        "description": "Image width in pixels (max 16384; default 1024 or from the aspect ratio)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "height",
+                        "in": "query",
+                        "description": "Image height in pixels (max 16384; default from the aspect ratio)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "f",
+                        "in": "query",
+                        "description": "png (default) or jpeg",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "png",
+                                "jpeg"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "transparent",
+                        "in": "query",
+                        "description": "Transparent background (default true for png, false for jpeg)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "bgcolor",
+                        "in": "query",
+                        "description": "Background colour 0xRRGGBB",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "datetime",
+                        "in": "query",
+                        "description": "ISO 8601 instant: render the version valid at that time (versioned layers only)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "image/png or image/jpeg"
+                    },
+                    "400": {
+                        "description": "Invalid or unknown parameter"
+                    },
+                    "401": {
+                        "description": "Credentials required for a Read/write layer"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges, or denied by a geofence rule"
+                    },
+                    "404": {
+                        "description": "Unknown collection"
+                    }
+                }
+            }
+        },
+        "/api/v4/ogc/database/{database}/map": {
+            "get": {
+                "tags": [
+                    "Ogc"
+                ],
+                "description": "Map of several collections (same schema) rendered through the WMS backend with geofence rules and versioning applied.",
+                "operationId": "getOgcDatasetMap",
+                "parameters": [
+                    {
+                        "name": "database",
+                        "in": "path",
+                        "description": "Database name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_database"
+                    },
+                    {
+                        "name": "collections",
+                        "in": "query",
+                        "description": "Comma-separated collection ids",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my_schema.roads,my_schema.buildings"
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "minx,miny,maxx,maxy in bbox-crs",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bbox-crs",
+                        "in": "query",
+                        "description": "CRS URI of bbox (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "crs",
+                        "in": "query",
+                        "description": "Output CRS URI (default CRS84)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "width",
+                        "in": "query",
+                        "description": "Image width in pixels (max 16384)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "height",
+                        "in": "query",
+                        "description": "Image height in pixels (max 16384)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "f",
+                        "in": "query",
+                        "description": "png (default) or jpeg",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "png",
+                                "jpeg"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "transparent",
+                        "in": "query",
+                        "description": "Transparent background (default true for png)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "bgcolor",
+                        "in": "query",
+                        "description": "Background colour 0xRRGGBB",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "datetime",
+                        "in": "query",
+                        "description": "ISO 8601 instant: render the version valid at that time (versioned layers)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "image/png or image/jpeg"
+                    }
+                }
+            }
         }
     },
     "components": {

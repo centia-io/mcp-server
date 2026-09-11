@@ -20,6 +20,8 @@ Use the smallest matching skill set for the task.
 | `centia-keyvalue` | Storing/reading JSON state (settings, flags, preferences) in the key/value store |
 | `centia-feature` | Reading/creating/updating/deleting single features as GeoJSON by primary key |
 | `centia-realtime` | Realtime WebSocket events, subscriptions with shapes, enabling table change events |
+| `centia-ows` | Serving/querying layers via WMS, WFS, WFS-T and the MapCache (WMTS/TMS/XYZ) proxy; Basic/Bearer/anonymous access, FILTERS, srs/time-slice |
+| `centia-ogc` | OGC API Features/Maps: collections, GeoJSON items with bbox/limit/offset/crs/datetime, map images by URL |
 | `centia-delivery` | Final delivery checklist, MCP coverage check, and handoff quality gate |
 | `danish-search` | Danish address/matrikel typeahead search component (`@centia-io/danish-search`) |
 

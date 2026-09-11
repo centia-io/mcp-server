@@ -135,6 +135,8 @@ To ensure your AI agent follows these rules while developing your application:
 - `centia-auth-model` — Auth across browser, backend, CLI, and provisioning
 - `centia-types-formats` — PostgreSQL types, casts, type hints, output formats
 - `centia-file-import` — File import workflow
+- `centia-ows` — WMS/WFS/WFS-T and MapCache proxy endpoints and their access model
+- `centia-ogc` — OGC API Features and Maps (GeoJSON items, map images)
 - `centia-openapi-docs` — OpenAPI and docs fallback policy
 - `centia-delivery` — Delivery checklist and quality gate
 

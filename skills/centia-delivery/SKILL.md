@@ -49,6 +49,11 @@ Metadata:
 
 - `getMetaData`, `patchMetaData`
 
+OGC services:
+
+- `getOws`, `postOws`, `getWfs`, `postWfs`, `getMapcache`, `deleteMapcacheTileset`
+- `getOgcLandingPage`, `getOgcConformance`, `getOgcCollections`, `getOgcCollection`, `getOgcItems`, `getOgcItem`, `getOgcCollectionMap`, `getOgcDatasetMap`
+
 Import and misc:
 
 - `postFileUpload`, `postFileProcess`

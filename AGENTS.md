@@ -61,6 +61,8 @@ Use the minimal matching skill(s) below for each task:
 - Feature CRUD as GeoJSON by primary key: `skills/centia-feature/SKILL.md`
 - Realtime WebSocket events: `skills/centia-realtime/SKILL.md`
 - File import workflow: `skills/centia-file-import/SKILL.md`
+- OGC web services (WMS/WFS/WFS-T/MapCache): `skills/centia-ows/SKILL.md`
+- OGC API Features and Maps (GeoJSON items, map images): `skills/centia-ogc/SKILL.md`
 - OpenAPI and docs fallback: `skills/centia-openapi-docs/SKILL.md`
 - Delivery checklist and MCP reference: `skills/centia-delivery/SKILL.md`
 - Danish address/matrikel search component: `skills/danish-search/SKILL.md`
