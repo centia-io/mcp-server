@@ -9,18 +9,18 @@ Use this skill for the v4 OGC web service endpoints. They are the map/feature ba
 
 ## Availability
 
-Production-ready on GeoCloud2 `master` (2026-08). No `@centia-io/sdk` class (SDK 0.2.12) — clients talk to the URLs directly; the MCP tools wrap the same routes and return text (XML/JSON), so they suit GetCapabilities/DescribeFeatureType/GetFeature checks, not images or tiles.
+Production-ready on GeoCloud2 `master` (2026-08). SDK: `@centia-io/sdk` >= 0.2.12 ships `Ows`, `Wfs` and `Mapcache` (explicit-client pattern: `new Wfs(client)`); they return text/JSON, and `Mapcache.mapcacheUrl()` builds tile URL templates for map libraries. The MCP tools wrap the same routes and return text (XML/JSON), so they suit GetCapabilities/DescribeFeatureType/GetFeature checks, not images or tiles.
 
-## Endpoints and MCP tools
+## Endpoints, MCP tools and SDK
 
-| Service | Route | Tools | Notes |
+| Service | Route | Tools / SDK | Notes |
 |---|---|---|---|
-| WMS 1.1.1/1.3.0, UTFGRID, MVT | `GET /api/v4/ows/schema/{schema}/database/{database}?SERVICE=WMS&REQUEST=GetMap&LAYERS=schema.table&...` | `getOws` | MapServer (or QGIS Server / external WMS source per layer). Layer names are `schema.table`. `FORMAT=json` → UTFGRID, `FORMAT=mvt` → vector tiles |
-| WFS proxy (MapServer) | `POST /api/v4/ows/...` with WFS XML | `postOws` | legacy path; prefer `/api/v4/wfs` |
-| WFS 1.0.0/1.1.0 | `GET /api/v4/wfs/schema/{schema}/database/{database}/srs/{srs}/ts/{timeSlice}?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=table&...` | `getWfs` | in-process engine; `srs` = output SRID, `timeSlice` = ISO date for versioned layers — both optional path segments (omit the whole `/srs/...` tail) |
-| WFS-T | `POST /api/v4/wfs/...` with `<wfs:Transaction>` (Insert/Update/Delete) | `postWfs` | versioning, workflow, geofence rules, tile-cache busting, pre/post processors |
-| MapCache (WMTS, TMS, XYZ, Google) | `GET /api/v4/mapcache/database/{database}/{path}` e.g. `wmts/1.0.0/WMTSCapabilities.xml`, `tms/1.0.0/schema.table@g/10/512/340.png` | `getMapcache` | authorizing proxy in front of MapCache; a tile whose tileset cannot be resolved fails closed (403) |
-| Tile cache wipe | `DELETE /api/v4/mapcache/database/{database}/tileset/{tileset}?bbox&zoom` | `deleteMapcacheTileset` | full wipe is synchronous (200), scoped delete is a background job (202) |
+| WMS 1.1.1/1.3.0, UTFGRID, MVT | `GET /api/v4/ows/schema/{schema}/database/{database}?SERVICE=WMS&REQUEST=GetMap&LAYERS=schema.table&...` | `getOws` / `Ows.getOws` | MapServer (or QGIS Server / external WMS source per layer). Layer names are `schema.table`. `FORMAT=json` → UTFGRID, `FORMAT=mvt` → vector tiles |
+| WFS proxy (MapServer) | `POST /api/v4/ows/...` with WFS XML | `postOws` / `Ows.postOws` | legacy path; prefer `/api/v4/wfs` |
+| WFS 1.0.0/1.1.0 | `GET /api/v4/wfs/schema/{schema}/database/{database}/srs/{srs}/ts/{timeSlice}?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=table&...` | `getWfs` / `Wfs.getWfs(schema, db, params, {srs, timeSlice})` | in-process engine; `srs` = output SRID, `timeSlice` = ISO date for versioned layers — both optional path segments (omit the whole `/srs/...` tail) |
+| WFS-T | `POST /api/v4/wfs/...` with `<wfs:Transaction>` (Insert/Update/Delete) | `postWfs` / `Wfs.postWfs` | versioning, workflow, geofence rules, tile-cache busting, pre/post processors |
+| MapCache (WMTS, TMS, XYZ, Google) | `GET /api/v4/mapcache/database/{database}/{path}` e.g. `wmts/1.0.0/WMTSCapabilities.xml`, `tms/1.0.0/schema.table@g/10/512/340.png` | `getMapcache` / `Mapcache.getMapcache`, `Mapcache.mapcacheUrl` | authorizing proxy in front of MapCache; a tile whose tileset cannot be resolved fails closed (403) |
+| Tile cache wipe | `DELETE /api/v4/mapcache/database/{database}/tileset/{tileset}?bbox&zoom` | `deleteMapcacheTileset` / `Mapcache.deleteMapcacheTileset` | full wipe is synchronous (200), scoped delete is a background job (202) |
 
 WMS GetMap parameters follow the standard (`BBOX`, `WIDTH`, `HEIGHT`, `CRS`/`SRS`, `FORMAT=image/png`, `STYLES=`, `TRANSPARENT`). Extra vendor parameters on `/ows`: `FILTERS` = base64url JSON `{ "schema.table": ["sql where", ...] }` applied as extra WHERE clauses; `LABELS=false` disables labels. Rules and `FILTERS` do not work together with several QGIS-backed layers in one request.
 
@@ -50,5 +50,5 @@ Versioned layers (`gc2_version_*` columns): WFS/WMS show the current version by 
 | Expecting anonymous access to a `Read/write` layer | 401 + `WWW-Authenticate: Basic`; use Basic (viewer/login password) or a token |
 | Reading tiles straight from `/mapcache/` | bypasses authorization; use `/api/v4/mapcache/database/{db}/...` |
 | Paging WFS with `STARTINDEX` | unsupported; use OGC API `/items?limit&offset` |
-| Fetching images through MCP tools | tools return text; images/tiles must be fetched over HTTP |
+| Fetching images through MCP tools or `Ows.getOws` | tools and wrappers return text; images/tiles must be fetched over HTTP (`Mapcache.mapcacheUrl()` for tile templates) |
 | Expecting HTTP 4xx from a WMS/WFS error mid-stream | OGC `ServiceException`/`ExceptionReport` XML with HTTP 200 once headers are sent |

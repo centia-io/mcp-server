@@ -9,7 +9,7 @@ Use this skill for the v4 OGC API under `/api/v4/ogc/database/{database}`: a sta
 
 ## Availability
 
-Lives on the GeoCloud2 branch `feature/v4-ogc-api` (2026-09-10/11). **Not** on production `api.centia.io` yet — assume dev-only. No `@centia-io/sdk` class exists (SDK 0.2.12); use the MCP tools or plain HTTP. `f=jpeg` maps need the WMS mapfiles regenerated once after upgrade (save any layer via `postLayer`, or the legacy `/controllers/mapfile` endpoint).
+Lives on the GeoCloud2 branch `feature/v4-ogc-api` (2026-09-10/11). **Not** on production `api.centia.io` yet — assume dev-only. SDK: `@centia-io/sdk` >= 0.2.13 ships the `Ogc` class (explicit-client pattern, `new Ogc(client)`) with `getLandingPage`, `getConformance`, `getCollections`, `getCollection`, `getItems<P>`, `getItem<P>`, and the URL builders `mapUrl`/`datasetMapUrl` for images, plus `OGC_CRS84` and `ogcEpsgCrs(code)` for CRS URIs. Otherwise use the MCP tools or plain HTTP. `f=jpeg` maps need the WMS mapfiles regenerated once after upgrade (save any layer via `postLayer`, or the legacy `/controllers/mapfile` endpoint).
 
 ## Routes and MCP tools
 
@@ -21,10 +21,10 @@ All routes are `GET`, public (`Scope::PUBLIC`): Bearer token, HTTP Basic or anon
 | `/conformance` | `getOgcConformance` | `conformsTo` — Features Core/GeoJSON/OAS30/CRS, Maps Core/bbox/crs/datetime/png/jpeg |
 | `/collections?limit&offset` | `getOgcCollections` | `collections[]`, `numberMatched`, `numberReturned`, `next`/`prev` links (limit default 100, max 1000) |
 | `/collections/{id}` | `getOgcCollection` | `id`, `title`, `description`, `extent.spatial.bbox` (CRS84), `extent.temporal` (versioned layers), `crs[]`, `storageCrs`, links `items` (vector only) and `map` |
-| `/collections/{id}/items?limit&offset&bbox&bbox-crs&crs&datetime` | `getOgcItems` | streamed `application/geo+json` FeatureCollection + `Content-Crs` header |
-| `/collections/{id}/items/{fid}?crs&datetime` | `getOgcItem` | bare GeoJSON `Feature` with `links` |
-| `/collections/{id}/map?bbox&bbox-crs&crs&width&height&f&transparent&bgcolor&datetime` | `getOgcCollectionMap` | `image/png` (default) or `image/jpeg` |
-| `/map?collections=a,b&...` | `getOgcDatasetMap` | image with several collections **of the same schema** (400 otherwise) |
+| `/collections/{id}/items?limit&offset&bbox&bbox-crs&crs&datetime` | `getOgcItems` / `Ogc.getItems(db, id, {limit, offset, bbox, bboxCrs, crs, datetime})` | streamed `application/geo+json` FeatureCollection + `Content-Crs` header |
+| `/collections/{id}/items/{fid}?crs&datetime` | `getOgcItem` / `Ogc.getItem` | bare GeoJSON `Feature` with `links` |
+| `/collections/{id}/map?bbox&bbox-crs&crs&width&height&f&transparent&bgcolor&datetime` | `getOgcCollectionMap` / `Ogc.mapUrl` | `image/png` (default) or `image/jpeg` |
+| `/map?collections=a,b&...` | `getOgcDatasetMap` / `Ogc.datasetMapUrl` | image with several collections **of the same schema** (400 otherwise) |
 
 Only layers with WFS/OWS enabled (`enableows`) are collections. Raster layers appear as collections without `itemType`/`items` (map only). The MCP tools return the response as text: fine for JSON, useless for map images — fetch maps over HTTP.
 
@@ -64,6 +64,6 @@ Same per-layer model as WMS/WFS (`centia-privileges`): anonymous callers read la
 | Passing `crs=EPSG:25832` | CRS must be the URI `http://www.opengis.net/def/crs/EPSG/0/25832` |
 | Expecting 404 on a protected collection | it exists → 401 (anonymous) or 403 (no privilege); 404 means unknown |
 | Adding custom query parameters | 400 `UNKNOWN_PARAMETER` |
-| Reading a map image through the MCP tool | tools return text; request the image over HTTP |
+| Reading a map image through the MCP tool | tools return text; use `Ogc.mapUrl()` and fetch the image over HTTP |
 | Mixing schemas in `/map?collections=` | one WMS mapfile per schema → 400 |
 | Using it for editing | read-only; write with `centia-feature` (WFS-T) or the SQL API |
