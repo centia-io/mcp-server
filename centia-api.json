@@ -3799,6 +3799,244 @@
                 }
             }
         },
+        "/api/v4/schemas/{schema}/relations/{relation}/snapshots": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "List the published snapshots of a relation, newest first. Returns a bare array like every other v4 collection.",
+                "operationId": "getRelationSnapshots",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RelationSnapshot"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/relations/{relation}/snapshots/{date}": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "Get one published snapshot (metadata).",
+                "operationId": "getRelationSnapshot",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "description": "Snapshot date YYYY-MM-DD",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RelationSnapshot"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "404": {
+                        "description": "No published snapshot for that date"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/relations/{relation}/snapshots/{date}/data": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "The snapshot's Parquet file. Supports HEAD and single byte ranges (206/416). In redirect mode answers 302 to a short-lived storage URL.",
+                "operationId": "getRelationSnapshotData",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bytes=0-1023"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Whole file",
+                        "content": {
+                            "application/vnd.apache.parquet": {}
+                        }
+                    },
+                    "206": {
+                        "description": "Partial content"
+                    },
+                    "302": {
+                        "description": "Redirect to a presigned URL (redirect mode)"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "404": {
+                        "description": "No published snapshot for that date"
+                    },
+                    "409": {
+                        "description": "Snapshot has several files; use /files/{file}"
+                    },
+                    "416": {
+                        "description": "Range not satisfiable"
+                    },
+                    "502": {
+                        "description": "Snapshot storage unavailable"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/relations/{relation}/snapshots/{date}/files/{file}": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "One file of the snapshot by catalog name (data-<id>.parquet, metadata-<id>.json). Same HEAD/Range semantics as /data.",
+                "operationId": "getRelationSnapshotFile",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "file",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File"
+                    },
+                    "206": {
+                        "description": "Partial content"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "404": {
+                        "description": "Unknown snapshot or file"
+                    },
+                    "416": {
+                        "description": "Range not satisfiable"
+                    },
+                    "502": {
+                        "description": "Snapshot storage unavailable"
+                    }
+                }
+            }
+        },
         "/api/v4/interfaces": {
             "get": {
                 "tags": [
@@ -4276,6 +4514,132 @@
                     },
                     "404": {
                         "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/snapshots/{id}": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "Get a snapshot job.",
+                "operationId": "getSnapshot",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Snapshot id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Snapshot"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Super-user only"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/snapshots": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "List the newest snapshot jobs.",
+                "operationId": "getSnapshots",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "query",
+                        "description": "List filter: schema",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "query",
+                        "description": "List filter: relation",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Snapshot"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Super-user only"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "Queue a Parquet snapshot of a table or view to S3. Returns 202; poll the returned link for status.",
+                "operationId": "postSnapshot",
+                "requestBody": {
+                    "description": "Relation to snapshot.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SnapshotRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Accepted; poll _links.self for status"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "403": {
+                        "description": "Super-user only"
+                    },
+                    "404": {
+                        "description": "Relation not found"
+                    },
+                    "406": {
+                        "description": "POST with a resource id is not allowed"
+                    },
+                    "409": {
+                        "description": "A snapshot of this relation is already pending or running"
+                    },
+                    "501": {
+                        "description": "Snapshot storage is not configured"
                     }
                 }
             }
@@ -7027,6 +7391,40 @@
                 },
                 "type": "object"
             },
+            "RelationSnapshot": {
+                "description": "A published snapshot of a relation.",
+                "properties": {
+                    "snapshot_date": {
+                        "description": "Read API for published GeoParquet snapshots of a relation: list, metadata,\nand the files themselves with HEAD + byte-range support so Parquet readers\n(DuckDB read_parquet) can fetch footers and row groups selectively.\n\nAuthorization runs before any catalog file name or storage call: super\nusers always, sub-users by schema ownership or layer read privilege, and\nnever a sub-user the geofence filters (a whole-table file cannot honour a\nrow filter). Storage failures answer 502 without naming bucket or key.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-09-16"
+                    },
+                    "snapshot_id": {
+                        "type": "string"
+                    },
+                    "row_count": {
+                        "type": "integer"
+                    },
+                    "size_bytes": {
+                        "type": "integer"
+                    },
+                    "schema_version": {
+                        "type": "string"
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "published": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Schema": {
                 "description": "Schema definition, including tables and sequences.",
                 "required": [
@@ -7119,6 +7517,147 @@
                         "description": "Associates the sequence with a table column so it is dropped with that column/table. Format: schema.table.column.",
                         "type": "string",
                         "example": "public.my_table.id"
+                    }
+                },
+                "type": "object"
+            },
+            "SnapshotRequest": {
+                "description": "A request to snapshot a table or view to Parquet on S3.",
+                "required": [
+                    "schema",
+                    "relation"
+                ],
+                "properties": {
+                    "schema": {
+                        "title": "Schema",
+                        "description": "Schema of the relation.",
+                        "type": "string",
+                        "example": "geodanmark"
+                    },
+                    "relation": {
+                        "title": "Relation",
+                        "description": "Table or view name.",
+                        "type": "string",
+                        "example": "bygning"
+                    },
+                    "srs": {
+                        "title": "SRS",
+                        "description": "Optional EPSG code to reproject to. Omit to keep the native SRID.",
+                        "type": "integer",
+                        "example": 25832
+                    }
+                },
+                "type": "object"
+            },
+            "Snapshot": {
+                "description": "Status of a snapshot job.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "0f4c1b2e-..."
+                    },
+                    "schema": {
+                        "type": "string",
+                        "example": "geodanmark"
+                    },
+                    "relation": {
+                        "type": "string",
+                        "example": "bygning"
+                    },
+                    "srs": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 25832
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "running",
+                            "succeeded",
+                            "failed",
+                            "superseded"
+                        ]
+                    },
+                    "snapshot_date": {
+                        "description": "UTC date the export ran; the {date} segment of the relation snapshot read API.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date",
+                        "example": "2026-09-16"
+                    },
+                    "s3_path": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "s3://gc2-parquet/prod/mydb/schema=geodanmark/relation=bygning/_gc2_snapshot_date=2026-09-15/"
+                    },
+                    "row_count": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 123456
+                    },
+                    "schema_version": {
+                        "description": "md5 fingerprint of relation_schema, for drift detection.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "9e107d9d372bb6826bd81d3542a419d6"
+                    },
+                    "relation_schema": {
+                        "description": "Columns of the relation at snapshot time (name and PostgreSQL type).",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "object"
+                        },
+                        "example": [
+                            {
+                                "column_name": "gid",
+                                "data_type": "integer"
+                            },
+                            {
+                                "column_name": "the_geom",
+                                "data_type": "geometry(Point,25832)"
+                            }
+                        ]
+                    },
+                    "error": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "started": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "finished": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -7789,6 +8328,10 @@
         {
             "name": "Privileges",
             "description": "Privileges"
+        },
+        {
+            "name": "Snapshots",
+            "description": "Snapshots"
         },
         {
             "name": "Search",

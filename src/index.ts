@@ -307,6 +307,11 @@ function normalizeJsonSchemaForMCP(schema: any): any {
 const tools: Tool[] = [];
 const operationMap = new Map<string, any>();
 
+// Binary file endpoints: their tools answer with the file's URL and HEAD
+// metadata instead of the body — a Parquet file cannot travel through an MCP
+// text result.
+const BINARY_URL_TOOLS = new Set(["getRelationSnapshotData", "getRelationSnapshotFile"]);
+
 for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
     for (const [method, operation] of Object.entries(pathItem as any)) {
         if (method === "parameters") continue;
@@ -384,7 +389,10 @@ for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
 
         tools.push({
             name: operationId,
-            description: op.description || op.summary || `Execute ${method.toUpperCase()} ${pathStr}`,
+            description: (op.description || op.summary || `Execute ${method.toUpperCase()} ${pathStr}`) +
+                (BINARY_URL_TOOLS.has(operationId)
+                    ? " This tool returns the file's URL and metadata, not the binary body."
+                    : ""),
             inputSchema: {
                 type: "object",
                 properties,
@@ -500,6 +508,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
     }
 
+    // Binary file tools issue a HEAD instead of a GET and report URL + metadata.
+    const binaryUrlTool = BINARY_URL_TOOLS.has(name);
+    if (binaryUrlTool) config.method = "head";
+
     const sendRequest = () => axios({
         ...config,
         url,
@@ -507,14 +519,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         validateStatus: (status) => status < 400,
     });
 
-    const formatSuccess = (response: any) => ({
-        content: [
-            {
-                type: "text" as const,
-                text: response.data != null ? JSON.stringify(response.data, null, 2) : response.statusText,
-            },
-        ],
-    });
+    const formatSuccess = (response: any) => {
+        if (binaryUrlTool) {
+            const h = response.headers ?? {};
+            const presigned = response.status === 302 ? h["location"] : undefined;
+            return {
+                content: [{
+                    type: "text" as const,
+                    text: JSON.stringify({
+                        url,
+                        ...(presigned ? {presigned_url: presigned} : {}),
+                        content_type: h["content-type"] ?? null,
+                        size_bytes: h["content-length"] != null ? Number(h["content-length"]) : null,
+                        etag: h["etag"] ?? null,
+                        accept_ranges: h["accept-ranges"] ?? null,
+                        note: presigned
+                            ? "Redirect mode: fetch presigned_url directly — it is short-lived and needs no auth headers."
+                            : "The binary body is not returned through MCP. Read `url` directly with the same bearer token (HTTP Range supported), e.g. DuckDB: CREATE SECRET (TYPE http, BEARER_TOKEN '<token>'); SELECT * FROM read_parquet('<url>');",
+                    }, null, 2),
+                }],
+            };
+        }
+        return {
+            content: [
+                {
+                    type: "text" as const,
+                    text: response.data != null ? JSON.stringify(response.data, null, 2) : response.statusText,
+                },
+            ],
+        };
+    };
 
     try {
         return formatSuccess(await sendRequest());
