@@ -4054,6 +4054,274 @@
                 }
             }
         },
+        "/api/v4/scheduler/jobs/{id}": {
+            "get": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Get one or more jobs (comma separated ids), or list all jobs of the database.",
+                "operationId": "getSchedulerJob",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Job id, or comma separated ids",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "5497,5498"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/SchedulerJob"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SchedulerJob"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Delete one or more jobs (comma separated ids). Refused while a run of any of them is running.",
+                "operationId": "deleteSchedulerJob",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Job id, or comma separated ids",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "5497,5498"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "409": {
+                        "description": "A run is in progress"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Update fields of a job.",
+                "operationId": "patchSchedulerJob",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SchedulerJob"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Updated"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v4/scheduler/jobs": {
+            "post": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Create one or more jobs.",
+                "operationId": "postSchedulerJob",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SchedulerJob"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/SchedulerJob"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/scheduler/runs/{uuid}": {
+            "get": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Get one run, or list runs (running first, then the newest finished). Filters: ?job=, ?status=.",
+                "operationId": "getSchedulerRun",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "job",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SchedulerRun"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Stop a running run: SIGINT, then SIGKILL after 30 s.",
+                "operationId": "deleteSchedulerRun",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signal sent"
+                    },
+                    "404": {
+                        "description": "No running run with that uuid"
+                    },
+                    "409": {
+                        "description": "The run is on another host"
+                    }
+                }
+            }
+        },
+        "/api/v4/scheduler/runs": {
+            "post": {
+                "tags": [
+                    "Scheduler"
+                ],
+                "description": "Start a job now. Asynchronous: poll the runs list for the new run.",
+                "operationId": "postSchedulerRun",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "job": {
+                                        "type": "integer"
+                                    },
+                                    "force": {
+                                        "description": "Ignore delete_append and overwrite",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Starting"
+                    },
+                    "404": {
+                        "description": "Job not found"
+                    },
+                    "409": {
+                        "description": "A run of the job is already running"
+                    }
+                }
+            }
+        },
         "/api/v4/schemas/{schema}": {
             "get": {
                 "tags": [
@@ -4523,13 +4791,13 @@
                 "tags": [
                     "Snapshots"
                 ],
-                "description": "Get a snapshot job.",
+                "description": "Get one snapshot job (object), or several by comma separated ids (array).",
                 "operationId": "getSnapshot",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Snapshot id",
+                        "description": "Snapshot id, or comma separated ids",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -4542,7 +4810,17 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Snapshot"
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Snapshot"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Snapshot"
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4606,22 +4884,49 @@
                 "tags": [
                     "Snapshots"
                 ],
-                "description": "Queue a Parquet snapshot of a table or view to S3. Returns 202; poll the returned link for status.",
+                "description": "Queue a Parquet snapshot of one relation (object) or several (array of objects). Returns 202; poll the returned link(s) for status. With an array, every relation is checked before anything is queued.",
                 "operationId": "postSnapshot",
                 "requestBody": {
-                    "description": "Relation to snapshot.",
+                    "description": "Relation(s) to snapshot.",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/SnapshotRequest"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SnapshotRequest"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/SnapshotRequest"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
                 },
                 "responses": {
                     "202": {
-                        "description": "Accepted; poll _links.self for status"
+                        "description": "Accepted; poll _links.self for status. An object for a single request, an array for an array request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/SnapshotAccepted"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SnapshotAccepted"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad request"
@@ -7425,6 +7730,156 @@
                 },
                 "type": "object"
             },
+            "SchedulerJob": {
+                "description": "An import job of the scheduler.",
+                "required": [
+                    "name",
+                    "schema",
+                    "url",
+                    "schedule"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "v4 scheduler jobs: the import jobs of the caller's database (super-user only).\nA job's five cron columns are exposed as one \"schedule\" string.",
+                        "type": "string",
+                        "example": "bygninger"
+                    },
+                    "schema": {
+                        "type": "string",
+                        "example": "geodanmark"
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://example.com/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=bygning"
+                    },
+                    "schedule": {
+                        "description": "Five-field cron expression: min hour dayofmonth month dayofweek",
+                        "type": "string",
+                        "example": "0 3 * * *"
+                    },
+                    "epsg": {
+                        "type": "integer",
+                        "example": 25832
+                    },
+                    "type": {
+                        "description": "ogr2ogr -nlt or AUTO",
+                        "type": "string",
+                        "example": "AUTO"
+                    },
+                    "encoding": {
+                        "type": "string",
+                        "example": "UTF8"
+                    },
+                    "extra": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "delete_append": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "download_schema": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "presql": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "postsql": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "snapshot": {
+                        "description": "Queue a Parquet snapshot after each successful import",
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "SchedulerRun": {
+                "description": "One run of a scheduler job.",
+                "properties": {
+                    "uuid": {
+                        "description": "v4 scheduler runs: start a job now, list and inspect runs (the\nstarted_jobs registry kept by get.php), stop a running run.",
+                        "type": "string"
+                    },
+                    "job": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "pid": {
+                        "type": "integer"
+                    },
+                    "host": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "slot": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "running",
+                            "succeeded",
+                            "failed",
+                            "skipped",
+                            "lost"
+                        ]
+                    },
+                    "stale": {
+                        "description": "No progress signal (heartbeat or start) for 5 minutes",
+                        "type": "boolean"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "heartbeat": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "finished_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "exit_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
             "Schema": {
                 "description": "Schema definition, including tables and sequences.",
                 "required": [
@@ -7517,6 +7972,30 @@
                         "description": "Associates the sequence with a table column so it is dropped with that column/table. Format: schema.table.column.",
                         "type": "string",
                         "example": "public.my_table.id"
+                    }
+                },
+                "type": "object"
+            },
+            "SnapshotAccepted": {
+                "description": "A queued snapshot job.",
+                "properties": {
+                    "id": {
+                        "description": "Asynchronous Parquet snapshots of a table or view to S3.\n\nPOST queues a job (202) and a cron worker (app/scripts/snapshot_worker.php)\nexports the relation with ogr2ogr and uploads data.parquet + metadata.json.\nGET returns the job status. Super-user only.",
+                        "type": "string",
+                        "example": "0b8c2f2e-2f5a-4d9c-9d3a-1b2c3d4e5f60"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "pending"
+                    },
+                    "_links": {
+                        "properties": {
+                            "self": {
+                                "type": "string",
+                                "example": "/api/v4/snapshots/0b8c2f2e-2f5a-4d9c-9d3a-1b2c3d4e5f60"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"
@@ -8332,6 +8811,10 @@
         {
             "name": "Snapshots",
             "description": "Snapshots"
+        },
+        {
+            "name": "Scheduler",
+            "description": "Scheduler"
         },
         {
             "name": "Search",
