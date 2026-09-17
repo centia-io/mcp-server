@@ -4065,8 +4065,8 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Job id, or comma separated ids",
-                        "required": true,
+                        "description": "Job id, or comma separated ids. Omit to list all jobs of the database.",
+                        "required": false,
                         "schema": {
                             "type": "string"
                         },
@@ -4182,12 +4182,12 @@
                             "schema": {
                                 "oneOf": [
                                     {
-                                        "$ref": "#/components/schemas/SchedulerJob"
+                                        "$ref": "#/components/schemas/SchedulerJobInput"
                                     },
                                     {
                                         "type": "array",
                                         "items": {
-                                            "$ref": "#/components/schemas/SchedulerJob"
+                                            "$ref": "#/components/schemas/SchedulerJobInput"
                                         }
                                     }
                                 ]
@@ -4216,7 +4216,8 @@
                     {
                         "name": "uuid",
                         "in": "path",
-                        "required": true,
+                        "description": "Run uuid. Omit to list runs (running plus the newest finished ones).",
+                        "required": false,
                         "schema": {
                             "type": "string"
                         }
@@ -4295,6 +4296,9 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "job"
+                                ],
                                 "properties": {
                                     "job": {
                                         "type": "integer"
@@ -7730,14 +7734,22 @@
                 },
                 "type": "object"
             },
-            "SchedulerJob": {
-                "description": "An import job of the scheduler.",
+            "SchedulerJobInput": {
+                "description": "A job to create: name, schema, url and schedule are required.",
                 "required": [
                     "name",
                     "schema",
                     "url",
                     "schedule"
                 ],
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/SchedulerJob"
+                    }
+                ]
+            },
+            "SchedulerJob": {
+                "description": "An import job of the scheduler. On PATCH every field is optional.",
                 "properties": {
                     "name": {
                         "description": "v4 scheduler jobs: the import jobs of the caller's database (super-user only).\nA job's five cron columns are exposed as one \"schedule\" string.",
