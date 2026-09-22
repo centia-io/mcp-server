@@ -30,7 +30,7 @@ Required on create: `name`, `schema`, `url`, `schedule` (five-field cron `min ho
 | Start now | `POST .../runs`, body `{job, force?}` / `postSchedulerRun` | `202` `{job, status: "starting", _links.runs}` — **asynchronous**: poll the runs list for the new run; `404` `JOB_NOT_FOUND`; `409` `JOB_RUNNING` |
 | Stop | `DELETE .../runs/{uuid}` / `deleteSchedulerRun` | `200` `{uuid, signal: "SIGINT"}` — SIGINT, escalated to SIGKILL after 30 s (the call can take ~30 s; mind timeouts); `404` (only *running* runs can be stopped); `409` `RUN_ON_OTHER_HOST` (multi-host: the request must land on the host running it — retry) |
 
-Run fields: `uuid`, `job`, `name`, `pid`, `host`, `slot`, `status` (`running`/`succeeded`/`failed`/`skipped`/`lost`), `stale` (true = running with no heartbeat or start signal for 5 minutes — candidate for stopping), `started_at`, `heartbeat`, `finished_at`, `exit_reason`.
+Run fields: `uuid`, `job`, `name`, `pid`, `host`, `slot`, `status` (`running`/`succeeded`/`failed`/`skipped`/`lost`), `stale` (true = running with no heartbeat or start signal for 5 minutes — candidate for stopping), `started_at`, `heartbeat`, `finished_at`, `exit_reason`, `log` (the run's stdout, updated at every heartbeat and on finish, tail-capped at 1 MB — **only in the single-run GET, never in listings**).
 
 **Cooldown:** cron-scheduled runs respect the server's `gc2scheduler.minInterval` (a job that ran more recently is skipped by the picker). A manual `postSchedulerRun` **bypasses** the cooldown — the only guard is the 409 while a run is in flight. `force: true` makes the run **ignore `delete_append` and overwrite** the target table (full reload) — data a normal append run would preserve is replaced.
 

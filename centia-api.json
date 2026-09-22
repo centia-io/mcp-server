@@ -4292,7 +4292,7 @@
                 "tags": [
                     "Scheduler"
                 ],
-                "description": "Get one run, or list runs (running first, then the newest finished). Filters: ?job=, ?status=.",
+                "description": "Get one run (with its log), or list runs (running first, then the newest finished; without log). Filters: ?job=, ?status=.",
                 "operationId": "getSchedulerRun",
                 "parameters": [
                     {
@@ -7991,6 +7991,13 @@
                         "format": "date-time"
                     },
                     "exit_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "log": {
+                        "description": "stdout of the run (the Info/Warning/Error lines get.php prints), updated at every heartbeat and on finish; capped at 1 MB with the tail kept. Only in the single-run response, never in listings.",
                         "type": [
                             "string",
                             "null"
