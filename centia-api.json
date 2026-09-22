@@ -7905,6 +7905,24 @@
                         "description": "Queue a Parquet snapshot after each successful import",
                         "type": "boolean",
                         "example": false
+                    },
+                    "snapshot_formats": {
+                        "description": "Formats of the snapshot queued after a successful import (when snapshot is true); null = the server default snapshot.formats",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "parquet",
+                                "flatgeobuf"
+                            ]
+                        },
+                        "example": [
+                            "parquet",
+                            "flatgeobuf"
+                        ]
                     }
                 },
                 "type": "object"
