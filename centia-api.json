@@ -3904,7 +3904,7 @@
                 "tags": [
                     "Snapshots"
                 ],
-                "description": "The snapshot's Parquet file. Supports HEAD and single byte ranges (206/416). In redirect mode answers 302 to a short-lived storage URL.",
+                "description": "The snapshot's primary data file: the Parquet when produced, else the only produced file; 409 when several formats were produced and none is Parquet (use /data/{format}). Supports HEAD and single byte ranges (206/416). In redirect mode answers 302 to a short-lived storage URL.",
                 "operationId": "getRelationSnapshotData",
                 "parameters": [
                     {
@@ -3944,10 +3944,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Whole file",
-                        "content": {
-                            "application/vnd.apache.parquet": {}
-                        }
+                        "description": "Whole file, in the media type of the format served (application/vnd.apache.parquet for Parquet)"
                     },
                     "206": {
                         "description": "Partial content"
@@ -3962,7 +3959,92 @@
                         "description": "No published snapshot for that date"
                     },
                     "409": {
-                        "description": "Snapshot has several files; use /files/{file}"
+                        "description": "Several formats produced and none is Parquet; the message lists /data/{format} for each"
+                    },
+                    "416": {
+                        "description": "Range not satisfiable"
+                    },
+                    "502": {
+                        "description": "Snapshot storage unavailable"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/relations/{relation}/snapshots/{date}/data/{format}": {
+            "get": {
+                "tags": [
+                    "Snapshots"
+                ],
+                "description": "The snapshot's data file in one named output format. Same HEAD/Range/redirect semantics as /data. 400 for an unknown format id, 404 when the snapshot did not produce that format (it was skipped or never requested).",
+                "operationId": "getRelationSnapshotDataFormat",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "relation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "format",
+                        "in": "path",
+                        "description": "Output format id",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "parquet",
+                                "flatgeobuf"
+                            ]
+                        },
+                        "example": "flatgeobuf"
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bytes=0-1023"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Whole file"
+                    },
+                    "206": {
+                        "description": "Partial content"
+                    },
+                    "302": {
+                        "description": "Redirect to a presigned URL (redirect mode)"
+                    },
+                    "400": {
+                        "description": "Unknown format id"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges"
+                    },
+                    "404": {
+                        "description": "No published snapshot for that date, or that format was not produced"
                     },
                     "416": {
                         "description": "Range not satisfiable"
@@ -7704,7 +7786,7 @@
                 "description": "A published snapshot of a relation.",
                 "properties": {
                     "snapshot_date": {
-                        "description": "Read API for published GeoParquet snapshots of a relation: list, metadata,\nand the files themselves with HEAD + byte-range support so Parquet readers\n(DuckDB read_parquet) can fetch footers and row groups selectively.\n\nAuthorization runs before any catalog file name or storage call: super\nusers always, sub-users by schema ownership or layer read privilege, and\nnever a sub-user the geofence filters (a whole-table file cannot honour a\nrow filter). Storage failures answer 502 without naming bucket or key.",
+                        "description": "Read API for published snapshots of a relation: list, metadata, and the\nfiles themselves with HEAD + byte-range support so Parquet readers (DuckDB\nread_parquet) can fetch footers and row groups selectively.\n\nA snapshot holds one data file per produced output format (SnapshotFormat).\n`/data` serves the Parquet, as it always has; `/data/{format}` serves a\nnamed one.\n\nAuthorization runs before any catalog file name or storage call: super\nusers always, sub-users by schema ownership or layer read privilege, and\nnever a sub-user the geofence filters (a whole-table file cannot honour a\nrow filter). Storage failures answer 502 without naming bucket or key.",
                         "type": "string",
                         "format": "date",
                         "example": "2026-09-16"
@@ -7725,6 +7807,13 @@
                         "type": "array",
                         "items": {
                             "type": "object"
+                        }
+                    },
+                    "formats": {
+                        "description": "One entry per requested output format; a produced one carries its `href` under /data/{format}.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SnapshotFormatResult"
                         }
                     },
                     "published": {
@@ -7752,7 +7841,7 @@
                 "description": "An import job of the scheduler. On PATCH every field is optional.",
                 "properties": {
                     "name": {
-                        "description": "v4 scheduler jobs: the import jobs of the caller's database (super-user only).\nA job's five cron columns are exposed as one \"schedule\" string.",
+                        "description": "Job name; the imported table is named after it, so it is normalised on write: transliterated to ASCII, lower-cased, characters other than letters, digits, / _ | + space and - removed, and every run of / _ | + space - replaced by a single underscore (\"Bygninger 2026-09\" becomes \"bygninger_2026_09\"). Read the job back to see the stored name.",
                         "type": "string",
                         "example": "bygninger"
                     },
@@ -7992,7 +8081,7 @@
                 "description": "A queued snapshot job.",
                 "properties": {
                     "id": {
-                        "description": "Asynchronous Parquet snapshots of a table or view to S3.\n\nPOST queues a job (202) and a cron worker (app/scripts/snapshot_worker.php)\nexports the relation with ogr2ogr and uploads data.parquet + metadata.json.\nGET returns the job status. Super-user only.",
+                        "description": "Asynchronous snapshots of a table or view to object storage.\n\nPOST queues a job (202) and a cron worker (app/scripts/snapshot_worker.php)\nexports the relation with ogr2ogr in every requested output format\n(SnapshotFormat: Parquet, FlatGeobuf) and uploads one data-<id>.<ext> per\nformat plus metadata-<id>.json. GET returns the job status, including what\nbecame of each format. Super-user only.",
                         "type": "string",
                         "example": "0b8c2f2e-2f5a-4d9c-9d3a-1b2c3d4e5f60"
                     },
@@ -8008,6 +8097,54 @@
                             }
                         },
                         "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "SnapshotFormatResult": {
+                "description": "One output format of a snapshot and what became of it: `requested` before the worker ran, then `produced` (with file, size and media type) or `skipped` (with a reason, e.g. a geometry-only format on a relation without geometry).",
+                "properties": {
+                    "format": {
+                        "type": "string",
+                        "enum": [
+                            "parquet",
+                            "flatgeobuf"
+                        ],
+                        "example": "parquet"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "requested",
+                            "produced",
+                            "skipped"
+                        ],
+                        "example": "produced"
+                    },
+                    "file": {
+                        "description": "Produced only: file name in the snapshot directory.",
+                        "type": "string",
+                        "example": "data-0b8c2f2e-2f5a-4d9c-9d3a-1b2c3d4e5f60.parquet"
+                    },
+                    "size_bytes": {
+                        "description": "Produced only.",
+                        "type": "integer",
+                        "example": 123456
+                    },
+                    "media_type": {
+                        "description": "Produced only.",
+                        "type": "string",
+                        "example": "application/vnd.apache.parquet"
+                    },
+                    "reason": {
+                        "description": "Skipped only: why this format could not be produced.",
+                        "type": "string",
+                        "example": "relation has no geometry column"
+                    },
+                    "href": {
+                        "description": "Produced only, and only in the relation snapshot read API: where to download this format.",
+                        "type": "string",
+                        "example": "/api/v4/schemas/geodanmark/relations/bygning/snapshots/2026-09-16/data/parquet"
                     }
                 },
                 "type": "object"
@@ -8036,6 +8173,22 @@
                         "description": "Optional EPSG code to reproject to. Omit to keep the native SRID.",
                         "type": "integer",
                         "example": 25832
+                    },
+                    "formats": {
+                        "title": "Formats",
+                        "description": "Output formats to produce, in the order they are produced. Omit to use the server default (App.php `snapshot.formats`). Must be non-empty and free of duplicates. A format that needs geometry (FlatGeobuf) is skipped with a reason for a relation without a geometry column — unless every requested format needs one, which is refused up front.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "parquet",
+                                "flatgeobuf"
+                            ]
+                        },
+                        "example": [
+                            "parquet",
+                            "flatgeobuf"
+                        ]
                     }
                 },
                 "type": "object"
@@ -8061,6 +8214,13 @@
                             "null"
                         ],
                         "example": 25832
+                    },
+                    "formats": {
+                        "description": "One entry per requested output format and its outcome.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SnapshotFormatResult"
+                        }
                     },
                     "status": {
                         "type": "string",

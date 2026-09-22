@@ -310,7 +310,7 @@ const operationMap = new Map<string, any>();
 // Binary file endpoints: their tools answer with the file's URL and HEAD
 // metadata instead of the body — a Parquet file cannot travel through an MCP
 // text result.
-const BINARY_URL_TOOLS = new Set(["getRelationSnapshotData", "getRelationSnapshotFile"]);
+const BINARY_URL_TOOLS = new Set(["getRelationSnapshotData", "getRelationSnapshotDataFormat", "getRelationSnapshotFile"]);
 
 for (const [pathStr, pathItem] of Object.entries(apiSpec.paths as any)) {
     for (const [method, operation] of Object.entries(pathItem as any)) {
