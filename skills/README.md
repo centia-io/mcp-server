@@ -19,6 +19,8 @@ Use the smallest matching skill set for the task.
 | `centia-privileges` | Granting sub-user privileges, groups, rights inheritance, layer authentication levels |
 | `centia-keyvalue` | Storing/reading JSON state (settings, flags, preferences) in the key/value store |
 | `centia-feature` | Reading/creating/updating/deleting single features as GeoJSON by primary key |
+| `centia-scheduler` | Automated/cron data imports: scheduler jobs and runs, manual start/stop, monitoring |
+| `centia-snapshots` | Parquet/FlatGeobuf exports of relations and reading published snapshots (DuckDB) |
 | `centia-realtime` | Realtime WebSocket events, subscriptions with shapes, enabling table change events |
 | `centia-ows` | Serving/querying layers via WMS, WFS, WFS-T and the MapCache (WMTS/TMS/XYZ) proxy; Basic/Bearer/anonymous access, FILTERS, srs/time-slice |
 | `centia-ogc` | OGC API Features/Maps: collections, GeoJSON items with bbox/limit/offset/crs/datetime, map images by URL |

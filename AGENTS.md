@@ -59,6 +59,8 @@ Use the minimal matching skill(s) below for each task:
 - Sub-user privileges and rights inheritance: `skills/centia-privileges/SKILL.md`
 - Key/value store (app state, flags, preferences): `skills/centia-keyvalue/SKILL.md`
 - Feature CRUD as GeoJSON by primary key: `skills/centia-feature/SKILL.md`
+- Scheduled/automated data imports (cron jobs, runs): `skills/centia-scheduler/SKILL.md`
+- Parquet/FlatGeobuf snapshot exports and analytics reads: `skills/centia-snapshots/SKILL.md`
 - Realtime WebSocket events: `skills/centia-realtime/SKILL.md`
 - File import workflow: `skills/centia-file-import/SKILL.md`
 - OGC web services (WMS/WFS/WFS-T/MapCache): `skills/centia-ows/SKILL.md`

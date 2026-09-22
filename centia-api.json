@@ -4970,7 +4970,7 @@
                 "tags": [
                     "Snapshots"
                 ],
-                "description": "Queue a Parquet snapshot of one relation (object) or several (array of objects). Returns 202; poll the returned link(s) for status. With an array, every relation is checked before anything is queued.",
+                "description": "Queue a snapshot of one relation (object) or several (array of objects) in the requested formats (Parquet, FlatGeobuf; see formats). Returns 202; poll the returned link(s) for status. With an array, every relation is checked before anything is queued.",
                 "operationId": "postSnapshot",
                 "requestBody": {
                     "description": "Relation(s) to snapshot.",
