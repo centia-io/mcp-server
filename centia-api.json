@@ -4432,7 +4432,7 @@
                     {
                         "name": "namesOnly",
                         "in": "query",
-                        "description": "Return only schema names and table_count (omit tables and sequences). Much faster: the full listing loads the definition of every table.",
+                        "description": "Return only schema names and _table_count (omit tables and sequences). Much faster: the full listing loads the definition of every table.",
                         "required": false,
                         "schema": {
                             "type": "boolean"
@@ -5413,7 +5413,7 @@
                     {
                         "name": "namesOnly",
                         "in": "query",
-                        "description": "Return only table names (omit columns, indexes, constraints, and other details).",
+                        "description": "Return only table names with the read-only facts (_type, _events, _column_count, _links); omit columns, comment, indexes and constraints. One catalog query for the whole schema, so use it for listings.",
                         "required": false,
                         "schema": {
                             "type": "boolean"
@@ -8021,10 +8021,11 @@
                         "type": "string",
                         "example": "my-schema"
                     },
-                    "table_count": {
+                    "_table_count": {
                         "title": "Table count",
-                        "description": "Number of tables and views in the schema (what /tables lists). Always present, also with namesOnly=true, so a client can list schemas without loading every table.",
+                        "description": "Read-only. Number of tables, views and materialized views in the schema (what /tables lists). Always present, also with namesOnly=true, so a client can list schemas without loading every table.",
                         "type": "integer",
+                        "readOnly": true,
                         "example": 12
                     },
                     "tables": {
@@ -8753,6 +8754,24 @@
                         "description": "Table name.",
                         "type": "string",
                         "example": "my-column"
+                    },
+                    "_type": {
+                        "description": "Read-only. TABLE, VIEW or MATERIALIZED VIEW.",
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "TABLE"
+                    },
+                    "_events": {
+                        "description": "Read-only. Whether realtime change events are enabled on the table.",
+                        "type": "boolean",
+                        "readOnly": true,
+                        "example": false
+                    },
+                    "_column_count": {
+                        "description": "Read-only. Number of columns. Always present, also with namesOnly=true, so a listing can show sizes without loading every column.",
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 7
                     },
                     "columns": {
                         "title": "Columns",

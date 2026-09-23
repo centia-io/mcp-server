@@ -30,9 +30,9 @@ Provisioning is not runtime logic.
 - Runtime app code must never call provisioning endpoints.
 - Schema changes happen only in provisioning/codegen flows.
 
-## Listing schemas efficiently
+## Listing schemas and tables efficiently
 
-`getSchema` with `namesOnly=true` returns just names + `table_count` (tables + views) and is much faster than the full listing — use it to enumerate schemas, then fetch a single schema's tables only when needed. `table_count` is always present, also without `namesOnly`.
+`getSchema` with `namesOnly=true` returns just names + `_table_count` (tables + views) and is much faster than the full listing — use it to enumerate schemas, then fetch a single schema's tables only when needed. Likewise `getTable` with `namesOnly=true` lists a schema's tables as name + the read-only catalog facts (`_type`, `_events`, `_column_count`) in one catalog query — then `getTable` on one table for its full definition. The `_`-prefixed fields are read-only (server-computed) and always present, also without `namesOnly`; never send them in write bodies.
 
 ## PATCH returns 303 See Other
 
