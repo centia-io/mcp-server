@@ -30,6 +30,10 @@ Provisioning is not runtime logic.
 - Runtime app code must never call provisioning endpoints.
 - Schema changes happen only in provisioning/codegen flows.
 
+## Listing schemas efficiently
+
+`getSchema` with `namesOnly=true` returns just names + `table_count` (tables + views) and is much faster than the full listing — use it to enumerate schemas, then fetch a single schema's tables only when needed. `table_count` is always present, also without `namesOnly`.
+
 ## PATCH returns 303 See Other
 
 All provisioning PATCH endpoints return `303 See Other` with a `Location` header pointing to the updated resource. HTTP clients that automatically follow redirects will receive an unexpected `200 OK` from the subsequent GET instead of the expected `303`.
