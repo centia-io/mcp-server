@@ -24,7 +24,7 @@ A cron worker (`snapshot_worker.php`) runs the export with ogr2ogr — **poll un
 ## Read API (published snapshots)
 
 - `getRelationSnapshots` — bare array, newest first: `{snapshot_date, snapshot_id, row_count, size_bytes, schema_version, files[], formats[], published}`.
-- `getRelationSnapshot` — one by `{date}` (`YYYY-MM-DD`); adds `srs`, `relation_schema`, `crs`, `_links`. `400` malformed date, `404` `NO_SNAPSHOT_ERROR`.
+- `getRelationSnapshot` — one by `{date}` (`YYYY-MM-DD`, **or `latest`** for the newest published snapshot — a fixed URL; the response still carries the real `snapshot_date`, and `_links.latest` points there); adds `srs`, `relation_schema`, `crs`, `_links`. `400` malformed date, `404` `NO_SNAPSHOT_ERROR`. All four `{date}` routes (metadata + the three file routes) accept `latest`.
 - Three file routes, all with HEAD + **single** byte-range support (206/416, ETag): `/data` = the primary file (the Parquet when produced, else the only produced file; `409` `MULTI_FILE_SNAPSHOT` when several files and no Parquet — the message lists the per-format URLs); `/data/{format}` = a named format (`400` unknown, `404` skipped/not produced — check `formats[]` for a `produced` entry first); `/files/{name}` = a raw catalog file by name (`data-<id>.<ext>`, `metadata-<id>.json` — the only route to the metadata sidecar). Storage failure → `502` `SNAPSHOT_STORAGE_ERROR`.
 
 **The MCP tools for the file routes (`getRelationSnapshotData`, `getRelationSnapshotDataFormat`, `getRelationSnapshotFile`) never return the binary body** — they HEAD the route and answer `{url, presigned_url?, content_type, size_bytes, etag, accept_ranges, note}`. Read the `url` out-of-band with the same bearer token; in redirect mode the server answers `302` and the short-lived `presigned_url` is fetched **without** auth headers (don't cache it).
@@ -32,11 +32,12 @@ A cron worker (`snapshot_worker.php`) runs the export with ogr2ogr — **poll un
 ## Analytics pattern (DuckDB)
 
 ```python
-snaps = GET .../relations/bygninger/snapshots      # newest first → snaps[0]
-url   = f".../snapshots/{snaps[0]['snapshot_date']}/data"
+url = ".../relations/bygninger/snapshots/latest/data"        # fixed URL, newest published snapshot
 con.execute("CREATE SECRET (TYPE http, BEARER_TOKEN '<token>');")
 con.execute(f"SELECT count(*) FROM read_parquet('{url}')")   # httpfs does HEAD + Range reads
 ```
+
+Pin a specific date (`.../snapshots/2026-09-22/data`) when the analysis must not drift as new snapshots publish.
 
 Scheduler jobs can queue snapshots automatically after each successful import (`snapshot: true`, `snapshot_formats`) — see `centia-scheduler`.
 

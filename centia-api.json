@@ -3871,12 +3871,12 @@
                     {
                         "name": "date",
                         "in": "path",
-                        "description": "Snapshot date YYYY-MM-DD",
+                        "description": "Snapshot date YYYY-MM-DD, or \"latest\" for the newest published snapshot (a fixed URL; the response still carries the real snapshot_date)",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
+                            "type": "string"
+                        },
+                        "example": "latest"
                     }
                 ],
                 "responses": {
@@ -3926,11 +3926,12 @@
                     {
                         "name": "date",
                         "in": "path",
+                        "description": "Snapshot date YYYY-MM-DD, or \"latest\" for the newest published snapshot",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
+                            "type": "string"
+                        },
+                        "example": "latest"
                     },
                     {
                         "name": "Range",
@@ -3997,11 +3998,12 @@
                     {
                         "name": "date",
                         "in": "path",
+                        "description": "Snapshot date YYYY-MM-DD, or \"latest\" for the newest published snapshot",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
+                            "type": "string"
+                        },
+                        "example": "latest"
                     },
                     {
                         "name": "format",
@@ -4082,11 +4084,12 @@
                     {
                         "name": "date",
                         "in": "path",
+                        "description": "Snapshot date YYYY-MM-DD, or \"latest\" for the newest published snapshot",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
+                            "type": "string"
+                        },
+                        "example": "latest"
                     },
                     {
                         "name": "file",
