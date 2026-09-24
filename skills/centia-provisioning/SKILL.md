@@ -18,7 +18,7 @@ Provisioning includes:
 - constraints
 - policies
 - relations
-- relation metadata (titles, descriptions, tags, field aliases)
+- relation metadata (titles, descriptions, tags, field aliases; the free-form `properties` follow the fieldsets/fields from `getMetaConfig` — built-ins merged with server-configured custom ones, custom wins per `fieldsetName`)
 - seed data
 - migrations
 

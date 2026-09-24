@@ -2788,6 +2788,39 @@
                 ]
             }
         },
+        "/api/v4/meta-config": {
+            "get": {
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Get the effective meta config",
+                "description": "Get the effective meta config: the fieldsets and fields a client renders to edit the free-form relation `properties` of the Metadata API. The built-in fieldsets merged with the custom ones configured on the server, de-duplicated by fieldsetName (custom wins).",
+                "operationId": "getMetaConfig",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MetaConfigFieldset"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid token"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v4/methods/{method}": {
             "get": {
                 "tags": [
@@ -7456,6 +7489,99 @@
                                 }
                             },
                             "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "MetaConfigFieldValue": {
+                "description": "One choice of a `combo` or `checkboxgroup` field.",
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Label shown to the user.",
+                        "type": "string",
+                        "example": "Vector"
+                    },
+                    "value": {
+                        "description": "Value stored in the relation properties.",
+                        "type": "string",
+                        "example": "v"
+                    }
+                },
+                "type": "object"
+            },
+            "MetaConfigField": {
+                "description": "One field of a fieldset. `name` is the key it is stored under in the relation `properties` object.",
+                "required": [
+                    "name",
+                    "type",
+                    "title"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Property key in the relation `properties` object.",
+                        "type": "string",
+                        "example": "vidi_layer_type"
+                    },
+                    "type": {
+                        "description": "Form control to render. A `checkboxgroup` stores its selection as one comma separated string.",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "textarea",
+                            "checkbox",
+                            "combo",
+                            "checkboxgroup"
+                        ],
+                        "example": "checkboxgroup"
+                    },
+                    "title": {
+                        "description": "Label shown to the user.",
+                        "type": "string",
+                        "example": "Type"
+                    },
+                    "values": {
+                        "description": "Choices of a `combo` or `checkboxgroup` field.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetaConfigFieldValue"
+                        }
+                    },
+                    "default": {
+                        "description": "Value to use when the relation has no stored value for this field. A boolean for `checkbox`, a string otherwise.",
+                        "example": "t",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "MetaConfigFieldset": {
+                "description": "A named group of fields, rendered as one fieldset in the relation properties form.",
+                "required": [
+                    "fieldsetName",
+                    "fields"
+                ],
+                "properties": {
+                    "fieldsetName": {
+                        "description": "Name of the group. Unique across the returned list.",
+                        "type": "string",
+                        "example": "Layer type"
+                    },
+                    "fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetaConfigField"
                         }
                     }
                 },
