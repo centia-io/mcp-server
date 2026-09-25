@@ -8035,6 +8035,11 @@
                         "type": "boolean",
                         "example": false
                     },
+                    "use_sortby": {
+                        "description": "Sort the automatic WFS 2.0.0 paging (startIndex/count) by an id-like property, so pages do not overlap or skip rows. Set false for a WFS 2.0.0 server that rejects sortBy; the server must then page in a stable order by itself. Default true, and irrelevant to jobs that are not paged WFS 2.0.0.",
+                        "type": "boolean",
+                        "example": true
+                    },
                     "snapshot_formats": {
                         "description": "Formats of the snapshot queued after a successful import (when snapshot is true); null = the server default snapshot.formats",
                         "type": [
