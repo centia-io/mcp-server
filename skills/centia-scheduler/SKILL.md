@@ -32,6 +32,15 @@ Required on create: `name`, `schema`, `url`, `schedule` (five-field cron `min ho
 
 Run fields: `uuid`, `job`, `name`, `pid`, `host`, `slot`, `status` (`running`/`succeeded`/`failed`/`skipped`/`lost`), `stale` (true = running with no heartbeat or start signal for 5 minutes — candidate for stopping), `started_at`, `heartbeat`, `finished_at`, `exit_reason`, `log` (the run's stdout, updated at every heartbeat and on finish, tail-capped at 1 MB — **only in the single-run GET, never in listings**).
 
+## WFS 2.0.0 paging of the job URL
+
+The worker auto-pages a job URL **only** when it is a plain WFS 2.0.0 GetFeature URL: `service=WFS` + `request=GetFeature` (values case-insensitive), `version` exactly `2.0.0`, a `typeNames`/`typename`, and **no `startIndex`** — an explicit `startIndex` means the caller pages by hand, and the URL is fetched once as-is. Grid notation (`…|http…`) and WFS 1.x keep their existing non-paged paths.
+
+- **Page size:** `count=N` in the job URL sets it; absent or ≤ 0 → default **10000**. Page URLs are rebuilt with canonical `startIndex`/`count`/`sortBy` (the originals are stripped).
+- **`sortBy` precedence:** `use_sortby: false` → never sent, even if the URL asked for it (the server must page in a stable order itself). Else a `sortBy` in the job URL wins. Else derived from **DescribeFeatureType**: the first element (document order) with an exact identity name — `id`, `fid`, `gid`, `objectid`, `ogc_fid`, `identifier`, `gml_id` — else the first whose name ends in `_id` (both matched case-insensitively). No candidate → a run-log Warning and paging **without** `sortBy` (same stable-order burden on the server); the run does not fail.
+- **Stop conditions:** `startIndex` starts at 0 and advances by each page's `numberReturned`. The loop stops when `numberReturned` is missing, 0 or **smaller than the page size**, or when `startIndex + returned >= numberMatched`. A non-numeric `numberMatched` (`"unknown"`) is tolerated — the short-page rule ends the loop.
+- The run's `log` (single-run `getSchedulerRun`) prints the detection, the chosen `sortBy` (or the warning) and the page progress — read it when paging behaves unexpectedly.
+
 **Cooldown:** cron-scheduled runs respect the server's `gc2scheduler.minInterval` (a job that ran more recently is skipped by the picker). A manual `postSchedulerRun` **bypasses** the cooldown — the only guard is the 409 while a run is in flight. `force: true` makes the run **ignore `delete_append` and overwrite** the target table (full reload) — data a normal append run would preserve is replaced.
 
 ## Common mistakes
