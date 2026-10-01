@@ -5681,6 +5681,241 @@
                 }
             }
         },
+        "/api/v4/tileseeder/jobs": {
+            "get": {
+                "tags": [
+                    "Tileseeder"
+                ],
+                "description": "The caller's seed jobs, newest first, without the log. A super-user sees every job of the database.",
+                "operationId": "getSeedJobs",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Keep only jobs in this status. An unknown status is not an error: it simply matches nothing and answers an empty array.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "running",
+                                "succeeded",
+                                "failed",
+                                "cancelled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "tileset",
+                        "in": "query",
+                        "description": "Keep only jobs for this tileset. Matched exactly; an unknown tileset answers an empty array.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SeedJob"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tileseeder"
+                ],
+                "description": "Queue one seed job (object) or several (array of objects). Asynchronous: answers 202 and a worker runs it. Requires write/owner on the tileset's relation. Every job in the list is validated and authorized before any of them is queued.",
+                "operationId": "postSeedJob",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SeedJobInput"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/SeedJobInput"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Queued; poll _links.self. An object for a single request, an array for an array request.",
+                        "headers": {
+                            "Location": {
+                                "description": "The created job(s): /api/v4/tileseeder/jobs/<uuid[,uuid…]>",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/SeedJob"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SeedJob"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request: malformed body, an empty list, or a field failing validation"
+                    },
+                    "403": {
+                        "description": "Insufficient privileges on the tileset, or on the extent layer"
+                    },
+                    "404": {
+                        "description": "Unknown tileset, or unknown extent layer"
+                    },
+                    "406": {
+                        "description": "POST was addressed to a job uuid; POST the collection instead"
+                    },
+                    "429": {
+                        "description": "tileseeder.maxPending would be exceeded"
+                    }
+                }
+            }
+        },
+        "/api/v4/tileseeder/jobs/{uuid}": {
+            "get": {
+                "tags": [
+                    "Tileseeder"
+                ],
+                "description": "One seed job (object) with its log tail, or several by comma separated uuids (array).",
+                "operationId": "getSeedJob",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "One uuid, or several comma separated. A single uuid answers an object, a list answers an array.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok. An object for a single uuid, an array for a comma separated list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/SeedJob"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/SeedJob"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "A uuid is malformed"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Tileseeder"
+                ],
+                "description": "Ask for a seed job to stop. 204 when it was still queued (cancelled outright, or already finished), 202 when it is running and its worker has to act. Comma separated uuids allowed; every uuid is checked before anything is written.",
+                "operationId": "deleteSeedJob",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "At least one job was running; its worker will finish the cancel.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stopping"
+                                        },
+                                        "uuid": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "_links": {
+                                            "description": "Links to the cancelled job(s), for polling until the worker has acted.",
+                                            "properties": {
+                                                "self": {
+                                                    "type": "string",
+                                                    "example": "/api/v4/tileseeder/jobs/c4a3797e-ec6b-4dac-9474-ada9083620f3"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "Cancelled or already finished"
+                    },
+                    "400": {
+                        "description": "A uuid is malformed"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
         "/api/v4/users/{name}": {
             "get": {
                 "tags": [
@@ -8904,6 +9139,41 @@
                         "readOnly": true,
                         "example": 7
                     },
+                    "_columns": {
+                        "description": "Read-only. The relation's column names in table column order. Always present, also with namesOnly=true, so a client can offer autocompletion over a schema without loading every definition. Names only: types, comments and the rest stay in the full shape and on /columns.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true,
+                        "example": [
+                            "gid",
+                            "navn",
+                            "the_geom"
+                        ]
+                    },
+                    "_geometry_columns": {
+                        "description": "Read-only. The relation's geometry and geography columns, in column order; an empty array for a relation without any. Always present, also with namesOnly=true, so a client can find the spatial relations of a schema from the listing alone. Type and SRID are read off the column's typmod, the same source PostGIS' geometry_columns/geography_columns views use, so a column declared plain `geometry` reports type Geometry and SRID 0. Relations owned by an extension report an empty array: public.raster_columns.extent is PostGIS' own, not the user's data.",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "the_geom"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "example": "MultiPolygon"
+                                },
+                                "srid": {
+                                    "type": "integer",
+                                    "example": 25832
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "readOnly": true
+                    },
                     "columns": {
                         "title": "Columns",
                         "description": "Columns in the table.",
@@ -8933,6 +9203,224 @@
                         "description": "Comment for the table.",
                         "type": "string",
                         "example": "This is a comment on the table"
+                    }
+                },
+                "type": "object"
+            },
+            "SeedJobInput": {
+                "description": "The POST request body to queue a seed job. tileset, grid, zoom_start and zoom_end are required and, unlike their SeedJob response counterparts, never null here. Every other SeedJob property is server-owned and ignored (in fact rejected) on input.",
+                "required": [
+                    "tileset",
+                    "grid",
+                    "zoom_start",
+                    "zoom_end"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Optional label for the job.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Seed roads"
+                    },
+                    "tileset": {
+                        "description": "The mapcache tileset (layer key).",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "myschema.roads"
+                    },
+                    "grid": {
+                        "description": "One of the grids that tileset declares in the database's tile cache configuration (GC2 generates a grid called g20 for every tileset). Any other name is 400 UNKNOWN_GRID, and the message lists the grids the tileset does have.",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "g20"
+                    },
+                    "zoom_start": {
+                        "description": "First zoom level to seed. Must be >= 0 and <= zoom_end.",
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "zoom_end": {
+                        "description": "Last zoom level to seed. Must be within the grid's own zoom levels.",
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "extent_layer": {
+                        "description": "Optional relation whose features bound the seeded area. It must exist and the caller must have read privilege on it.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    },
+                    "threads": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "SeedJob": {
+                "description": "One tile seeding job. Queued by POST, run by a worker on whichever node claims it. name, tileset, grid, zoom_start, zoom_end, extent_layer and threads are the request fields (see SeedJobInput); every other property is server-owned (readOnly) and only ever appears in a response.",
+                "properties": {
+                    "uuid": {
+                        "description": "Server-generated.",
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "c4a3797e-ec6b-4dac-9474-ada9083620f3"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Seed roads"
+                    },
+                    "status": {
+                        "description": "pending, running, succeeded, failed or cancelled. Null for a row written before v4.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "pending",
+                            "running",
+                            "succeeded",
+                            "failed",
+                            "cancelled"
+                        ],
+                        "readOnly": true
+                    },
+                    "stale": {
+                        "description": "Computed: running, but no heartbeat for 10 minutes, so the run or its node is gone.",
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "username": {
+                        "description": "Null for a legacy row written before v4.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "readOnly": true
+                    },
+                    "tileset": {
+                        "description": "The mapcache tileset (layer key). Null only for a legacy row.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "myschema.roads"
+                    },
+                    "grid": {
+                        "description": "Null only for a legacy row.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "GoogleMapsCompatible"
+                    },
+                    "zoom_start": {
+                        "description": "Null only for a legacy row.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 0
+                    },
+                    "zoom_end": {
+                        "description": "Null only for a legacy row.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 12
+                    },
+                    "extent_layer": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "threads": {
+                        "description": "Null only for a legacy row.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "example": 2
+                    },
+                    "host": {
+                        "description": "The node that claimed the job.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "readOnly": true
+                    },
+                    "pid": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "readOnly": true
+                    },
+                    "created": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "started": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "heartbeat": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "cancel_requested": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "error": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "readOnly": true
+                    },
+                    "log": {
+                        "description": "The tail of the seed output. Only on a single-job read.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "readOnly": true
+                    },
+                    "_links": {
+                        "properties": {
+                            "self": {
+                                "type": "string",
+                                "example": "/api/v4/tileseeder/jobs/c4a3797e-ec6b-4dac-9474-ada9083620f3"
+                            }
+                        },
+                        "type": "object",
+                        "readOnly": true
                     }
                 },
                 "type": "object"
@@ -9183,6 +9671,10 @@
         {
             "name": "Stats",
             "description": "Stats"
+        },
+        {
+            "name": "Tileseeder",
+            "description": "Tileseeder"
         },
         {
             "name": "Users",
