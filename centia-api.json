@@ -2632,7 +2632,7 @@
                 "tags": [
                     "Mapcache"
                 ],
-                "description": "Delete a MapCache tileset's cached tiles. A FULL delete (no bbox/zoom) wipes the backend store directly — synchronous for sqlite/bdb (200), background for disk (202); s3/memcache are not supported for a full delete (400 — use a scoped delete or TTL/lifecycle). A SCOPED delete (bbox and/or zoom) runs mapcache_seed -m delete as a background job (202). Requires write/owner authorization.",
+                "description": "Delete a MapCache tileset's cached tiles — a layer's tileset, or the merged per-schema one (a bare schema name). A FULL delete (no bbox/zoom) wipes the backend store directly — synchronous for sqlite/bdb (200), background for disk (202); s3/memcache are not supported for a full delete (400 — use a scoped delete or TTL/lifecycle). A SCOPED delete (bbox and/or zoom) runs mapcache_seed -m delete as a background job (202). Requires write/owner authorization.",
                 "operationId": "deleteMapcacheTileset",
                 "parameters": [
                     {
@@ -2648,7 +2648,7 @@
                     {
                         "name": "tileset",
                         "in": "path",
-                        "description": "Tileset name, i.e. the layer \"schema.table\" (vector variants \"schema.table.mvt\"/\".json\").",
+                        "description": "Tileset name: a layer's \"schema.table\" (vector variants \"schema.table.mvt\"/\".json\"), or a bare \"schema\" for the merged per-schema tileset drawn from every layer in that schema (\"schema.mvt\" for its vector variant). Clearing a merged schema tileset is reserved for the database super user, because no single layer's privileges govern it; an unknown schema answers 404.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -2694,16 +2694,16 @@
                         "description": "Deletion job started (scoped seed, or background disk wipe)"
                     },
                     "400": {
-                        "description": "Bad request, or full delete unsupported for the backend (s3/memcache)"
+                        "description": "Bad request — a missing tileset, a malformed bbox/zoom/grid, a schema name that is not a possible one, or a full delete of an s3/memcache backend (use a scoped delete instead)"
                     },
                     "401": {
                         "description": "Authentication required"
                     },
                     "403": {
-                        "description": "Not authorized"
+                        "description": "Not authorized — including anyone but the database super user clearing a merged per-schema tileset (SUPER_USER_ONLY)"
                     },
                     "404": {
-                        "description": "Database cache config or tileset not found (scoped delete)"
+                        "description": "Database cache config or tileset not found (scoped delete), or the schema of a merged tileset does not exist (SCHEMA_NOT_FOUND)"
                     }
                 }
             }
@@ -4631,6 +4631,100 @@
                     },
                     "400": {
                         "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/v4/schemas/{schema}/tile": {
+            "get": {
+                "tags": [
+                    "SchemaTileSettings"
+                ],
+                "description": "The merged per-schema tileset's effective tile settings — the stored values over the fallbacks, so a client sees what the config generator will actually do. Answers the fallbacks when nothing is stored, and still answers when the schema itself has been dropped.",
+                "operationId": "getSchemaTileSettings",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SchemaTileSettings"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The schema name is not a possible one"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "SchemaTileSettings"
+                ],
+                "description": "Remove the stored settings, returning the schema to the defaults. Idempotent, and works when the schema is gone so a leftover row can be cleared.",
+                "operationId": "deleteSchemaTileSettings",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Removed, or there was nothing to remove"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "SchemaTileSettings"
+                ],
+                "description": "Merge settings into the schema's stored ones. An explicit null removes a setting, returning it to its fallback. The schema must exist: a write to one that does not is how a typo becomes a row that silently takes effect later.",
+                "operationId": "patchSchemaTileSettings",
+                "parameters": [
+                    {
+                        "name": "schema",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SchemaTileSettingsInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "303": {
+                        "description": "Stored; see the Location header"
+                    },
+                    "400": {
+                        "description": "A value is not allowed, or an unknown field was sent"
+                    },
+                    "404": {
+                        "description": "The schema does not exist"
                     }
                 }
             }
@@ -8413,6 +8507,190 @@
                 },
                 "type": "object"
             },
+            "SchemaTileSettingsInput": {
+                "description": "The PATCH body. Every field is optional; an explicit null removes that setting and returns it to its fallback. Unknown fields are rejected.",
+                "properties": {
+                    "cache": {
+                        "description": "Cache backend.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "sqlite",
+                            "disk",
+                            "memcache",
+                            "s3"
+                        ]
+                    },
+                    "format": {
+                        "description": "The image tileset's format — PNG or a jpeg_* quality. The .mvt tileset is always MVT, which is its only possible value, so there is nothing to configure there and 'MVT' is not accepted here; the response reports it as the read-only vector_format. 'JSON' is not accepted either, because no merged .json tileset exists.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "PNG",
+                            "jpeg_low",
+                            "jpeg_medium",
+                            "jpeg_high"
+                        ]
+                    },
+                    "ttl": {
+                        "description": "Seconds a tile stays valid (mapcache expires). Any positive value is accepted and then floored at 30 when the config is generated, so 5 behaves as 30. Defaults to 60.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 1,
+                        "example": 86400
+                    },
+                    "auto_expire": {
+                        "description": "Seconds after which an existing tile is refreshed on next access.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 1,
+                        "example": 3600
+                    },
+                    "meta_size": {
+                        "description": "Metatile size N, rendered as N x N tiles per WMS request. 1 to 16; defaults to 3.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "maximum": 16,
+                        "minimum": 1,
+                        "example": 5
+                    },
+                    "meta_buffer": {
+                        "description": "Pixels drawn around each metatile and cropped afterwards. 0 to 512; defaults to 0.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "maximum": 512,
+                        "minimum": 0,
+                        "example": 10
+                    },
+                    "s3_tile_set": {
+                        "description": "With cache \"s3\", the object-path segment for this schema. Letters, digits, dot, dash and underscore only, and not dots alone: it is interpolated into the cache URL, and a dot-only value would put the tiles at the bucket root.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255,
+                        "pattern": "^[A-Za-z0-9_\\-.]+$"
+                    },
+                    "title": {
+                        "description": "Shown in WMTS capabilities. Defaults to the schema name. Must not contain \"]]>\", which would close the CDATA section it is written into.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    },
+                    "abstract": {
+                        "description": "Shown in WMTS capabilities. Must not contain \"]]>\", which would close the CDATA section it is written into.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 2048
+                    }
+                },
+                "type": "object"
+            },
+            "SchemaTileSettings": {
+                "description": "The settings the config generator will actually use: stored values merged over the fallbacks. _stored carries only what is stored, so a form can tell a set value from a defaulted one, and schema_exists is false for settings left behind by a dropped schema.",
+                "required": [
+                    "schema",
+                    "schema_exists",
+                    "cache",
+                    "format",
+                    "vector_format",
+                    "ttl",
+                    "auto_expire",
+                    "meta_size",
+                    "meta_buffer",
+                    "s3_tile_set",
+                    "title",
+                    "abstract",
+                    "_stored",
+                    "_defaults"
+                ],
+                "properties": {
+                    "schema": {
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "dagi"
+                    },
+                    "schema_exists": {
+                        "description": "False when the settings are waiting for their schema to come back.",
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "cache": {
+                        "type": "string",
+                        "example": "sqlite"
+                    },
+                    "format": {
+                        "description": "The image tileset's format. Configurable.",
+                        "type": "string",
+                        "example": "PNG"
+                    },
+                    "vector_format": {
+                        "description": "The .mvt tileset's format. Always MVT and not configurable — reported so a client does not have to assume it.",
+                        "type": "string",
+                        "readOnly": true,
+                        "example": "MVT"
+                    },
+                    "ttl": {
+                        "type": "integer",
+                        "example": 60
+                    },
+                    "auto_expire": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "meta_size": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "meta_buffer": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "s3_tile_set": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "dagi"
+                    },
+                    "abstract": {
+                        "type": "string",
+                        "example": ""
+                    },
+                    "_stored": {
+                        "description": "Only the keys actually stored, so a form can tell a set value from a defaulted one. An explicit null in a PATCH removes a key from here.",
+                        "type": "object",
+                        "readOnly": true
+                    },
+                    "_defaults": {
+                        "description": "What each setting would be if it were not stored — the patchable keys only. Reported even for a field that IS stored, which is when a form needs it: to show the default beside the value the user is about to clear.",
+                        "type": "object",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
             "Sequence": {
                 "description": "Sequence definition for generating incremental numeric values.",
                 "required": [
@@ -9659,6 +9937,10 @@
         {
             "name": "Scheduler",
             "description": "Scheduler"
+        },
+        {
+            "name": "SchemaTileSettings",
+            "description": "SchemaTileSettings"
         },
         {
             "name": "Search",
