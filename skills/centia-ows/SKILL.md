@@ -9,7 +9,7 @@ Use this skill for the v4 OGC web service endpoints. They are the map/feature ba
 
 ## Availability
 
-Production-ready on GeoCloud2 `master` (2026-08). SDK: `@centia-io/sdk` >= 0.2.12 ships `Ows`, `Wfs` and `Mapcache` (explicit-client pattern: `new Wfs(client)`); they return text/JSON, and `Mapcache.mapcacheUrl()` builds tile URL templates for map libraries. The MCP tools wrap the same routes and return text (XML/JSON), so they suit GetCapabilities/DescribeFeatureType/GetFeature checks, not images or tiles.
+Production-ready on GeoCloud2 `master` (2026-08) — **except the tileseeder job queue** (below), which is on GC2 local master only as of 2026-10 and **not** on production `api.centia.io`; its tools cannot be tried against production until it deploys. SDK: `@centia-io/sdk` >= 0.2.12 ships `Ows`, `Wfs` and `Mapcache` (explicit-client pattern: `new Wfs(client)`); they return text/JSON, and `Mapcache.mapcacheUrl()` builds tile URL templates for map libraries. The MCP tools wrap the same routes and return text (XML/JSON), so they suit GetCapabilities/DescribeFeatureType/GetFeature checks, not images or tiles.
 
 ## Endpoints, MCP tools and SDK
 
